@@ -1,0 +1,54 @@
+
+query TodolosPeixes {
+  description: "Devolve todos os peixes do rexistro"
+  statement:  
+    SELECT org.peixeencadeado.peixe.Peixe
+}
+
+query PeixePorPesqueira {
+  description: "Devolve todos os peixes capturados por unha organización"
+  statement:  
+    SELECT  org.peixeencadeado.peixe.Peixe
+  	WHERE   (pesqueira.orgId == _$orgId )
+}
+
+
+/*
+
+ // Returns all flights 
+ query AllFlights {
+   description: "Returns all flights in the registry"
+   statement:  
+      SELECT  org.acme.airline.flight.Flight
+ }
+
+ query FlightByNumber {
+   description: "Returns all flights in the registry"
+   statement:  
+      SELECT  org.acme.airline.flight.Flight
+  	  WHERE   (flightNumber == _$flight_number)
+  } 
+
+  query FlightsOriginAndDestination {
+   description: "Returns all flights in the registry"
+   statement:  
+      SELECT  org.acme.airline.flight.Flight
+  	  WHERE   (route.origin == _$origin_airport AND route.destination  == _$destination_airport )
+  }
+
+ query FlightsOriginAndDestinationOrdered {
+   description: "Returns all flights in the registry"
+   statement:  
+      SELECT  org.acme.airline.flight.Flight
+  	  WHERE   (route.origin == _$origin_airport AND route.destination  == _$destination_airport)
+      ORDER BY [flightNumber ASC]
+  } 
+
+
+  query AllAircrafts {
+  description: "Returns all aircrafts in the registry"
+  statement:  
+    SELECT  org.acme.airline.aircraft.Aircraft
+}
+
+*/

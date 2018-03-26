@@ -1,0 +1,17 @@
+namespace org.peixeencadeado.organizacions
+
+import org.peixeencadeado.participantes.Participante
+
+abstract asset Organizacion identified by orgId {
+  o String orgId
+  o String email
+  --> Participante administrador
+}
+
+asset Pesqueira extends Organizacion {
+  
+}
+
+asset Empresa extends Organizacion {
+
+}

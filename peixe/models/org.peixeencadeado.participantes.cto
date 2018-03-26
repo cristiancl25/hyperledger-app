@@ -1,0 +1,6 @@
+namespace org.peixeencadeado.participantes
+
+participant Participante identified by email {
+  o String email
+  o String nome
+}

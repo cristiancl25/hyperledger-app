@@ -1,0 +1,39 @@
+namespace org.peixeencadeado.peixe
+
+import org.peixeencadeado.organizacions.Empresa
+import org.peixeencadeado.organizacions.Pesqueira
+
+asset Peixe identified by peixeId {
+  o String peixeId
+  o String variedade
+  o Coordenadas coordenadas
+  o   DateTime  dataCaptura
+  --> Pesqueira pesqueira
+  --> Compra[] compras optional
+}
+
+asset Compra identified by compraId {
+  o String compraId
+  o DateTime dataCompra
+  --> Empresa empresa
+}
+
+concept Coordenadas {
+  o   String    latitude
+  o   String    lonxitude
+}
+
+enum Estado {
+  o   CAPTURADO
+  o   VENTA
+  o   COMPRADO
+  o   CONSUMIDO
+}
+
+transaction SetupDemo{
+
+}
+
+event PeixeCreado{
+  o String peixeId
+}
