@@ -6,7 +6,9 @@ import org.peixeencadeado.organizacions.Pesqueira
 asset Peixe identified by peixeId {
   o String peixeId
   o String variedade
+  o Double peso
   o Coordenadas coordenadas
+  o Estado estado
   o   DateTime  dataCaptura
   --> Pesqueira pesqueira
   --> Compra[] compras optional
@@ -19,8 +21,8 @@ asset Compra identified by compraId {
 }
 
 concept Coordenadas {
-  o   String    latitude
-  o   String    lonxitude
+  o   Double    latitude
+  o   Double    lonxitude
 }
 
 enum Estado {
@@ -30,10 +32,16 @@ enum Estado {
   o   CONSUMIDO
 }
 
-transaction SetupDemo{
+transaction SetupDemo{}
 
+transaction CrearPeixe {
+  o String variedade
+  o Double peso
+  o Double latitude
+  o Double lonxitude
 }
 
 event PeixeCreado{
   o String peixeId
+  o String participante
 }

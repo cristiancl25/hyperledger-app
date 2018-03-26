@@ -5,9 +5,9 @@
  */
 function setupDemo(setupDemo) {
     var factory = getFactory();
-    var NS_PAR = 'org.peixeencadeado.participantes'
-    var NS_PEIXE = 'org.peixeencadeado.peixe'
-    var NS_ORG = 'org.peixeencadeado.organizacions'
+    var NS_PAR = 'org.peixeencadeado.participantes';
+    var NS_PEIXE = 'org.peixeencadeado.peixe';
+    var NS_ORG = 'org.peixeencadeado.organizacions';
 
     var participantes = [
         factory.newResource(NS_PAR, 'Participante', 'participante1'),
@@ -58,13 +58,15 @@ function setupDemo(setupDemo) {
     .then(function(rexistroPeixe) {
         peixes.forEach(function(peixe, index) {
             var coordenadas = factory.newConcept(NS_PEIXE,'Coordenadas');
-            coordenadas.lonxitude = '1234567890';
-            coordenadas.latitude = '1234567891';
+            coordenadas.lonxitude = 3.14;
+            coordenadas.latitude = -74.23;
             peixe.coordenadas = coordenadas;
             peixe.variedade = 'xurelo';
             peixe.dataCaptura = new Date();
             peixe.pesqueira = factory.newRelationship(NS_ORG, 'Pesqueira', 'pesqueira1');
             peixe.compras = [];
+            peixe.estado = 'CAPTURADO';
+            peixe.peso = 1.1;
         });
         return rexistroPeixe.addAll(peixes);
     })
