@@ -26,7 +26,8 @@
     }).then(function(){
         var evento = factory.newEvent(NS_PEIXE, 'PeixeCreado');
         evento.peixeId = peixe.peixeId;
-        evento.participante = getCurrentParticipant().getFullyQualifiedIdentifier();
+        console.log(getCurrentParticipant().getFullyQualifiedIdentifier());
+        console.log(getCurrentParticipant().getFullyQualifiedIdentifier().split('#'));
         emit(evento);
     })
     .catch(function(error){

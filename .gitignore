@@ -1,3 +1,5 @@
 peixe/.eslintrc.yml
 peixe/dist/
 peixe/composer-logs
+peixe/node_modules
+peixe/package-lock.json
