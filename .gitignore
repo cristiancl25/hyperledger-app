@@ -4,3 +4,5 @@ peixe/composer-logs
 peixe/node_modules
 peixe/package-lock.json
 peixe/.vscode/
+peixe/coverage
+peixe/.nyc_output
