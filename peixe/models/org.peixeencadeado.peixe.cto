@@ -43,4 +43,5 @@ transaction CrearPeixe {
 
 event PeixeCreado{
   o String peixeId
+  o String orgId
 }

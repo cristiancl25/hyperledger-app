@@ -1,6 +1,20 @@
 namespace org.peixeencadeado.participantes
 
-participant Participante identified by email {
+abstract participant Participante identified by email {
   o String email
   o String nome
+  o tipoOrg nameSpaceOrg optional
+  o String orgId optional
+}
+
+enum tipoOrg{
+  o Empresa
+  o Pesqueira
+}
+
+participant OrgAdmin extends Participante {
+}
+
+participant Usuario extends Participante {
+
 }

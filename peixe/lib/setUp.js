@@ -3,16 +3,23 @@
  * @param {org.peixeencadeado.peixe.SetupDemo} setupDemo
  * @transaction
  */
-function setupDemo(setupDemo) {
+async function setupDemo(setupDemo) {
     var factory = getFactory();
     var NS_PAR = 'org.peixeencadeado.participantes';
     var NS_PEIXE = 'org.peixeencadeado.peixe';
     var NS_ORG = 'org.peixeencadeado.organizacions';
 
     var participantes = [
-        factory.newResource(NS_PAR, 'Participante', 'participante1'),
-        factory.newResource(NS_PAR, 'Participante', 'participante2')
+        factory.newResource(NS_PAR, 'Usuario', 'participante1@pes1'),
+        factory.newResource(NS_PAR, 'Usuario', 'participante1@org1'),
+        factory.newResource(NS_PAR, 'Usuario', 'participante1@org2')
     ];
+
+    var admins = [
+        factory.newResource(NS_PAR, 'OrgAdmin', 'admin@pes1'),
+        factory.newResource(NS_PAR, 'OrgAdmin', 'admin@org1'),
+        factory.newResource(NS_PAR, 'OrgAdmin', 'admin@org2')
+    ]
 
     var peixes = [
         factory.newResource(NS_PEIXE, 'Peixe', 'peixe1'),
@@ -27,34 +34,54 @@ function setupDemo(setupDemo) {
         factory.newResource(NS_PEIXE, 'Peixe', 'peixe10')
     ];
         
-    return getParticipantRegistry(NS_PAR + '.Participante')
-    .then(function(rexistroParticipante) {
-        participantes.forEach(function(participante, index){
-            participante.nome = 'participante' + (index + 1);
-        });
-        return rexistroParticipante.addAll(participantes);
-    })
-    .then(function() {
-        return getAssetRegistry(NS_ORG + '.Pesqueira');
-    })
-    .then(function(rexistroPesqueira) {
-        pesqueira = factory.newResource(NS_ORG, 'Pesqueira','pesqueira1');
-        pesqueira.email = pesqueira.orgId;
-        pesqueira.administrador = factory.newRelationship(NS_PAR, 'Participante', 'participante1');
-        return rexistroPesqueira.add(pesqueira);
-    })
-    .then(function() {
-        return getAssetRegistry(NS_ORG + '.Empresa');
-    })
-    .then(function(rexistroEmpresa) {        
-        empresa = factory.newResource(NS_ORG, 'Empresa','empresa1');
-        empresa.email = empresa.orgId;
-        empresa.administrador = factory.newRelationship(NS_PAR, 'Participante', 'participante2');
-        return rexistroEmpresa.add(empresa);
-    })
-    .then(function() {
-      return getAssetRegistry(NS_PEIXE + '.Peixe');
-    })
+    var rexistroParticipante = await getParticipantRegistry(NS_PAR + '.Usuario');
+    participantes[0].nome = 'participante1';
+    participantes[0].nameSpaceOrg = 'Pesqueira';
+    participantes[0].orgId = participantes[0].email.split('@')[1];
+
+    participantes[1].nome = 'participante1';
+    participantes[1].nameSpaceOrg = 'Empresa';
+    participantes[1].orgId = participantes[1].email.split('@')[1];
+
+    participantes[2].nome = 'participante1';
+    participantes[2].nameSpaceOrg = 'Empresa';
+    participantes[2].orgId = participantes[2].email.split('@')[1];
+    await rexistroParticipante.addAll(participantes);
+
+    var rexistroAdmins = await getParticipantRegistry(NS_PAR + '.OrgAdmin');
+    admins[0].nome = 'admin1';
+    admins[0].nameSpaceOrg = 'Pesqueira';
+    admins[0].orgId = admins[0].email.split('@')[1];
+
+    admins[1].nome = 'admin1';
+    admins[1].nameSpaceOrg = 'Empresa';
+    admins[1].orgId = admins[1].email.split('@')[1];
+
+    admins[2].nome = 'admin1';
+    admins[2].nameSpaceOrg = 'Empresa';
+    admins[2].orgId = admins[2].email.split('@')[1];
+    await rexistroAdmins.addAll(admins);
+
+    var rexistroPesqueira = await getAssetRegistry(NS_ORG + '.Pesqueira');
+    var pesqueira = factory.newResource(NS_ORG, 'Pesqueira','pes1');
+    pesqueira.administrador = factory.newRelationship(NS_PAR, 'OrgAdmin', 'admin@pes1');
+    pesqueira.usuarios = [];
+    await rexistroPesqueira.add(pesqueira);
+    
+
+    var rexistroEmpresa = await getAssetRegistry(NS_ORG + '.Empresa');
+    var empresa1 = factory.newResource(NS_ORG, 'Empresa','org1');
+    empresa1.administrador = factory.newRelationship(NS_PAR, 'OrgAdmin', 'admin@org1');
+    empresa1.usuarios = [];
+
+    var empresa2 = factory.newResource(NS_ORG, 'Empresa','org2');
+    empresa2.administrador = factory.newRelationship(NS_PAR, 'OrgAdmin', 'admin@org2');
+    empresa2.usuarios = [];
+    await rexistroEmpresa.addAll([empresa1, empresa2]);
+    
+
+
+    return getAssetRegistry(NS_PEIXE + '.Peixe')
     .then(function(rexistroPeixe) {
         peixes.forEach(function(peixe, index) {
             var coordenadas = factory.newConcept(NS_PEIXE,'Coordenadas');
@@ -63,7 +90,7 @@ function setupDemo(setupDemo) {
             peixe.coordenadas = coordenadas;
             peixe.variedade = 'xurelo';
             peixe.dataCaptura = new Date();
-            peixe.pesqueira = factory.newRelationship(NS_ORG, 'Pesqueira', 'pesqueira1');
+            peixe.pesqueira = factory.newRelationship(NS_ORG, 'Pesqueira', 'pes1');
             peixe.compras = [];
             peixe.estado = 'CAPTURADO';
             peixe.peso = 1.1;

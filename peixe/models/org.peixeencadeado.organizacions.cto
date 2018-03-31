@@ -1,11 +1,12 @@
 namespace org.peixeencadeado.organizacions
 
-import org.peixeencadeado.participantes.Participante
+import org.peixeencadeado.participantes.OrgAdmin
+import org.peixeencadeado.participantes.Usuario
 
 abstract asset Organizacion identified by orgId {
   o String orgId
-  o String email
-  --> Participante administrador
+  --> OrgAdmin administrador
+  --> Usuario[] usuarios
 }
 
 asset Pesqueira extends Organizacion {

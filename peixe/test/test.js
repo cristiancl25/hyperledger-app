@@ -34,10 +34,6 @@ describe('Sample', () => {
     // This is the factory for creating instances of types.
     let factory;
 
-    // These are the identities for Alice and Bob.
-    const aliceCardName = 'alice';
-    const bobCardName = 'bob';
-
     // These are a list of receieved events.
     let events;
 
@@ -107,68 +103,16 @@ describe('Sample', () => {
         // Get the factory for the business network.
         factory = businessNetworkConnection.getBusinessNetwork().getFactory();
 
-        const participantRegistry = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Participante');
-        // Create the participants.
-        const alice = factory.newResource(NS_PAR, 'Participante', 'alice@email.com');
-        alice.nome = 'Alice';
+        let transaction = factory.newTransaction("org.peixeencadeado.peixe", "SetupDemo");
+        await businessNetworkConnection.submitTransaction(transaction);
 
-        const bob = factory.newResource(NS_PAR, 'Participante', 'bob@email.com');
-        bob.nome = 'Bob';
+        await importCardForIdentity('admin@pes1', await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#admin@pes1', 'admin@pes1'));
+        await importCardForIdentity('admin@org1', await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#admin@org1', 'admin@org1'));
+        await importCardForIdentity('admin@org2', await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#admin@org2', 'admin@org2'));
+        await importCardForIdentity('participante1@pes1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@pes1', 'participante1@pes1'));
+        await importCardForIdentity('participante1@org1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@org1', 'participante1@org1'));
+        await importCardForIdentity('participante1@org2', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@org2', 'participante1@org2'));
 
-        participantRegistry.addAll([alice, bob]);
-
-        const rexistroPesqueira = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Pesqueira')
-        var pesqueira = factory.newResource(NS_ORG, 'Pesqueira','pesqueira1');
-        pesqueira.email = pesqueira.orgId;
-        pesqueira.administrador = factory.newRelationship(NS_PAR, 'Participante', 'participante1');
-        await rexistroPesqueira.add(pesqueira)
-        const rexistroEmpresa = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Empresa');      
-        var empresa = factory.newResource(NS_ORG, 'Empresa','empresa1');
-        empresa.email = empresa.orgId;
-        empresa.administrador = factory.newRelationship(NS_PAR, 'Participante', 'participante2');
-        return rexistroEmpresa.add(empresa)
-        .then(function() {
-        return businessNetworkConnection.getAssetRegistry(NS_PEIXE + '.Peixe');
-        })
-        .then(function(rexistroPeixe) {
-            var peixes = [
-                factory.newResource(NS_PEIXE, 'Peixe', 'peixe1'),
-                factory.newResource(NS_PEIXE, 'Peixe', 'peixe2'),
-                factory.newResource(NS_PEIXE, 'Peixe', 'peixe3'),
-                factory.newResource(NS_PEIXE, 'Peixe', 'peixe4'),
-                factory.newResource(NS_PEIXE, 'Peixe', 'peixe5'),
-                factory.newResource(NS_PEIXE, 'Peixe', 'peixe6'),
-                factory.newResource(NS_PEIXE, 'Peixe', 'peixe7'),
-                factory.newResource(NS_PEIXE, 'Peixe', 'peixe8'),
-                factory.newResource(NS_PEIXE, 'Peixe', 'peixe9'),
-                factory.newResource(NS_PEIXE, 'Peixe', 'peixe10')
-            ];
-            peixes.forEach(function(peixe, index) {
-                var coordenadas = factory.newConcept(NS_PEIXE,'Coordenadas');
-                coordenadas.lonxitude = 3.14;
-                coordenadas.latitude = -74.23;
-                peixe.coordenadas = coordenadas;
-                peixe.variedade = 'xurelo';
-                peixe.dataCaptura = new Date();
-                peixe.pesqueira = factory.newRelationship(NS_ORG, 'Pesqueira', 'pesqueira1');
-                peixe.compras = [];
-                peixe.estado = 'CAPTURADO';
-                peixe.peso = 1.1;
-            });
-            return rexistroPeixe.addAll(peixes);
-        })
-        .then(() => {
-            // Issue the identities.
-            return businessNetworkConnection.issueIdentity(NS_PAR + '.Participante#alice@email.com', 'alice1');
-        })
-        .then(identity => {
-            return importCardForIdentity(aliceCardName, identity);
-        }).then(() => {
-            return businessNetworkConnection.issueIdentity(NS_PAR + '.Participante#bob@email.com', 'bob1');
-        })
-        .then((identity) => {
-            return importCardForIdentity(bobCardName, identity);
-        });
     });
 
     /**
@@ -189,7 +133,7 @@ describe('Sample', () => {
     it('Execución da transaccion CrearPeixe', async () => {
 
         // Use the identity for Alice.
-        await useIdentity(aliceCardName)
+        await useIdentity('admin@pes1')
         let transaction = factory.newTransaction("org.peixeencadeado.peixe", "CrearPeixe");
         transaction.setPropertyValue('variedade', 'SARDIÑA');
         transaction.setPropertyValue('peso', 1.28);
@@ -197,11 +141,13 @@ describe('Sample', () => {
         transaction.setPropertyValue('lonxitude', 3.14);
 
         await businessNetworkConnection.submitTransaction(transaction);
+
+        console.log(events);
     });
 
     it('Comporobación de lectura no blockchain por parte de alice', () => {
 
-        return useIdentity(aliceCardName)
+        return useIdentity('participante1@org2')
         .then(() => {
             return businessNetworkConnection.getAssetRegistry(NS_PEIXE + '.Peixe')
             .then((assetRegistry) => {
