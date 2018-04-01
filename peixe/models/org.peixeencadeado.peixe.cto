@@ -1,23 +1,27 @@
 namespace org.peixeencadeado.peixe
 
-import org.peixeencadeado.organizacions.Empresa
-import org.peixeencadeado.organizacions.Pesqueira
+import org.peixeencadeado.organizacions.Organizacion
 
 asset Peixe identified by peixeId {
   o String peixeId
-  o String variedade
-  o Double peso
-  o Coordenadas coordenadas
   o Estado estado
-  o   DateTime  dataCaptura
-  --> Pesqueira pesqueira
-  --> Compra[] compras optional
+  o Caracteristicas caracteristicas
+  o Operacion operacionActual
+  o Operacion[] operacions
 }
 
-asset Compra identified by compraId {
-  o String compraId
-  o DateTime dataCompra
-  --> Empresa empresa
+concept Operacion{
+  o Boolean Captura
+  o Coordenadas coordenadas
+  o String Descripcion
+  o DateTime fecha
+  --> Organizacion organizacion
+}
+
+concept Caracteristicas{
+  o String variedade
+  o Double peso
+  o Coordenadas coordenadasCaptura
 }
 
 concept Coordenadas {
@@ -28,11 +32,11 @@ concept Coordenadas {
 enum Estado {
   o   CAPTURADO
   o   VENTA
-  o   COMPRADO
-  o   CONSUMIDO
+  o   PARADO
+  o   FINALIZADO
 }
 
-transaction SetupDemo{}
+transaction SetupDemo{} /* Crea datos de proba */
 
 transaction CrearPeixe {
   o String variedade

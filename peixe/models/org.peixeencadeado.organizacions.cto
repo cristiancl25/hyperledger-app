@@ -5,14 +5,7 @@ import org.peixeencadeado.participantes.Usuario
 
 abstract asset Organizacion identified by orgId {
   o String orgId
+  o String tipoOrganizacion
   --> OrgAdmin administrador
   --> Usuario[] usuarios
-}
-
-asset Pesqueira extends Organizacion {
-  
-}
-
-asset Empresa extends Organizacion {
-
 }
