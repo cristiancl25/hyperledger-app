@@ -7,7 +7,7 @@
   "license": "Apache-2.0",
   "scripts": {
     "test": "nyc mocha -t 0 --recursive",
-    "prepublish": "composer archive create --sourceType dir --sourceName ./ -a ./dist/peixeencadeado.bna"
+    "prepublish": "mkdirp ./dist && composer archive create --sourceType dir --sourceName ./ -a ./dist/peixeencadeado.bna"
   },
   "devDependencies": {
     "chai": "^4.1.2",
