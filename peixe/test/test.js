@@ -112,6 +112,7 @@ describe('Sample', () => {
         await importCardForIdentity('participante1@pes1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@pes1', 'participante1@pes1'));
         await importCardForIdentity('participante1@org1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@org1', 'participante1@org1'));
         await importCardForIdentity('participante1@org2', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@org2', 'participante1@org2'));
+        await importCardForIdentity('participante2@pes1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante2@pes1', 'participante2@pes1'));
 
     });
 
@@ -130,22 +131,21 @@ describe('Sample', () => {
         factory = businessNetworkConnection.getBusinessNetwork().getFactory();
     }
 
-    it('Execución da transaccion CrearPeixe', async () => {
+    it('Creación dun peixe cun participante non válido', async () => {
 
         // Use the identity for Alice.
-        await useIdentity('admin@pes1')
+        await useIdentity('participante2@pes1');
         let transaction = factory.newTransaction("org.peixeencadeado.peixe", "CrearPeixe");
         transaction.setPropertyValue('variedade', 'SARDIÑA');
         transaction.setPropertyValue('peso', 1.28);
         transaction.setPropertyValue('latitude', -1.45);
         transaction.setPropertyValue('lonxitude', 3.14);
-
-        await businessNetworkConnection.submitTransaction(transaction);
-
-        console.log(events);
+        transaction.setPropertyValue('descripcion', 'sin descripcion');
+        businessNetworkConnection.submitTransaction(transaction);
+        chai.expect(events).to.eql([]);
     });
 
-    it('Comporobación de lectura no blockchain por parte de alice', () => {
+    it('Comporobación de lectura no blockchain por parte do participante1@org2', async() => {
 
         return useIdentity('participante1@org2')
         .then(() => {

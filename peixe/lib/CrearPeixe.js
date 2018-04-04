@@ -1,9 +1,9 @@
 /**
  *
- * @param {org.peixeencadeado.peixe.CrearPeixe} crearPeixe
+ * @param {org.peixeencadeado.peixe.CrearPeixe} datos
  * @transaction
  */
- async function crearPeixe(crearPeixe){
+ async function crearPeixe(datos){
     const NS_ORG = 'org.peixeencadeado.organizacions'
     const NS_PEIXE = 'org.peixeencadeado.peixe';
     var participante = getCurrentParticipant();
@@ -13,31 +13,51 @@
     var coordenadas = factory.newConcept(NS_PEIXE,'Coordenadas');
     var peixe = factory.newResource(NS_PEIXE, 'Peixe', peixeId);
 
-    var rexistroPeixe = await getAssetRegistry(NS_PEIXE + '.Peixe');
-    coordenadas.lonxitude = crearPeixe.lonxitude;
-    coordenadas.latitude = crearPeixe.latitude;
-    peixe.coordenadas = coordenadas;
-    peixe.variedade = crearPeixe.variedade;
-    peixe.dataCaptura = new Date();
-    peixe.pesqueira = factory.newRelationship(NS_ORG, 'Pesqueira', participante.orgId);
-    peixe.compras = [];
+    var coordenadas = factory.newConcept(NS_PEIXE,'Coordenadas');
+    coordenadas.lonxitude = datos.lonxitude;
+    coordenadas.latitude = datos.latitude;
+
+    var caracteristicas = factory.newConcept(NS_PEIXE,'Caracteristicas');
+    caracteristicas.variedade = datos.variedade
+    caracteristicas.peso = datos.peso;
+
+    var operacion = factory.newConcept(NS_PEIXE,'Operacion');
+    operacion.captura = true;
+    operacion.coordenadas = coordenadas;
+    operacion.descripcion = datos.descripcion;
+    operacion.fecha = new Date();
+    operacion.organizacion = factory.newRelationship(NS_ORG, 'Organizacion', participante.orgId);
+    
+    peixe.caracteristicas = caracteristicas;
+    peixe.operacionActual = operacion;
+    peixe.operacions = [];
     peixe.estado = 'CAPTURADO';
-    peixe.peso = crearPeixe.peso;
+    var rexistroPeixe = await getAssetRegistry(NS_PEIXE + '.Peixe');
     await rexistroPeixe.add(peixe);
 
     var evento = factory.newEvent(NS_PEIXE, 'PeixeCreado');
-    evento.peixeId = peixe.peixeId;
+    evento.peixeId = peixeId;
     evento.orgId = participante.orgId;
+    evento.variedade = datos.variedade
     emit(evento);
 }
 
-function validarParticipante(NS_ORG, participante){
-    return getAssetRegistry(NS_ORG + '.Pesqueira')
-    .then(function(rexistroPesqueira){
-        return rexistroPesqueira.exists(participante.orgId);
-    })
-    .then(function(existe){
-        
+async function validarParticipante(NS_ORG, participante){
+    return getAssetRegistry(NS_ORG + '.Organizacion')
+    .then(function(rexistro){
+        return rexistro.get(participante.orgId);
+    }).then(function(organizacion){
+        var find = false;
+        organizacion.usuarios.forEach(function(usuario){
+            if (participante.email === usuario['$identifier']){
+                find = true;
+                return;
+            }
+        });
+        if (!find){
+            console.log('non encontrado');
+            throw new Error('Participante non encontrado');
+        }
     });
 
 }

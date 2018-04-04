@@ -3,9 +3,10 @@ namespace org.peixeencadeado.organizacions
 import org.peixeencadeado.participantes.OrgAdmin
 import org.peixeencadeado.participantes.Usuario
 
-abstract asset Organizacion identified by orgId {
+asset Organizacion identified by orgId {
   o String orgId
   o String tipoOrganizacion
+  o String descripcion
   --> OrgAdmin administrador
   --> Usuario[] usuarios
 }
