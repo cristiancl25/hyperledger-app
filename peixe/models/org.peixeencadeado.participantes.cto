@@ -12,3 +12,8 @@ participant OrgAdmin extends Participante {
 participant Usuario extends Participante {
 
 }
+
+transaction CrearParticipanteUsuario {
+  o String email
+  o String nome
+}

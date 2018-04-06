@@ -44,8 +44,12 @@
 }
 
 async function validarParticipante(NS_ORG, participante){
-    var rexistro = await getAssetRegistry(NS_ORG + '.Organizacion');
-    var organizacion = await rexistro.get(participante.orgId);
+    try{
+        var rexistro = await getAssetRegistry(NS_ORG + '.Organizacion');
+        var organizacion = await rexistro.get(participante.orgId);
+    }catch(error){
+        throw new Error('Error ao acceder aos rexistros');
+    }
     var find = false;
     if (participante.getFullyQualifiedType() !== 'org.peixeencadeado.participantes.Usuario'){
         throw new Error('Participante non válido');
