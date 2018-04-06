@@ -131,9 +131,8 @@ describe('Sample', () => {
         factory = businessNetworkConnection.getBusinessNetwork().getFactory();
     }
 
-    it('Creación dun peixe cun participante non válido', async () => {
+    it('Creación dun peixe cun participante NON válido', async () => {
 
-        // Use the identity for Alice.
         await useIdentity('participante2@pes1');
         let transaction = factory.newTransaction("org.peixeencadeado.peixe", "CrearPeixe");
         transaction.setPropertyValue('variedade', 'SARDIÑA');
@@ -145,9 +144,23 @@ describe('Sample', () => {
         chai.expect(events).to.eql([]);
     });
 
-    it('Comporobación de lectura no blockchain por parte do participante1@org2', async() => {
+    it.only('Creación dun peixe cun participante válido', async () => {
 
-        return useIdentity('participante1@org2')
+        await useIdentity('participante1@pes1');
+        let transaction = factory.newTransaction("org.peixeencadeado.peixe", "CrearPeixe");
+        transaction.setPropertyValue('variedade', 'SARDIÑA');
+        transaction.setPropertyValue('peso', 1.28);
+        transaction.setPropertyValue('latitude', -1.45);
+        transaction.setPropertyValue('lonxitude', 3.14);
+        transaction.setPropertyValue('descripcion', 'sin descripcion');
+        businessNetworkConnection.submitTransaction(transaction);
+        console.log(events);
+        //events.should.have.lengthOf(1);
+    });
+
+    it('Comporobación de lectura no blockchain por parte do participante1@pes1', async() => {
+
+        return useIdentity('participante1@pes1')
         .then(() => {
             return businessNetworkConnection.getAssetRegistry(NS_PEIXE + '.Peixe')
             .then((assetRegistry) => {
