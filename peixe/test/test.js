@@ -148,13 +148,8 @@ describe('Sample', () => {
         transaction.setPropertyValue('latitude', -1.45);
         transaction.setPropertyValue('lonxitude', 3.14);
         transaction.setPropertyValue('descripcion', 'sin descripcion');
-        var error = false;
-        try{
-            await businessNetworkConnection.submitTransaction(transaction);
-        }catch(error){
-            error = true;
-            chai.expect(error).to.eq(true);
-        }
+
+        await chai.expect(businessNetworkConnection.submitTransaction(transaction)).to.be.rejectedWith(Error);
         chai.expect(events).to.eql([]);
     });
 

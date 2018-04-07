@@ -44,17 +44,19 @@
 }
 
 async function validarParticipante(NS_ORG, participante){
+
+    if (participante.getFullyQualifiedType() !== 'org.peixeencadeado.participantes.Usuario'){
+        throw new Error('Participante ' + participante.getFullyQualifiedIdentifier() + ' non válido');
+    }
+
     try{
         var rexistro = await getAssetRegistry(NS_ORG + '.Organizacion');
         var organizacion = await rexistro.get(participante.orgId);
     }catch(error){
-        throw new Error('Error ao acceder aos rexistros');
-    }
-    var find = false;
-    if (participante.getFullyQualifiedType() !== 'org.peixeencadeado.participantes.Usuario'){
-        throw new Error('Participante non válido');
+        throw new Error('O usuario ' + participante.getFullyQualifiedIdentifier() +  ' pertence a unha organizacion non válida ( ' +  participante.orgId + ' )');
     }
 
+    var find = false;
     organizacion.usuarios.forEach(function(usuario){
         if (participante.email === usuario['$identifier']){
             find = true;
