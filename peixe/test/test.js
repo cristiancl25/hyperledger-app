@@ -186,4 +186,19 @@ describe('Sample', () => {
 
         events.should.have.lengthOf(0);
     });
+
+    it('Compra dun peixe a pes1 por parte de org1', async () => {
+
+        await useIdentity('participante1@org1');
+        const transaction = factory.newTransaction('org.peixeencadeado.peixe', 'ComprarPeixe');
+        transaction.peixeId = 'peixe1';
+        await businessNetworkConnection.submitTransaction(transaction);
+
+        const rexistro = await businessNetworkConnection.getAssetRegistry('org.peixeencadeado.peixe.Peixe');
+        const peixe = await rexistro.get('peixe1');
+        peixe.operacions.should.have.lengthOf(1);
+        peixe.operacionActual.organizacion.$identifier.should.equal('org1');
+
+        events.should.have.lengthOf(0);
+    });
 });

@@ -5,6 +5,7 @@ import org.peixeencadeado.organizacions.Organizacion
 asset Peixe identified by peixeId {
   o String peixeId
   o Estado estado
+  o Foto foto optional
   o Caracteristicas caracteristicas
   o Operacion operacionActual
   o Operacion[] operacions
@@ -23,6 +24,11 @@ concept Caracteristicas{
   o Double peso
 }
 
+concept Foto{
+  o String hashFoto
+  o String url
+}
+
 concept Coordenadas {
   o   Double    latitude
   o   Double    lonxitude
@@ -37,6 +43,10 @@ enum Estado {
 
 transaction SetupDemo{} /* Crea datos de proba */
 
+transaction ComprarPeixe {
+  o String peixeId
+}
+
 transaction CrearPeixe {
   o String variedade
   o String descripcion
@@ -45,7 +55,7 @@ transaction CrearPeixe {
   o Double lonxitude
 }
 
-event PeixeCreado{
+event PeixeCreado {
   o String peixeId
   o String orgId
   o String variedade
