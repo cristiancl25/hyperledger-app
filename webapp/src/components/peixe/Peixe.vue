@@ -2,9 +2,9 @@
   <div>
     <h1>Peixe - {{ $route.params.id }}</h1>
     <h2></h2>
-    <div v-if="error.e" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <div v-if="error.show" class="alert alert-danger alert-dismissible fade show" role="alert">
       <strong>Error</strong> {{ error.message }}
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <button @click="error.show = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
@@ -32,7 +32,7 @@
     data() {
       return{
         error :{
-          e : false,
+          show : false,
           message : ''
         },
         markers: [],
@@ -47,7 +47,7 @@
           console.log(response);
             this.peixeData = response.data;
         }).catch(error => {
-          this.error.e = true;
+          this.error.show = true;
           this.error.message = error.bodyText;
       })
     },

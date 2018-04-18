@@ -14,7 +14,7 @@
             active-class="active">
             <a>Novo peixe capturado {{event.data}}</a>
           </router-link>
-          <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+          <button @click="event.show = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
