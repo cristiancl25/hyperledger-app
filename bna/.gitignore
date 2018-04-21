@@ -1,6 +1,7 @@
 .eslintrc.yml
 dist/peixeencadeado.bna
 dist/fabric-tools
+dist/envvars.txt
 composer-logs
 node_modules
 package-lock.json

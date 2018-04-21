@@ -67,7 +67,6 @@ async function setupDemo(setupDemo) {
     pesqueira.tipoOrganizacion = 'tipo';
     pesqueira.usuarios = [factory.newRelationship(NS_PAR, 'Usuario', 'participante1@pes1')];    
 
-    var rexistroEmpresa = await getAssetRegistry(NS_ORG + '.Organizacion');
     var empresa1 = factory.newResource(NS_ORG, 'Organizacion','org1');
     empresa1.descripcion = 'descripcion';
     empresa1.tipoOrganizacion = 'tipo';

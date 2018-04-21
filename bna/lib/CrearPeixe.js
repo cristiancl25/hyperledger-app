@@ -11,7 +11,6 @@
     await validarParticipante(NS_ORG, participante);
     const factory = getFactory();
     const peixeId = xerarPeixeId(participante.orgId);
-    var coordenadas = factory.newConcept(NS_PEIXE,'Coordenadas');
     var peixe = factory.newResource(NS_PEIXE, 'Peixe', peixeId);
     var coordenadas = factory.newConcept(NS_PEIXE,'Coordenadas');
     coordenadas.lonxitude = datos.lonxitude;
