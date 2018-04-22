@@ -6,12 +6,11 @@ abstract participant Participante identified by email {
   o String orgId optional
 }
 
-participant OrgAdmin extends Participante {
-}
+participant OrgAdmin extends Participante { }
 
-participant Usuario extends Participante {
+participant Usuario extends Participante { }
 
-}
+participant Invitado extends Participante { }
 
 transaction CrearParticipanteUsuario {
   o String email
