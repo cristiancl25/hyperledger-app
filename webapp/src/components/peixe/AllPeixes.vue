@@ -1,15 +1,16 @@
 <template>
-  <div id="app">
-    <div v-if="error.e" class="alert alert-danger">
+  <div class="row">
+    <div v-if="error.e" class="alert alert-danger col-md-8">
       <strong>Error:</strong> {{ error.message }}.
     </div>
-    <div v-else="error.e">
-      <ul>
+    <div v-else class="col-md-4">
+      <ul class="list-group">
         <router-link
+          class="list-group-item"
           :to="'/peixe/' + peixe"
           tag="li"
           :key="peixe"
-          v-for="(peixe, index) in peixes"
+          v-for="(peixe) in peixes"
           active-class="active">
         <a>{{peixe}}</a>
         </router-link>
@@ -34,7 +35,6 @@
       }
     },
     created: function () {
-      var coordenadas = [];
       this.$http.get('http://localhost:3000/api/org.peixeencadeado.peixe.Peixe/')
         .then(response => {
           let peixes = [];

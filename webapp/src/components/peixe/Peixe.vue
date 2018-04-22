@@ -4,7 +4,7 @@
     <h2></h2>
     <div v-if="error.show" class="alert alert-danger alert-dismissible fade show" role="alert">
       <strong>Error</strong> {{ error.message }}
-      <button @click="error.show = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>

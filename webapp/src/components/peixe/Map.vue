@@ -1,17 +1,16 @@
 <template>
-  <div>
-    <div>
+  <div class="row">
+    <div class="col-md-4">
       <ul class="list-group" style="text-align:center" >
         <li class="list-group-item"
             @click="center=mark"
-            v-for="(mark, index) in markers">{{mark}}
+            :key="mark"
+            v-for="(mark) in markers">{{mark}}
         </li>
       </ul>
     </div>
-    <gmap-map
-      :center="center"
-      :zoom="7"
-      class="google-map">
+    <div class="col-md-8">
+      <gmap-map :center="center" :zoom="7" class="google-map">
         <gmap-marker
           :key="index"
           v-for="(m, index) in markers"
@@ -19,7 +18,9 @@
           :clickable="true"
           :draggable="true"
         ></gmap-marker>
-    </gmap-map>
+      </gmap-map>
+    </div>
+    
   </div>
 </template>
 
@@ -48,7 +49,7 @@
 
 <style scoped>
   .google-map {
-    width: 1200px;
+    width: 100%;
     height: 600px;
     margin: 0 auto;
   }
