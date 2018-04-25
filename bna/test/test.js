@@ -103,16 +103,16 @@ describe('Sample', () => {
         // Get the factory for the business network.
         factory = businessNetworkConnection.getBusinessNetwork().getFactory();
 
-        let transaction = factory.newTransaction("org.peixeencadeado.peixe", "SetupDemo");
-        await businessNetworkConnection.submitTransaction(transaction);
+        //let transaction = factory.newTransaction("org.peixeencadeado.peixe", "SetupDemo");
+        //await businessNetworkConnection.submitTransaction(transaction);
 
-        await importCardForIdentity('admin@pes1', await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#admin@pes1', 'admin@pes1'));
-        await importCardForIdentity('admin@org1', await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#admin@org1', 'admin@org1'));
-        await importCardForIdentity('admin@org2', await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#admin@org2', 'admin@org2'));
-        await importCardForIdentity('participante1@pes1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@pes1', 'participante1@pes1'));
-        await importCardForIdentity('participante1@org1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@org1', 'participante1@org1'));
-        await importCardForIdentity('participante1@org2', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@org2', 'participante1@org2'));
-        await importCardForIdentity('participante2@pes1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante2@pes1', 'participante2@pes1'));
+        //await importCardForIdentity('admin@pes1', await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#admin@pes1', 'admin@pes1'));
+        //await importCardForIdentity('admin@org1', await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#admin@org1', 'admin@org1'));
+        //await importCardForIdentity('admin@org2', await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#admin@org2', 'admin@org2'));
+        //await importCardForIdentity('participante1@pes1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@pes1', 'participante1@pes1'));
+        //await importCardForIdentity('participante1@org1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@org1', 'participante1@org1'));
+        //await importCardForIdentity('participante1@org2', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante1@org2', 'participante1@org2'));
+        //await importCardForIdentity('participante2@pes1', await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#participante2@pes1', 'participante2@pes1'));
 
     });
 
@@ -131,74 +131,135 @@ describe('Sample', () => {
         factory = businessNetworkConnection.getBusinessNetwork().getFactory();
     }
 
-    it('Comporobación de lectura no blockchain por parte do participante1@pes1', async() => {
+    async function crearParticipanteUsuario(email, nome) {
+        const transaction = factory.newTransaction(NS_PAR, 'CrearParticipanteUsuario');
 
-        await useIdentity('participante1@pes1')
-        var assetRegistry = await businessNetworkConnection.getAssetRegistry(NS_PEIXE + '.Peixe')
-        var assets = await assetRegistry.getAll();
-        assets.should.have.lengthOf(10);
+        transaction.email = email;
+        transaction.nome = nome;
+        await businessNetworkConnection.submitTransaction(transaction);
+        await importCardForIdentity(email, await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#' + email, email));
+    }
+
+    async function crearOrganizacion(orgId, tipoOrganizacion, descripcion, nomeAdmin, emailAdmin){
+        const transaction = factory.newTransaction(NS_ORG, 'CrearOrganizacion');
+
+        transaction.orgId = orgId;
+        transaction.tipoOrganizacion = tipoOrganizacion;
+        transaction.descripcion = descripcion;
+        transaction.nomeAdmin = nomeAdmin;
+        transaction.emailAdmin = emailAdmin;
+        await businessNetworkConnection.submitTransaction(transaction);
+        await importCardForIdentity(emailAdmin, await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#' + emailAdmin, emailAdmin, {issuer:true}));
+    }
+
+    async function crearPeixe(variedade, peso, latitude, lonxitude, descripcion){
+        let transaction = factory.newTransaction(NS_PEIXE, 'CrearPeixe');
+        transaction.variedade = variedade;
+        transaction.peso = peso;
+        transaction.latitude = latitude;
+        transaction.lonxitude = lonxitude;
+        transaction.descripcion = descripcion;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
+
+    //it('Creación dun participante', async () => {
+    //    await useIdentity('admin');
+    //    await crearParticipanteUsuario('usuario1@pes1', 'usuario');
+    //    const rexistro = await businessNetworkConnection.getParticipantRegistry('org.peixeencadeado.participantes.Usuario');
+    //    const participante = await rexistro.get('usuario1@pes1');
+    //    participante.nome.should.equal('usuario');
+    //    participante.email.should.equal('usuario1@pes1');
+
+    //    events.should.have.lengthOf(0);
+    //});
+
+    //it('creacion dunha organización cun participante non válido', async () => {
+    //    await crearParticipanteUsuario('usuario1@pes1', 'usuario');
+    //    await useIdentity('usuario1@pes1');
+    //    await chai.expect(
+    //        crearOrganizacion('OrganizacionProba', 'LONXA', 'descripcion', 'admin', 'admin@OrganizacionProba')
+    //    ).to.be.rejectedWith(Error);
+    //});
+
+    it('Creación dunha organización e do seu administrador', async () => {
+
+        await useIdentity('admin');
+        await crearOrganizacion('OrganizacionProba', 'LONXA', 'descripcion', 'admin', 'admin@OrganizacionProba');
+
+        const rexistroOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        const org = await rexistroOrg.get('OrganizacionProba');
+        org.orgId.should.equal('OrganizacionProba');
+        const rexistroPar = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.OrgAdmin');
+        const par = await rexistroPar.get('admin@OrganizacionProba');
+        par.email.should.equal('admin@OrganizacionProba');
+        par.nome.should.equal('admin');
+
+    });
+    
+
+    it('Creación dun peixe', async () => {
+
+        await useIdentity('admin');
+        await crearOrganizacion('pes1', 'LONXA', 'descripcion', 'admin', 'admin@pes1');
+        await useIdentity('admin@pes1');
+        await crearParticipanteUsuario('usuario1@pes1', 'usuario');
+        await useIdentity('usuario1@pes1');
+        await crearPeixe('peixe1', 1.2, 12, 23, 'Descripción');
+        const rexistroOrg = await businessNetworkConnection.getAssetRegistry(NS_PEIXE + '.Peixe');
+        events.should.have.lengthOf(1);
     });
 
     it('Creación dun peixe cun participante NON válido', async () => {
 
-        await useIdentity('participante2@pes1');
-        let transaction = factory.newTransaction("org.peixeencadeado.peixe", "CrearPeixe");
-        transaction.setPropertyValue('variedade', 'SARDIÑA');
-        transaction.setPropertyValue('peso', 1.28);
-        transaction.setPropertyValue('latitude', -1.45);
-        transaction.setPropertyValue('lonxitude', 3.14);
-        transaction.setPropertyValue('descripcion', 'sin descripcion');
-
-        await chai.expect(businessNetworkConnection.submitTransaction(transaction)).to.be.rejectedWith(Error);
+        await useIdentity('admin');
+        await chai.expect(
+            crearPeixe('peixe1', 1.2, 12, 23, 'Descripción')
+        ).to.be.rejectedWith(Error);
         chai.expect(events).to.eql([]);
     });
 
-    it('Creación dun peixe cun participante válido', async () => {
+    //it('Comporobación de lectura no blockchain por parte do participante1@pes1', async() => {
 
-        await useIdentity('participante1@pes1');
-        let transaction = factory.newTransaction("org.peixeencadeado.peixe", "CrearPeixe");
-        transaction.setPropertyValue('variedade', 'SARDIÑA');
-        transaction.setPropertyValue('peso', 1.28);
-        transaction.setPropertyValue('latitude', -1.45);
-        transaction.setPropertyValue('lonxitude', 3.14);
-        transaction.setPropertyValue('descripcion', 'sin descripcion');
-        await businessNetworkConnection.submitTransaction(transaction);
+    //    await useIdentity('participante1@pes1')
+    //    var assetRegistry = await businessNetworkConnection.getAssetRegistry(NS_PEIXE + '.Peixe')
+    //    var assets = await assetRegistry.getAll();
+    //    assets.should.have.lengthOf(10);
+    //});
 
-        events.should.have.lengthOf(1);
 
-        const rexistro = await businessNetworkConnection.getAssetRegistry('org.peixeencadeado.peixe.Peixe');
-        const participante = await rexistro.get(events[0].peixeId);
-        //TODO : Completar test
-        //participante.nome.should.equal('usuario');
-    });
+    //it('Creación dun peixe cun participante válido', async () => {
 
-    it('Creación dun participante', async () => {
+    //    await useIdentity('participante1@pes1');
+    //    let transaction = factory.newTransaction("org.peixeencadeado.peixe", "CrearPeixe");
+    //    transaction.setPropertyValue('variedade', 'SARDIÑA');
+    //    transaction.setPropertyValue('peso', 1.28);
+    //    transaction.setPropertyValue('latitude', -1.45);
+    //    transaction.setPropertyValue('lonxitude', 3.14);
+    //    transaction.setPropertyValue('descripcion', 'sin descripcion');
+    //    await businessNetworkConnection.submitTransaction(transaction);
 
-        await useIdentity('admin@pes1');
-        const transaction = factory.newTransaction('org.peixeencadeado.participantes', 'CrearParticipanteUsuario');
-        transaction.email = 'usuario1@pes1';
-        transaction.nome = 'usuario';
-        await businessNetworkConnection.submitTransaction(transaction);
+    //    events.should.have.lengthOf(1);
 
-        const rexistro = await businessNetworkConnection.getParticipantRegistry('org.peixeencadeado.participantes.Usuario');
-        const participante = await rexistro.get('usuario1@pes1');
-        participante.nome.should.equal('usuario');
+    //    const rexistro = await businessNetworkConnection.getAssetRegistry('org.peixeencadeado.peixe.Peixe');
+    //    const participante = await rexistro.get(events[0].peixeId);
+    //    //TODO : Completar test
+    //    //participante.nome.should.equal('usuario');
+    //});
 
-        events.should.have.lengthOf(0);
-    });
 
-    it('Compra dun peixe a pes1 por parte de org1', async () => {
+    //it('Compra dun peixe a pes1 por parte de org1', async () => {
 
-        await useIdentity('participante1@org1');
-        const transaction = factory.newTransaction('org.peixeencadeado.peixe', 'ComprarPeixe');
-        transaction.peixeId = 'peixe1';
-        await businessNetworkConnection.submitTransaction(transaction);
+    //    await useIdentity('participante1@org1');
+    //    const transaction = factory.newTransaction('org.peixeencadeado.peixe', 'ComprarPeixe');
+    //    transaction.peixeId = 'peixe1';
+    //    await businessNetworkConnection.submitTransaction(transaction);
 
-        const rexistro = await businessNetworkConnection.getAssetRegistry('org.peixeencadeado.peixe.Peixe');
-        const peixe = await rexistro.get('peixe1');
-        peixe.operacions.should.have.lengthOf(1);
-        peixe.operacionActual.organizacion.$identifier.should.equal('org1');
+    //    const rexistro = await businessNetworkConnection.getAssetRegistry('org.peixeencadeado.peixe.Peixe');
+    //    const peixe = await rexistro.get('peixe1');
+    //    peixe.operacions.should.have.lengthOf(1);
+    //    peixe.operacionActual.organizacion.$identifier.should.equal('org1');
 
-        events.should.have.lengthOf(0);
-    });
+    //    events.should.have.lengthOf(0);
+    //});
 });

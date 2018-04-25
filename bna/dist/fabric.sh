@@ -34,19 +34,19 @@ composer identity issue -c admin@peixeencadeado -f usuario.card -u participante1
 composer card import -f usuario.card
 
 # composer-rest-server
-# export COMPOSER_PORT=3001
-# export COMPOSER_CARD=admin@peixeencadeado
-# export COMPOSER_NAMESPACES=always
-# export COMPOSER_WEBSOCKETS=true
-# export COMPOSER_TLS=false
-# export COMPOSER_AUTHENTICATION=false
-# export COMPOSER_MULTIUSER=false
-# composer-rest-server
+export COMPOSER_PORT=3000
+export COMPOSER_CARD=admin@peixeencadeado
+export COMPOSER_NAMESPACES=always
+export COMPOSER_WEBSOCKETS=true
+export COMPOSER_TLS=false
+export COMPOSER_AUTHENTICATION=false
+export COMPOSER_MULTIUSER=false
+composer-rest-server
 
 # composer-rest-server + Autenticación + Multiusuario + mongodb
-docker run -d --name mongo --network composer_default -p 27017:27017 mongo
-source ../envvars.txt
-composer-rest-server
+# docker run -d --name mongo --network composer_default -p 27017:27017 mongo
+# source ../envvars.txt
+# composer-rest-server
 
 # sed -e 's/localhost:/orderer.example.com:/' -e 's/localhost:/peer0.org1.example.com:/' -e 's/localhost:/peer0.org1.example.com:/' -e 's/localhost:/ca.org1.example.com:/'  < $HOME/.composer/cards/admin@peixeencadeado/connection.json  > /tmp/connection.json && cp -p /tmp/connection.json $HOME/.composer/cards/admin@peixeencadeado
 # docker run \
@@ -63,3 +63,6 @@ composer-rest-server
 # -p 3000:3000 \
 # -p 8080:8080 \
 # hyperledger-rest-server
+
+
+# http://localhost:3000/api/org.peixeencadeado.peixe.Peixe?filter={%22include%22:%22resolve%22}

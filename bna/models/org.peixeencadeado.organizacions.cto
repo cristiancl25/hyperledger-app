@@ -7,6 +7,15 @@ asset Organizacion identified by orgId {
   o String orgId
   o String tipoOrganizacion
   o String descripcion
+  o DateTime fechaCreacion
   --> OrgAdmin administrador
   --> Usuario[] usuarios
+}
+
+transaction CrearOrganizacion {
+  o String orgId
+  o String tipoOrganizacion
+  o String descripcion
+  o String nomeAdmin
+  o String emailAdmin
 }
