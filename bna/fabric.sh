@@ -4,33 +4,39 @@ docker rmi $(docker images dev-* -q)
 #docker rmi $(docker images -aq)
 #rm -rf fabric-tools
 rm -rf ~/.composer
+set -e
 npm run prepublish
 #mkdir fabric-tools
 cd fabric-tools
-rm *.card
-set -e
 #curl -O https://raw.githubusercontent.com/hyperledger/composer-tools/master/packages/fabric-dev-servers/fabric-dev-servers.tar.gz
 #tar -xvf fabric-dev-servers.tar.gz
 export FABRIC_VERSION=hlfv11
 #./downloadFabric.sh
 ./startFabric.sh
 ./createPeerAdminCard.sh
-composer network install --card PeerAdmin@hlfv1 --archiveFile ../dist/peixeencadeado.bna
-composer network start --networkName peixeencadeado --networkVersion 0.0.1 --networkAdmin admin --networkAdminEnrollSecret adminpw --card PeerAdmin@hlfv1 --file networkadmin.card
-composer card import --file networkadmin.card
+cd ../
+#docker build -t composer-dev .
+docker run -d --name composer-dev -v ~/.composer:/root/.composer -p 8080:8080 --network composer_default composer-dev
+cd rest-server && ./runServer.sh
+# composer network install --card PeerAdmin@hlfv1 --archiveFile ../dist/peixeencadeado.bna
+# composer network start --networkName peixeencadeado --networkVersion 0.0.1 --networkAdmin admin --networkAdminEnrollSecret adminpw --card PeerAdmin@hlfv1 --file networkadmin.card
+# composer card import --file networkadmin.card
 
-# Creación de datos de proba
-../setUpDemo.sh
+# # Creación de datos de proba
+# ../setUpDemo.sh
+
+# cd ../rest-server
+# ./runServer.sh
 
 # composer-rest-server
-export COMPOSER_PORT=3000
-export COMPOSER_CARD=admin@peixeencadeado
-export COMPOSER_NAMESPACES=always
-export COMPOSER_WEBSOCKETS=true
-export COMPOSER_TLS=false
-export COMPOSER_AUTHENTICATION=false
-export COMPOSER_MULTIUSER=false
-composer-rest-server
+# export COMPOSER_PORT=3000
+# export COMPOSER_CARD=admin@peixeencadeado
+# export COMPOSER_NAMESPACES=always
+# export COMPOSER_WEBSOCKETS=true
+# export COMPOSER_TLS=false
+# export COMPOSER_AUTHENTICATION=false
+# export COMPOSER_MULTIUSER=false
+# composer-rest-server
 
 # composer-rest-server + Autenticación + Multiusuario + mongodb
 # docker run -d --name mongo --network composer_default -p 27017:27017 mongo

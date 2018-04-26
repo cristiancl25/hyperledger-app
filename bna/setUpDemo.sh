@@ -1,5 +1,8 @@
 #!/bin/bash
-
+set -e
+composer network install --card PeerAdmin@hlfv1 --archiveFile ./peixeencadeado.bna
+composer network start --networkName peixeencadeado --networkVersion 0.0.1 --networkAdmin admin --networkAdminEnrollSecret adminpw --card PeerAdmin@hlfv1 --file networkadmin.card
+composer card import --file networkadmin.card
 # Creación dunha pesqueira, o seu administrador e un usuario
 composer transaction submit -c admin@peixeencadeado -d '{
     "$class":"org.peixeencadeado.organizacions.CrearOrganizacion",
