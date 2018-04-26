@@ -1,10 +1,11 @@
 .eslintrc.yml
-dist/peixeencadeado.bna
-dist/fabric-tools
-dist/envvars.txt
+dist
+.sonarlint
 composer-logs
 node_modules
 package-lock.json
 .vscode/
 coverage
 .nyc_output
+fabric-tools
+envvars.txt

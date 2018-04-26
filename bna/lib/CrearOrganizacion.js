@@ -13,6 +13,7 @@ async function CrearOrganizacion(datos){
         throw new Error('participante non válido');
     }
 
+    /* Creación do administrador para a organización */
     var admin = factory.newResource(NS_PAR, 'OrgAdmin', datos.emailAdmin);
     admin.nome = datos.nomeAdmin;
     admin.orgId = datos.orgId;
@@ -20,6 +21,7 @@ async function CrearOrganizacion(datos){
     var rexistroPar = await getParticipantRegistry(NS_PAR + '.OrgAdmin');
     rexistroPar.add(admin);
 
+    /* Creación da organización */
     var org = factory.newResource(NS_ORG, 'Organizacion', datos.orgId);
     org.tipoOrganizacion = datos.tipoOrganizacion;
     org.descripcion = datos.descripcion;

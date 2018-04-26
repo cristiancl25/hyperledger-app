@@ -41,8 +41,6 @@ enum Estado {
   o   FINALIZADO
 }
 
-transaction SetupDemo{} /* Crea datos de proba */
-
 transaction ComprarPeixe {
   o String peixeId
 }
