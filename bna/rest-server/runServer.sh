@@ -11,7 +11,7 @@ docker run \
 -e COMPOSER_MULTIUSER=${COMPOSER_MULTIUSER} \
 -e COMPOSER_PROVIDERS="${COMPOSER_PROVIDERS}" \
 -e COMPOSER_DATASOURCES="${COMPOSER_DATASOURCES}" \
--v ~/.composer:/home/composer/.composer \
+-v ~/.composer:/root/.composer \
 --name rest \
 --network composer_default \
 -p 3000:3000 \
