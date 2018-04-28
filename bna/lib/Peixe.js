@@ -1,3 +1,5 @@
+const NS_ORG = 'org.peixeencadeado.organizacions'
+const NS_PEIXE = 'org.peixeencadeado.peixe';
 /**
  *
  * @param {org.peixeencadeado.peixe.CrearPeixe} datos
@@ -5,10 +7,8 @@
  */
  async function crearPeixe(datos){
 
-    const NS_ORG = 'org.peixeencadeado.organizacions'
-    const NS_PEIXE = 'org.peixeencadeado.peixe';
     var participante = getCurrentParticipant();
-    await validarParticipante(NS_ORG, participante);
+    await validarParticipante(participante);
     const factory = getFactory();
     const peixeId = xerarPeixeId(participante.orgId);
     var peixe = factory.newResource(NS_PEIXE, 'Peixe', peixeId);
@@ -41,7 +41,7 @@
 
 }
 
-async function validarParticipante(NS_ORG, participante){
+async function validarParticipante(participante){
 
     if (participante.getFullyQualifiedType() !== 'org.peixeencadeado.participantes.Usuario'){
         throw new Error('Participante ' + participante.getFullyQualifiedIdentifier() + ' non válido');
@@ -74,19 +74,12 @@ async function validarEstado(estado){
 
 }
 
-/**
- *
- * @param {org.peixeencadeado.peixe.ComprarPeixe} datos
- * @transaction
-*/
-async function ComprarPeixe(datos){
+async function traspasarPeixe(peixeId){
 
-    const NS_ORG = 'org.peixeencadeado.organizacions'
-    const NS_PEIXE = 'org.peixeencadeado.peixe';
     var participante = getCurrentParticipant();
     const factory = getFactory();
     var rexistroPeixe = await getAssetRegistry(NS_PEIXE + '.Peixe');
-    var peixe = await rexistroPeixe.get(datos.peixeId);
+    var peixe = await rexistroPeixe.get(peixeId);
     await validarEstado(peixe.estado);
 
     peixe.operacions.push(peixe.operacionActual);
@@ -104,4 +97,13 @@ async function ComprarPeixe(datos){
     peixe.operacionActual = operacion;
 
     await rexistroPeixe.update(peixe);
+}
+
+/**
+ *
+ * @param {org.peixeencadeado.peixe.ComprarPeixe} datos
+ * @transaction
+*/
+async function ComprarPeixe(datos){
+
 }
