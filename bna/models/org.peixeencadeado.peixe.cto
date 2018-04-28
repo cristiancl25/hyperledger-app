@@ -4,6 +4,7 @@ import org.peixeencadeado.organizacions.Organizacion
 
 asset Peixe identified by peixeId {
   o String peixeId
+  o Transaccion transaccion optional
   o Estado estado
   o Foto foto optional
   o Caracteristicas caracteristicas
@@ -12,7 +13,6 @@ asset Peixe identified by peixeId {
 }
 
 concept Operacion{
-  o Boolean captura
   o Coordenadas coordenadas
   o String descripcion optional
   o DateTime fecha
@@ -37,7 +37,8 @@ concept Coordenadas {
 enum Estado {
   o   CAPTURADO
   o   VENTA
-  o   PARADO
+  o   TRANSACCION
+  o   COMRADO
   o   FINALIZADO
 }
 
@@ -57,4 +58,18 @@ event PeixeCreado {
   o String peixeId
   o String orgId
   o String variedade
+}
+
+
+
+asset Transaccion identified by transaccionId {
+  o String transaccionId
+  --> Peixe peixe
+  o Org orgVenta
+  o Org orgCompra
+}
+
+concept Org {
+  o String orgId
+  o Boolean confirmacion optional
 }
