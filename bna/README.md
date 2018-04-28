@@ -1,6 +1,6 @@
 # BNA
 
-## Comfiguración createPeerAdminCard.sh
+## Configuración createPeerAdminCard.sh
 ```
     "orderers": {
         "orderer.example.com": {

@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+rm -rf ~/.composer/*
 # MODIFICAR createPeerAdminCard.sh cos datos do README.md antes de executar
 ./fabric-tools/createPeerAdminCard.sh
 npm run prepublish
