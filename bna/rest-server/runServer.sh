@@ -2,15 +2,35 @@
 set -e
 docker run -d --name mongo --network composer_default -p 27017:27017 mongo
 docker build -t composer-rest-server .
-source envvars.txt
 docker run \
 -d \
--e COMPOSER_CARD=${COMPOSER_CARD} \
--e COMPOSER_NAMESPACES=${COMPOSER_NAMESPACES} \
--e COMPOSER_AUTHENTICATION=${COMPOSER_AUTHENTICATION} \
--e COMPOSER_MULTIUSER=${COMPOSER_MULTIUSER} \
--e COMPOSER_PROVIDERS="${COMPOSER_PROVIDERS}" \
--e COMPOSER_DATASOURCES="${COMPOSER_DATASOURCES}" \
+-e COMPOSER_PORT=3000 \
+-e COMPOSER_CARD=admin@peixeencadeado \
+-e COMPOSER_NAMESPACES=always \
+-e COMPOSER_WEBSOCKETS=true \
+-e COMPOSER_TLS=false \
+-e COMPOSER_AUTHENTICATION=false \
+-e COMPOSER_MULTIUSER=false \
+-e COMPOSER_PROVIDERS='{
+    "google": {
+        "provider": "google",
+        "module": "passport-google-oauth2",
+        "clientID": "CLIENT-ID",
+        "clientSecret": "CLIENT-SECRET",
+        "authPath": "/auth/google",
+        "callbackURL": "/auth/google/callback",
+        "scope": "https://www.googleapis.com/auth/plus.login",
+        "successRedirect": "/",
+        "failureRedirect": "/"
+    }
+}' \
+-e COMPOSER_DATASOURCES='{
+    "db": {
+        "name": "db",
+        "connector": "mongodb",
+        "host": "mongo"
+    }
+}' \
 -v ~/.composer:/root/.composer \
 --name rest \
 --network composer_default \

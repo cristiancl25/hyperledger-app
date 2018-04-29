@@ -7,5 +7,4 @@ package-lock.json
 .vscode/
 coverage
 .nyc_output
-fabric-tools
-envvars.txt
+DevServer_connection.json

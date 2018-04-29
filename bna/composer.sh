@@ -1,9 +1,13 @@
 #!/bin/bash
 set -e
 rm -rf ~/.composer/*
-# MODIFICAR createPeerAdminCard.sh cos datos do README.md antes de executar
-./fabric-tools/createPeerAdminCard.sh
+cd fabric-tools && ./createPeerAdminCard.sh && cd ..
+if [ ! -d "./node_modules" ]; then
+  npm install
+  chmod -R 777 ./node_modules
+fi
 npm run prepublish
+chmod 777 dist/peixeencadeado.bna
 composer network install --card PeerAdmin@hlfv1 --archiveFile dist/peixeencadeado.bna
 composer network start --networkName peixeencadeado --networkVersion 0.0.1 --networkAdmin admin --networkAdminEnrollSecret adminpw --card PeerAdmin@hlfv1 --file ~/.composer/networkadmin.card
 composer card import --file ~/.composer/networkadmin.card
@@ -27,11 +31,12 @@ composer transaction submit -c admin@pes1@peixeencadeado -d '{
 composer identity issue -c admin@pes1@peixeencadeado -f ~/.composer/usuario1_pes1.card -u usuario1@pes1 -a "resource:org.peixeencadeado.participantes.Usuario#usuario1@pes1"
 composer card import -f ~/.composer/usuario1_pes1.card
 
-composer transaction submit -c usuario1@pes1@peixeencadeado -d '{
-  "$class": "org.peixeencadeado.peixe.CrearPeixe",
-  "variedade": "XURELO",
-  "descripcion": "Descripción do xurelo",
-  "peso": 2,
-  "latitude": 43,
-  "lonxitude":-8 
-}'
+# composer transaction submit -c usuario1@pes1@peixeencadeado -d '{
+#   "$class": "org.peixeencadeado.peixe.CrearPeixe",
+#   "variedade": "XURELO",
+#   "descripcion": "Descripción do xurelo",
+#   "peso": 2,
+#   "latitude": 43,
+#   "lonxitude":-8 
+# }'
+echo composer-dev iniciado

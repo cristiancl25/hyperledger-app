@@ -1,21 +1,20 @@
 #!/bin/bash
 docker rm -f $(docker ps -aq)
 docker rmi $(docker images dev-* -q)
-#docker rmi $(docker images -aq)
-#rm -rf fabric-tools
 set -e
-#mkdir fabric-tools
-cd fabric-tools
-#curl -O https://raw.githubusercontent.com/hyperledger/composer-tools/master/packages/fabric-dev-servers/fabric-dev-servers.tar.gz
-#tar -xvf fabric-dev-servers.tar.gz
-export FABRIC_VERSION=hlfv11
-#./downloadFabric.sh
-./startFabric.sh
-cd ../
+export FABRIC_START_TIMEOUT=15
+FABRIC_VERSION=hlfv11
+fabric-tools/startFabric.sh
 docker build -t composer-dev .
 docker run -d --name composer-dev \
     -v ~/.composer:/root/.composer \
+    -v $PWD:/root/bna \
     -p 8080:8080 --network composer_default composer-dev
+
+until [ $(docker logs composer-dev --tail 50 2>&1 | grep 'composer-dev iniciado' | wc -l) -gt 0 ]; do
+    sleep 10;
+    docker logs composer-dev --tail 10
+done
+
 cd rest-server && ./runServer.sh
-docker logs composer-dev -f
 # http://localhost:3000/api/org.peixeencadeado.peixe.Peixe?filter={%22include%22:%22resolve%22}
