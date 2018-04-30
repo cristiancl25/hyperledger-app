@@ -74,6 +74,11 @@ async function validarEstado(estado){
 
 }
 
+async function obterPeixe(peixeId){
+    var rexistro = await getAssetRegistry(NS_PEIXE + '.Peixe');
+    return  await rexistro.get(peixeId);
+}
+
 async function traspasarPeixe(peixeId){
 
     var participante = getCurrentParticipant();
@@ -105,5 +110,43 @@ async function traspasarPeixe(peixeId){
  * @transaction
 */
 async function ComprarPeixe(datos){
+    const factory = getFactory();
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+    var peixe = await obterPeixe(datos.peixeId);
 
+    var orgVenta = factory.newConcept(NS_PEIXE,'Org');
+    orgVenta.orgId = peixe.operacionActual.organizacion.$identifier;
+    orgVenta.confirmacion = false;
+
+    var orgCompra = factory.newConcept(NS_PEIXE,'Org');
+    orgCompra.orgId = participante.orgId;
+    orgCompra.confirmacion = false;
+
+    var transaccion = factory.newResource(NS_PEIXE, 'Transaccion', peixe.peixeId + '-' + peixe.orgId + '-' + participante.orgId + '-' + new Date().toJSON());
+    transaccion.peixe = peixe;
+    transaccion.orgCompra = orgCompra;
+    transaccion.orgVenta = orgVenta;
+
+    peixe.estado = 'TRANSACCION';
+    peixe.transaccion = transaccion;
+    var rexistroPeixe = await getAssetRegistry(NS_PEIXE + '.Peixe');
+    await rexistroPeixe.update(peixe);
+
+    var rexistroTransaccion = await getAssetRegistry(NS_PEIXE + '.Transaccion');
+    await rexistroTransaccion.add(transaccion);
+}
+
+
+/**
+ *
+ * @param {org.peixeencadeado.peixe.ConfirmarTransaccion} datos
+ * @transaction
+*/
+async function ConfirmarTransaccion(datos){
+    const factory = getFactory();
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+    var peixe = await obterPeixe(datos.peixeId);
+    console.log(peixe);
 }

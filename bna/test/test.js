@@ -162,7 +162,17 @@ describe('Sample', () => {
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
+    async function comprarPeixe(peixeId){
+        let transaction = factory.newTransaction(NS_PEIXE, 'ComprarPeixe');
+        transaction.peixeId = peixeId;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
 
+    async function confirmarTransaccion(peixeId){
+        let transaction = factory.newTransaction(NS_PEIXE, 'ConfirmarTransaccion');
+        transaction.peixeId = peixeId;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
     //it('Creación dun participante', async () => {
     //    await useIdentity('admin');
     //    await crearParticipanteUsuario('usuario1@pes1', 'usuario');
@@ -217,6 +227,34 @@ describe('Sample', () => {
             crearPeixe('peixe1', 1.2, 12, 23, 'Descripción')
         ).to.be.rejectedWith(Error);
         chai.expect(events).to.eql([]);
+    });
+
+
+    it('Compra dun peixe válido', async () => {
+
+        await useIdentity('admin');
+        
+        await crearOrganizacion('pes1', 'LONXA', 'descripcion', 'admin', 'admin@pes1');
+        await crearOrganizacion('res1', 'RESTAURANTE', 'descripcion', 'admin', 'admin@res1');
+
+        await useIdentity('admin@pes1');
+        await crearParticipanteUsuario('usuario1@pes1', 'usuario');
+        await useIdentity('usuario1@pes1');
+        await crearPeixe('XURELO', 1.2, 12, 23, 'Descripción');
+        events.should.have.lengthOf(1);
+        var peixeId = events[0].peixeId;
+
+        await useIdentity('admin@res1');
+        await crearParticipanteUsuario('usuario1@res1', 'usuario');
+        await useIdentity('usuario1@res1');
+        await comprarPeixe(peixeId);
+        
+        var rexistroPeixe = await businessNetworkConnection.getAssetRegistry(NS_PEIXE + '.Peixe')
+        var peixe = await rexistroPeixe.get(peixeId);
+        var rexistroTransaccion = await businessNetworkConnection.getAssetRegistry(NS_PEIXE + '.Transaccion')
+        var transaccion = await rexistroTransaccion.get(peixe.transaccion.transaccionId);
+        
+        await confirmarTransaccion(peixeId);
     });
 
     //it('Comporobación de lectura no blockchain por parte do participante1@pes1', async() => {

@@ -42,10 +42,6 @@ enum Estado {
   o   FINALIZADO
 }
 
-transaction ComprarPeixe {
-  o String peixeId
-}
-
 transaction CrearPeixe {
   o String variedade
   o String descripcion
@@ -62,6 +58,18 @@ event PeixeCreado {
 
 
 
+transaction ComprarPeixe {
+  o String peixeId
+}
+
+transaction ConfirmarTransaccion {
+  o String peixeId
+}
+
+transaction rexeitarTransaccion {
+  o String peixeId
+}
+
 asset Transaccion identified by transaccionId {
   o String transaccionId
   --> Peixe peixe
@@ -70,6 +78,6 @@ asset Transaccion identified by transaccionId {
 }
 
 concept Org {
-  o String orgId
-  o Boolean confirmacion optional
+  o String orgId 
+  o Boolean confirmacion 
 }
