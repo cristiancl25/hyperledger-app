@@ -31,6 +31,30 @@ composer transaction submit -c admin@pes1@peixeencadeado -d '{
 composer identity issue -c admin@pes1@peixeencadeado -f ~/.composer/usuario1_pes1.card -u usuario1@pes1 -a "resource:org.peixeencadeado.participantes.Usuario#usuario1@pes1"
 composer card import -f ~/.composer/usuario1_pes1.card
 
+# Creación dun restaurante
+composer transaction submit -c admin@peixeencadeado -d '{
+    "$class":"org.peixeencadeado.organizacions.CrearOrganizacion",
+    "orgId":"res1",
+    "tipoOrganizacion":"RESTAURANTE",
+    "descripcion":"Descripción do restaurante",
+    "nomeAdmin":"admin",
+    "emailAdmin":"admin@res1"
+}'
+composer identity issue -c admin@peixeencadeado -f ~/.composer/admin_res1.card -u admin@res1 -a "resource:org.peixeencadeado.participantes.OrgAdmin#admin@res1" -x
+composer card import -f ~/.composer/admin_res1.card
+
+composer transaction submit -c admin@res1@peixeencadeado -d '{
+    "$class":"org.peixeencadeado.participantes.CrearParticipanteUsuario",
+    "nome":"usuario1",
+    "email":"usuario1@res1"
+}'
+composer identity issue -c admin@res1@peixeencadeado -f ~/.composer/usuario1_res1.card -u usuario1@res1 -a "resource:org.peixeencadeado.participantes.Usuario#usuario1@res1"
+composer card import -f ~/.composer/usuario1_res1.card
+
+
+
+
+
 # composer transaction submit -c usuario1@pes1@peixeencadeado -d '{
 #   "$class": "org.peixeencadeado.peixe.CrearPeixe",
 #   "variedade": "XURELO",

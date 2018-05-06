@@ -1,4 +1,4 @@
-FROM hyperledger/composer-rest-server
+FROM hyperledger/composer-rest-server:0.19.4
 USER root
 RUN npm install --production loopback-connector-mongodb passport-google-oauth2 && \
 npm cache clean --force && \
