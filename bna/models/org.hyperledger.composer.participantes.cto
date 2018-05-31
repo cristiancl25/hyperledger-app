@@ -1,8 +1,8 @@
-namespace org.peixeencadeado.participantes
+namespace org.hyperledger.composer.participantes
 
 abstract participant Participante identified by email {
   o String email
-  o String nome
+  o String nombre
   o String orgId optional
 }
 
@@ -14,5 +14,5 @@ participant Invitado extends Participante { }
 
 transaction CrearParticipanteUsuario {
   o String email
-  o String nome
+  o String nombre
 }

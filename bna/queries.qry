@@ -1,13 +1,7 @@
 
-query TodolosPeixes {
-  description: "Devolve todos os peixes do rexistro"
+query ProductosOrganizacion {
+  description: "Devuelve todos los productos de unha organización"
   statement:  
-    SELECT org.peixeencadeado.peixe.Peixe
-}
-
-query PeixePorOrganizacion {
-  description: "Devolve todos os peixes capturados por unha organización"
-  statement:  
-    SELECT  org.peixeencadeado.peixe.Peixe
+    SELECT  org.hyperledger.composer.productos.Producto
   	WHERE   (operacionActual.organizacion == _$orgId )
 }

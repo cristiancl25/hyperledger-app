@@ -1,13 +1,13 @@
 {
-  "name": "peixeencadeado",
+  "name": "bna",
   "version": "0.0.1",
-  "description": "Modelo para manter a trazabilidade do peixe",
+  "description": "Modelo para mantener la trazabilidad de productos de la industria agroalimentaria",
   "author": "Cristian Cancela Lema",
   "email": "cristian.cancela.lema@udc.es",
   "license": "Apache-2.0",
   "scripts": {
     "test": "nyc mocha -t 0 --recursive",
-    "prepublish": "mkdirp ./dist && composer archive create --sourceType dir --sourceName ./ -a ./dist/peixeencadeado.bna"
+    "prepublish": "mkdirp ./dist && composer archive create --sourceType dir --sourceName ./ -a ./dist/bna.bna"
   },
   "devDependencies": {
     "chai": "^4.1.2",
@@ -17,6 +17,7 @@
     "composer-common": "^0.19.4",
     "composer-connector-embedded": "^0.19.4",
     "composer-wallet-inmemory": "^0.19.4",
+    "composer-wallet-filesystem": "^0.19.4",
     "eslint": "^4.19.1",
     "mkdirp": "^0.5.1",
     "mocha": "^5.0.5",

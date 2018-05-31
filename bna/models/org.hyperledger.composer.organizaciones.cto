@@ -1,7 +1,7 @@
-namespace org.peixeencadeado.organizacions
+namespace org.hyperledger.composer.organizaciones
 
-import org.peixeencadeado.participantes.OrgAdmin
-import org.peixeencadeado.participantes.Usuario
+import org.hyperledger.composer.participantes.OrgAdmin
+import org.hyperledger.composer.participantes.Usuario
 
 asset Organizacion identified by orgId {
   o String orgId
@@ -16,6 +16,6 @@ transaction CrearOrganizacion {
   o String orgId
   o String tipoOrganizacion
   o String descripcion
-  o String nomeAdmin
+  o String nombreAdmin
   o String emailAdmin
 }

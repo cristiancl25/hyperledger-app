@@ -1,15 +1,15 @@
-namespace org.peixeencadeado.peixe
+namespace org.hyperledger.composer.productos
 
-import org.peixeencadeado.organizacions.Organizacion
+import org.hyperledger.composer.organizaciones.Organizacion
 
-asset Peixe identified by peixeId {
-  o String peixeId
+asset Producto identified by productoId {
+  o String productoId
   o Transaccion transaccion optional
   o Estado estado
   o Foto foto optional
   o Caracteristicas caracteristicas
   o Operacion operacionActual
-  o Operacion[] operacions
+  o Operacion[] operaciones
 }
 
 concept Operacion{
@@ -20,7 +20,7 @@ concept Operacion{
 }
 
 concept Caracteristicas{
-  o String variedade
+  o String variedad
   o Double peso
 }
 
@@ -30,8 +30,8 @@ concept Foto{
 }
 
 concept Coordenadas {
-  o   Double    latitude
-  o   Double    lonxitude
+  o   Double    latitud
+  o   Double    longitud
 }
 
 enum Estado {
@@ -42,42 +42,42 @@ enum Estado {
   o   FINALIZADO
 }
 
-transaction CrearPeixe {
-  o String variedade
+transaction CrearProducto {
+  o String variedad
   o String descripcion
   o Double peso
-  o Double latitude
-  o Double lonxitude
+  o Double latitud
+  o Double longitud
 }
 
-event PeixeCreado {
-  o String peixeId
+event ProductoCreado {
+  o String productoId
   o String orgId
-  o String variedade
+  o String variedad
 }
 
 
 
-transaction ComprarPeixe {
-  o String peixeId
+transaction ComprarProducto {
+  o String productoId
 }
 
 transaction ConfirmarTransaccion {
-  o String peixeId
+  o String productoId
 }
 
-transaction RexeitarTransaccion {
-  o String peixeId
+transaction RechazarTransaccion {
+  o String productoId
 }
 
 asset Transaccion identified by transaccionId {
   o String transaccionId
-  --> Peixe peixe
-  o Org orgVenta
-  o Org orgCompra
+  --> Producto producto
+  o OrgConfirmacion orgVenta
+  o OrgConfirmacion orgCompra
 }
 
-concept Org {
+concept OrgConfirmacion {
   o String orgId 
   o Boolean confirmacion 
 }

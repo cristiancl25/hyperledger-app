@@ -5,7 +5,7 @@ docker build -t composer-rest-server .
 docker run \
 -d \
 -e COMPOSER_PORT=3000 \
--e COMPOSER_CARD=admin@peixeencadeado \
+-e COMPOSER_CARD=admin@bna \
 -e COMPOSER_NAMESPACES=always \
 -e COMPOSER_WEBSOCKETS=true \
 -e COMPOSER_TLS=false \

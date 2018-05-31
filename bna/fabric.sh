@@ -17,4 +17,3 @@ until [ $(docker logs composer-dev --tail 50 2>&1 | grep 'composer-dev iniciado'
 done
 
 cd rest-server && ./runServer.sh
-# http://localhost:3000/api/org.peixeencadeado.peixe.Peixe?filter={%22include%22:%22resolve%22}
