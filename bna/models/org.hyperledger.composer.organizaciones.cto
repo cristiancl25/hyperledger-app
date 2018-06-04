@@ -12,6 +12,7 @@ asset Organizacion identified by orgId {
   --> Usuario[] usuarios
 }
 
+/* Crea una organización y su administrador */
 transaction CrearOrganizacion {
   o String orgId
   o String tipoOrganizacion

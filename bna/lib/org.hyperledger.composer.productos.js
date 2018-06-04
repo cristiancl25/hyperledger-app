@@ -69,6 +69,7 @@ async function validarParticipante(participante){
 }
 
 function generarIdProducto(orgId){
+    console.log(Math.floor(Math.random() * 100));
     return orgId + '-' + new Date().toJSON();
 }
 

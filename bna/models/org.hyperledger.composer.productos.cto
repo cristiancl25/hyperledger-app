@@ -1,73 +1,7 @@
 namespace org.hyperledger.composer.productos
 
-import org.hyperledger.composer.organizaciones.Organizacion
-
-asset Producto identified by productoId {
-  o String productoId
-  o Transaccion transaccion optional
-  o Estado estado
-  o Foto foto optional
-  o Caracteristicas caracteristicas
-  o Operacion operacionActual
-  o Operacion[] operaciones
-}
-
-concept Operacion{
-  o Coordenadas coordenadas
-  o String descripcion optional
-  o DateTime fecha
-  --> Organizacion organizacion
-}
-
-concept Caracteristicas{
-  o String variedad
-  o Double peso
-}
-
-concept Foto{
-  o String hashFoto
-  o String url
-}
-
-concept Coordenadas {
-  o   Double    latitud
-  o   Double    longitud
-}
-
-enum Estado {
-  o   CAPTURADO
-  o   VENTA
-  o   TRANSACCION
-  o   COMRADO
-  o   FINALIZADO
-}
-
-transaction CrearProducto {
-  o String variedad
-  o String descripcion
-  o Double peso
-  o Double latitud
-  o Double longitud
-}
-
-event ProductoCreado {
-  o String productoId
-  o String orgId
-  o String variedad
-}
-
-
-
-transaction ComprarProducto {
-  o String productoId
-}
-
-transaction ConfirmarTransaccion {
-  o String productoId
-}
-
-transaction RechazarTransaccion {
-  o String productoId
+asset TipoProducto identified by tipo {
+  o String tipo
 }
 
 asset Transaccion identified by transaccionId {
@@ -80,4 +14,103 @@ asset Transaccion identified by transaccionId {
 concept OrgConfirmacion {
   o String orgId 
   o Boolean confirmacion 
+}
+
+asset Puja identified by pujaId {
+  o String pujaId
+  --> Producto producto
+  o Double precioPartida
+  o PujaOrganizacion[] organizaciones
+}
+
+concept PujaOrganizacion {
+  o Double precio
+  o String orgId
+}
+
+asset Producto identified by productoId {
+  o String productoId
+  o String identificador optional
+  --> Producto predecesor optional
+  --> Producto[] sucesores optional
+  o Estado estado
+  o Imagen imagen optional
+  o Caracteristicas caracteristicas
+  --> Operacion operacionActual
+  --> Operacion[] operaciones
+}
+
+asset Operacion identified by transaccionId{
+  o String transaccionId
+  o Coordenadas coordenadas optional
+  o DateTime fechaAdquisicion
+  o String orgId
+  o DatosVenta datosVenta
+  
+}
+
+concept DatosVenta {
+  o String unidadMonetaria
+  o Double precioVenta optional
+  o String pujaId optional
+}
+
+concept Caracteristicas{
+  --> TipoProducto tipoProducto
+  o String variedadProducto optional
+  o String descripcion optional
+  o Tipo tipo
+  o Integer unidades optional
+  o Double peso optional
+  o String magnitud optional
+}
+
+
+concept Imagen {
+  o String hashImagen
+  o String url
+  o String algoritmo
+}
+
+concept Coordenadas {
+  o   Double    latitud
+  o   Double    longitud
+}
+
+enum Tipo {
+  o UNIDAD
+  o PESO
+}
+
+enum Estado {
+  o   PARADO
+  o   VENTA
+  o   TRANSACCION
+  o   COMRADO
+  o   FINALIZADO
+}
+
+transaction CrearProducto {
+  o String tipo
+  o String variedad optional
+  o String descripcion
+  o Double peso
+  o Double latitud
+  o Double longitud
+}
+
+event ProductoCreado {
+  o String productoId
+  o String orgId
+  o String tipo
+  o String variedad optional
+}
+
+transaction ComprarProducto {
+  o String productoId
+}
+
+transaction ConfirmarTransaccion {
+  o String productoId
+  o Boolean confirmar
 }

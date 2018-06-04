@@ -3,5 +3,12 @@ query ProductosOrganizacion {
   description: "Devuelve todos los productos de unha organización"
   statement:  
     SELECT  org.hyperledger.composer.productos.Producto
-  	WHERE   (operacionActual.organizacion == _$orgId )
+  	WHERE   ( operacionActual.orgId == _$orgId )
+}
+
+query ProductosPorTipo {
+  description: "Devuelve todos los productos de un determinado tipo"
+  statement:  
+    SELECT  org.hyperledger.composer.productos.Producto
+  	WHERE   ( caracteristicas.tipoProducto == _$tipoProducto )
 }
