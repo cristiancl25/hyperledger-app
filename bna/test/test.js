@@ -120,6 +120,12 @@ describe('Sample', () => {
         factory = businessNetworkConnection.getBusinessNetwork().getFactory();
     }
 
+    async function crearTipoOrganizacion(tipo){
+        const transaction = factory.newTransaction(NS_ORG, 'CrearTipoOrganizacion');
+        transaction.tipo = tipo;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
     async function crearParticipanteUsuario(email, nombre) {
         const transaction = factory.newTransaction(NS_PAR, 'CrearParticipanteUsuario');
 
@@ -164,8 +170,16 @@ describe('Sample', () => {
     }
 
 
+    it('Creación de un tipo de organización', async () => {
+        await useIdentity('admin');
+        crearTipoOrganizacion('PESQUEIRA');
+        var regTipoOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.TipoOrganizacion');
+        chai.assert.isTrue(await regTipoOrg.exists('PESQUEIRA'));
+    });
+
     it('Creación de una organización y de su administrador', async () => {
         await useIdentity('admin');
+        await crearTipoOrganizacion('LONXA');
         await crearOrganizacion('OrganizacionProba', 'LONXA', 'descripcion', 'admin', 'admin@OrganizacionProba');
 
         const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');

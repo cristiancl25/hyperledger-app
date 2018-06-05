@@ -13,6 +13,18 @@ composer network install --card PeerAdmin@hlfv1 --archiveFile dist/bna.bna
 composer network start --networkName bna --networkVersion 0.0.1 --networkAdmin admin --networkAdminEnrollSecret adminpw --card PeerAdmin@hlfv1 --file ~/.composer/networkadmin.card
 composer card import --file ~/.composer/networkadmin.card
 
+# Creación de un nuevo tipo de organización
+composer transaction submit -c admin@bna -d '{
+    "$class":"org.hyperledger.composer.organizaciones.CrearTipoOrganizacion",
+    "tipo":"PESQUEIRA"
+}'
+
+# Creación de un nuevo tipo de organización
+composer transaction submit -c admin@bna -d '{
+    "$class":"org.hyperledger.composer.organizaciones.CrearTipoOrganizacion",
+    "tipo":"RESTAURANTE"
+}'
+
 # Creación de una organización y su administrador
 composer transaction submit -c admin@bna -d '{
     "$class":"org.hyperledger.composer.organizaciones.CrearOrganizacion",

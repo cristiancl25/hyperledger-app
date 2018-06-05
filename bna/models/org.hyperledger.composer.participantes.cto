@@ -3,7 +3,7 @@ namespace org.hyperledger.composer.participantes
 abstract participant Participante identified by email {
   o String email
   o String nombre
-  o String orgId optional
+  o String orgId
 }
 
 participant OrgAdmin extends Participante { }

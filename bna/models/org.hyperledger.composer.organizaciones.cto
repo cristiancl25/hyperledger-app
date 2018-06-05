@@ -3,13 +3,30 @@ namespace org.hyperledger.composer.organizaciones
 import org.hyperledger.composer.participantes.OrgAdmin
 import org.hyperledger.composer.participantes.Usuario
 
+
+asset TipoOrganizacion identified by tipo {
+  o String tipo
+}
+
 asset Organizacion identified by orgId {
   o String orgId
-  o String tipoOrganizacion
+  --> TipoOrganizacion tipoOrganizacion
   o String descripcion
   o DateTime fechaCreacion
   --> OrgAdmin administrador
   --> Usuario[] usuarios
+  --> Localizacion[] Localizaciones optional
+}
+
+asset Localizacion identified by localizacionId {
+  o   String    localizacionId
+  o   Double    latitud
+  o   Double    longitud
+  o   String    direccion
+}
+
+transaction CrearTipoOrganizacion {
+  o String tipo
 }
 
 /* Crea una organización y su administrador */

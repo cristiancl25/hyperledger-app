@@ -1,5 +1,7 @@
 namespace org.hyperledger.composer.productos
 
+import org.hyperledger.composer.organizaciones.Localizacion
+
 asset TipoProducto identified by tipo {
   o String tipo
 }
@@ -42,7 +44,7 @@ asset Producto identified by productoId {
 
 asset Operacion identified by transaccionId{
   o String transaccionId
-  o Coordenadas coordenadas optional
+  o Localizacion localizacion
   o DateTime fechaAdquisicion
   o String orgId
   o DatosVenta datosVenta
@@ -65,16 +67,10 @@ concept Caracteristicas{
   o String magnitud optional
 }
 
-
 concept Imagen {
   o String hashImagen
   o String url
   o String algoritmo
-}
-
-concept Coordenadas {
-  o   Double    latitud
-  o   Double    longitud
 }
 
 enum Tipo {
