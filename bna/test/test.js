@@ -126,11 +126,12 @@ describe('Sample', () => {
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
-    async function crearParticipanteUsuario(email, nombre) {
-        const transaction = factory.newTransaction(NS_PAR, 'CrearParticipanteUsuario');
+    async function crearParticipante(email, nombre, tipoUsuario) {
+        const transaction = factory.newTransaction(NS_PAR, 'CrearParticipante');
 
         transaction.email = email;
         transaction.nombre = nombre;
+        transaction.tipoUsuario = tipoUsuario;
         await businessNetworkConnection.submitTransaction(transaction);
         await importCardForIdentity(email, await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#' + email, email));
     }
@@ -198,7 +199,7 @@ describe('Sample', () => {
         await useIdentity('admin');
         await crearOrganizacion('pes1', 'LONXA', 'descripcion', 'admin', 'admin@pes1');
         await useIdentity('admin@pes1');
-        await crearParticipanteUsuario('usuario1@pes1', 'usuario');
+        await crearParticipante('usuario1@pes1', 'usuario', 'Usuario');
         await useIdentity('usuario1@pes1');
         await crearProducto('producto1', 1.2, 12, 23, 'Descripción');
         const regOrg = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
@@ -223,14 +224,14 @@ describe('Sample', () => {
         await crearOrganizacion('res1', 'RESTAURANTE', 'descripcion', 'admin', 'admin@res1');
 
         await useIdentity('admin@pes1');
-        await crearParticipanteUsuario('usuario1@pes1', 'usuario');
+        await crearParticipante('usuario1@pes1', 'usuario', 'Usuario');
         await useIdentity('usuario1@pes1');
         await crearProducto('XURELO', 1.2, 12, 23, 'Descripción');
         events.should.have.lengthOf(1);
         var productoId = events[0].productoId;
 
         await useIdentity('admin@res1');
-        await crearParticipanteUsuario('usuario1@res1', 'usuario');
+        await crearParticipante('usuario1@res1', 'usuario', 'Usuario');
         await useIdentity('usuario1@res1');
         await comprarProducto(productoId);
         

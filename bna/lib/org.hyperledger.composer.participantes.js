@@ -1,10 +1,10 @@
 
 /**
  *
- * @param {org.hyperledger.composer.participantes.CrearParticipanteUsuario} datos
+ * @param {org.hyperledger.composer.participantes.CrearParticipante} datos
  * @transaction
  */
-async function CrearParticipanteUsuario(datos){
+async function CrearParticipante(datos){
     const factory = getFactory();
     const participanteActual = getCurrentParticipant();
 

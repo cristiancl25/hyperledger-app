@@ -12,7 +12,8 @@ participant Usuario extends Participante { }
 
 participant Invitado extends Participante { }
 
-transaction CrearParticipanteUsuario {
+transaction CrearParticipante {
   o String email
   o String nombre
+  o String tipoUsuario
 }

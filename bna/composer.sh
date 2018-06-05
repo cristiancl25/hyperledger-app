@@ -39,9 +39,10 @@ composer card import -f ~/.composer/admin_pes1.card
 
 # Creación de un usuario para una organización
 composer transaction submit -c admin@pes1@bna -d '{
-    "$class":"org.hyperledger.composer.participantes.CrearParticipanteUsuario",
+    "$class":"org.hyperledger.composer.participantes.CrearParticipante",
     "nombre":"usuario1",
-    "email":"usuario1@pes1"
+    "email":"usuario1@pes1",
+    "tipoUsuario":"Usuario"
 }'
 composer identity issue -c admin@pes1@bna -f ~/.composer/usuario1_pes1.card -u usuario1@pes1 -a "resource:org.hyperledger.composer.participantes.Usuario#usuario1@pes1"
 composer card import -f ~/.composer/usuario1_pes1.card
@@ -60,9 +61,10 @@ composer card import -f ~/.composer/admin_res1.card
 
 # Creación de un usuario dentro de una organizacion
 composer transaction submit -c admin@res1@bna -d '{
-    "$class":"org.hyperledger.composer.participantes.CrearParticipanteUsuario",
+    "$class":"org.hyperledger.composer.participantes.CrearParticipante",
     "nombre":"usuario1",
-    "email":"usuario1@res1"
+    "email":"usuario1@res1",
+    "tipoUsuario":"Usuario"
 }'
 composer identity issue -c admin@res1@bna -f ~/.composer/usuario1_res1.card -u usuario1@res1 -a "resource:org.hyperledger.composer.participantes.Usuario#usuario1@res1"
 composer card import -f ~/.composer/usuario1_res1.card

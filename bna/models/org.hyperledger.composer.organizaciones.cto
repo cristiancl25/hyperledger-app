@@ -25,6 +25,12 @@ asset Localizacion identified by localizacionId {
   o   String    direccion
 }
 
+transaction CrearLocalizacion {
+  o Double latitud
+  o Double longitud
+  o String direccion
+}
+
 transaction CrearTipoOrganizacion {
   o String tipo
 }

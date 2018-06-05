@@ -48,7 +48,6 @@ asset Operacion identified by transaccionId{
   o DateTime fechaAdquisicion
   o String orgId
   o DatosVenta datosVenta
-  
 }
 
 concept DatosVenta {
