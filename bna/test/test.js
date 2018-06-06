@@ -13,37 +13,21 @@ const NS_PROD = 'org.hyperledger.composer.productos';
 const NS_ORG = 'org.hyperledger.composer.organizaciones';
 
 describe('Sample', () => {
-    // In-memory card store for testing so cards are not persisted to the file system
     const cardStore = require('composer-common').NetworkCardStoreManager.getCardStore( { type: 'composer-wallet-inmemory' } );
-
-    // Embedded connection used for local testing
     const connectionProfile = {
         name: 'embedded',
         'x-type': 'embedded'
     };
-
-    // Name of the business network card containing the administrative identity for the business network
     const adminCardName = 'admin';
-
-    // Admin connection to the blockchain, used to deploy the business network
     let adminConnection;
-
-    // This is the business network connection the tests will use.
     let businessNetworkConnection;
-
-    // This is the factory for creating instances of types.
     let factory;
-
-    // These are a list of receieved events.
     let events;
-
     let businessNetworkName;
 
     before(async () => {
-        // Generate certificates for use with the embedded connection
         const credentials = CertificateUtil.generate({ commonName: 'admin' });
 
-        // Identity used with the admin connection to deploy business networks
         const deployerMetadata = {
             version: 1,
             userName: 'PeerAdmin',
@@ -59,11 +43,6 @@ describe('Sample', () => {
         await adminConnection.connect(deployerCardName);
     });
 
-    /**
-     *
-     * @param {String} cardName The card name to use for this identity
-     * @param {Object} identity The identity details
-     */
     async function importCardForIdentity(cardName, identity) {
         const metadata = {
             userName: identity.userID,
@@ -75,9 +54,7 @@ describe('Sample', () => {
         await adminConnection.importCard(cardName, card);
     }
 
-    // This is called before each test is executed.
     beforeEach(async () => {
-        // Generate a business network definition from the project directory.
         let businessNetworkDefinition = await BusinessNetworkDefinition.fromDirectory(path.resolve(__dirname, '..'));
         businessNetworkName = businessNetworkDefinition.getName();
         await adminConnection.install(businessNetworkDefinition);
@@ -92,7 +69,6 @@ describe('Sample', () => {
         const adminCards = await adminConnection.start(businessNetworkName, businessNetworkDefinition.getVersion(), startOptions);
         await adminConnection.importCard(adminCardName, adminCards.get('admin'));
 
-        // Create and establish a business network connection
         businessNetworkConnection = new BusinessNetworkConnection({ cardStore: cardStore });
         events = [];
         businessNetworkConnection.on('event', event => {
@@ -100,15 +76,9 @@ describe('Sample', () => {
         });
         await businessNetworkConnection.connect(adminCardName);
 
-        // Get the factory for the business network.
         factory = businessNetworkConnection.getBusinessNetwork().getFactory();
-
     });
 
-    /**
-     * Reconnect using a different identity.
-     * @param {String} cardName The name of the card for the identity to use
-     */
     async function useIdentity(cardName) {
         await businessNetworkConnection.disconnect();
         businessNetworkConnection = new BusinessNetworkConnection({ cardStore: cardStore });
@@ -118,6 +88,20 @@ describe('Sample', () => {
         });
         await businessNetworkConnection.connect(cardName);
         factory = businessNetworkConnection.getBusinessNetwork().getFactory();
+    }
+
+    async function crearLocalizacion(loc){
+        const transaction = factory.newTransaction(NS_ORG, 'CrearLocalizacion');
+        transaction.latitud = loc.latitud;
+        transaction.longitud = loc.longitud;
+        transaction.direccion = loc.direccion;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
+    async function crearTipoProducto(tipo){
+        const transaction = factory.newTransaction(NS_PROD, 'CrearTipoProducto');
+        transaction.tipo = tipo;
+        await businessNetworkConnection.submitTransaction(transaction);
     }
 
     async function crearTipoOrganizacion(tipo){
@@ -148,13 +132,32 @@ describe('Sample', () => {
         await importCardForIdentity(emailAdmin, await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#' + emailAdmin, emailAdmin, {issuer:true}));
     }
 
-    async function crearProducto(variedad, peso, latitud, longitud, descripcion){
+    async function crearProducto(identificador, c, localizacionId, localizacion, imagen){
+        var caracteristicas = factory.newConcept(NS_PROD, 'Caracteristicas');
+        caracteristicas.tipoProducto = factory.newRelationship(NS_PROD, 'TipoProducto', c.tipoProducto);
+        caracteristicas.variedadProducto = c.variedadProducto;
+        caracteristicas.descripcion = c.descripcion;
+        caracteristicas.tipo = c.tipo;
+        caracteristicas.unidades = c.unidades;
+        caracteristicas.peso = c.peso;
+        caracteristicas.magnitudPeso = c.magnitudPeso;
+
         let transaction = factory.newTransaction(NS_PROD, 'CrearProducto');
-        transaction.variedad = variedad;
-        transaction.peso = peso;
-        transaction.latitud = latitud;
-        transaction.longitud = longitud;
-        transaction.descripcion = descripcion;
+        if (localizacion){ 
+            var loc = factory.newConcept(NS_PROD, 'Loc');
+            loc.latitud = localizacion.latitud;
+            loc.longitud = localizacion.longitud;
+            loc.direccion = localizacion.direccion;
+            transaction.loc = loc;
+        } else {
+            transaction.localizacionId = localizacionId;
+        }
+        transaction.identificador = identificador;
+        transaction.caracteristicas = caracteristicas;
+        if (imagen){
+            transaction.imagen = imagen;
+        }
+        
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
@@ -171,12 +174,41 @@ describe('Sample', () => {
     }
 
 
+    it('Creación de una localización', async () => {
+        const addr = "Dirección de prueba";
+        await useIdentity('admin');
+        await crearLocalizacion({
+            "latitud" : 1.2,
+            "longitud" : 1.8,
+            "direccion" : addr
+        });
+        var regLoc = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Localizacion');
+        var locs = await regLoc.getAll();
+        locs.should.have.lengthOf(1);
+        locs[0].latitud.should.equal(1.2);
+        locs[0].longitud.should.equal(1.8);
+        locs[0].direccion.should.equal(addr);
+    });
+
+
+    it('Creación de un tipo de producto', async () => {
+        //TODO Ajustar identidades
+        await useIdentity('admin');
+        await crearTipoProducto('NUEVO_TIPO_PRODUCTO'); 
+        var regTipoProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.TipoProducto');
+        var tipoProd = await regTipoProd.getAll();
+        tipoProd.should.have.lengthOf(1);
+        tipoProd[0].tipo.should.equal('NUEVO_TIPO_PRODUCTO');
+    });
+
+
     it('Creación de un tipo de organización', async () => {
         await useIdentity('admin');
-        crearTipoOrganizacion('PESQUEIRA');
+        await crearTipoOrganizacion('PESQUEIRA');
         var regTipoOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.TipoOrganizacion');
         chai.assert.isTrue(await regTipoOrg.exists('PESQUEIRA'));
     });
+
 
     it('Creación de una organización y de su administrador', async () => {
         await useIdentity('admin');
@@ -194,21 +226,55 @@ describe('Sample', () => {
     });
     
 
-    it('Creación de un producto', async () => {
-
+    it('Creación de un producto por UNIDAD, con nueva localización', async () => {
         await useIdentity('admin');
+        await crearTipoOrganizacion('LONXA');
         await crearOrganizacion('pes1', 'LONXA', 'descripcion', 'admin', 'admin@pes1');
         await useIdentity('admin@pes1');
         await crearParticipante('usuario1@pes1', 'usuario', 'Usuario');
         await useIdentity('usuario1@pes1');
-        await crearProducto('producto1', 1.2, 12, 23, 'Descripción');
-        const regOrg = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        await crearTipoProducto('PESCADO');
+//        await crearLocalizacion({
+//            "latitud" : 1.2,
+//            "longitud" : 1.8,
+//            "direccion" : 'direccion de prueba'
+//        });
+        await crearProducto('producto1',{
+                "tipoProducto" : "PESCADO",
+                "variedadProducto" : "sardina",
+                "descripcion" : "Descripción del producto", 
+                "tipo" : "UNIDAD",
+                "unidades" : 1,
+                "peso" : 0.3,
+                "magnitudPeso" : 'kg'
+            }, undefined, {
+                "latitud" : 1.3,
+                "longitud" : 2.5,
+                "direccion" : "dirección de prueba"
+            }, 
+            undefined);
+
+        const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        var productos = await regProd.getAll();
+        productos.should.have.lengthOf(1);
         events.should.have.lengthOf(1);
+
+        var producto = await regProd.get(events[0].productoId);
+        producto.identificador.should.equal('producto1');
+        producto.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
+        producto.caracteristicas.variedadProducto.should.equal('sardina');
+        producto.caracteristicas.descripcion.should.equal('Descripción del producto');
+        producto.caracteristicas.tipo.should.equal('UNIDAD');
+        producto.caracteristicas.unidades.should.equal(1);
+        producto.caracteristicas.peso.should.equal(0.3);
+        chai.expect(producto.caracteristicas.magnitudPeso).to.be.undefined;
+        chai.expect(producto.imagen).to.be.undefined;
     });
 
-    it('Creación de un producto con un participante NO válido', async () => {
 
+    it('Creación de un producto con un participante NO válido', async () => {
         await useIdentity('admin');
+
         await chai.expect(
             crearProducto('producto1', 1.2, 12, 23, 'Descripción')
         ).to.be.rejectedWith(Error);
@@ -219,8 +285,9 @@ describe('Sample', () => {
     it('Compra de un producto válido', async () => {
 
         await useIdentity('admin');
-        
+        await crearTipoOrganizacion('LONXA');
         await crearOrganizacion('pes1', 'LONXA', 'descripcion', 'admin', 'admin@pes1');
+        await crearTipoOrganizacion('RESTAURANTE');
         await crearOrganizacion('res1', 'RESTAURANTE', 'descripcion', 'admin', 'admin@res1');
 
         await useIdentity('admin@pes1');
@@ -242,5 +309,4 @@ describe('Sample', () => {
         
         await confirmarTransaccion(productoId);
     });
-
 });

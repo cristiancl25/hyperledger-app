@@ -13,7 +13,6 @@ async function CrearOrganizacion(datos){
     }
 
     var regTipoOrg = await getAssetRegistry(NS_ORG + '.TipoOrganizacion');
-
     if (! await regTipoOrg.exists(datos.tipoOrganizacion)){
         throw new Error('El tipo de organización ' + datos.tipoOrganizacion + ' no existe');
     }
@@ -45,7 +44,7 @@ async function CrearOrganizacion(datos){
 async function CrearTipoOrganizacion(datos){
     var factory = getFactory();
 
-    /* TODO mejorar el control de acceso: NetworkAdmin */
+    /* TODO Crear función para el control de acceso */
     if (getCurrentParticipant().$namespace !== 'org.hyperledger.composer.system'){
         throw new Error('participante inválido');
     }
@@ -53,4 +52,22 @@ async function CrearTipoOrganizacion(datos){
     var tipoOrg = factory.newResource(NS_ORG, 'TipoOrganizacion', datos.tipo);
     var regOrg = await getAssetRegistry(NS_ORG + '.TipoOrganizacion');
     await regOrg.add(tipoOrg);
+}
+
+
+/**
+ *
+ * @param {org.hyperledger.composer.organizaciones.CrearLocalizacion} datos
+ * @transaction
+ */
+async function CrearLocalizacion(datos) {
+    var factory = getFactory();
+    //TODO localización en función del usuario
+    //TODO id de la localización
+    var loc = factory.newResource(NS_ORG, 'Localizacion', new Date().toJSON());
+    loc.latitud = datos.latitud;
+    loc.longitud = datos.longitud;
+    loc.direccion = datos.direccion;
+    var regLoc = await getAssetRegistry(NS_ORG + '.Localizacion');
+    await regLoc.add(loc);
 }

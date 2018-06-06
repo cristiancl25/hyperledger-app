@@ -38,16 +38,16 @@ asset Producto identified by productoId {
   o Estado estado
   o Imagen imagen optional
   o Caracteristicas caracteristicas
-  --> Operacion operacionActual
-  --> Operacion[] operaciones
+  o Operacion operacionActual
+  o Operacion[] operaciones
 }
 
-asset Operacion identified by transaccionId{
-  o String transaccionId
-  o Localizacion localizacion
-  o DateTime fechaAdquisicion
+concept Operacion {
+  o String transaccionId optional
+  --> Localizacion localizacion
+  o DateTime fecha
   o String orgId
-  o DatosVenta datosVenta
+  o DatosVenta datosVenta optional
 }
 
 concept DatosVenta {
@@ -63,7 +63,7 @@ concept Caracteristicas{
   o Tipo tipo
   o Integer unidades optional
   o Double peso optional
-  o String magnitud optional
+  o String magnitudPeso optional
 }
 
 concept Imagen {
@@ -85,20 +85,28 @@ enum Estado {
   o   FINALIZADO
 }
 
+concept Loc {
+  o   Double    latitud
+  o   Double    longitud
+  o   String    direccion
+}
 transaction CrearProducto {
+  o String identificador
+  o Caracteristicas caracteristicas
+  o String localizacionId optional
+  o Loc loc optional
+  o Imagen imagen optional
+}
+
+transaction CrearTipoProducto {
   o String tipo
-  o String variedad optional
-  o String descripcion
-  o Double peso
-  o Double latitud
-  o Double longitud
 }
 
 event ProductoCreado {
   o String productoId
   o String orgId
-  o String tipo
-  o String variedad optional
+  o String tipoProducto
+  o String variedadProducto
 }
 
 transaction ComprarProducto {
