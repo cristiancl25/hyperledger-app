@@ -3,92 +3,18 @@ const NS_PROD = 'org.hyperledger.composer.productos';
 const NS_ORG = 'org.hyperledger.composer.organizaciones';
 
 
-/**
- *
- * @param {org.hyperledger.composer.productos.CrearTipoProducto} datos
- * @transaction
- */
-async function CrearTipoProducto(datos) {
-    var factory = getFactory();
-    var tipoProd = factory.newResource(NS_PROD, 'TipoProducto', datos.tipo);
-    var reg = await getAssetRegistry(NS_PROD + '.TipoProducto');
-    await reg.add(tipoProd);
+function generarIdProducto(orgId){
+    return orgId + '-' + new Date().toJSON() + '-' + Math.floor(Math.random()*1000);
 }
 
-/**
- *
- * @param {org.hyperledger.composer.productos.CrearProducto} datos
- * @transaction
- */
- async function CrearProducto(datos){
-    var participante = getCurrentParticipant();
-    await validarParticipante(participante);
 
-    var regTipoProd = await getAssetRegistry(NS_PROD + '.TipoProducto');
-    const tipoProducto = datos.caracteristicas.tipoProducto.$identifier;
-    if (! await regTipoProd.exists(tipoProducto)){
-        throw new Error('El tipo de producto ' + tipoProducto 
-                + ' no existe, es necesario crearlo antes');
-    }
-    
-    const factory = getFactory();
-    const productoId = generarIdProducto(participante.orgId);
-    var regLoc = await getAssetRegistry(NS_ORG + '.Localizacion');
-
-    var localizacionId;
-    if (datos.loc){
-        localizacionId = new Date().toJSON(); //TODO ajustar el id
-        var loc = factory.newResource(NS_ORG, 'Localizacion', localizacionId);
-        loc.latitud = datos.loc.latitud;
-        loc.longitud = datos.loc.longitud;
-        loc.direccion = datos.loc.direccion;
-        await regLoc.add(loc);
-    } else {
-        if (! await regLoc.exists(datos.localizacionId)){
-            throw new Error('La localización ' + datos.localizacionId + ' no existe');
-        }
-        localizacionId = datos.localizacionId;
-    }
-
-    var caracteristicas = factory.newConcept(NS_PROD,'Caracteristicas');
-    caracteristicas.tipoProducto = factory.newRelationship(NS_PROD, 'TipoProducto', tipoProducto);
-    caracteristicas.variedadProducto = datos.caracteristicas.variedadProducto;
-    caracteristicas.descripcion = datos.caracteristicas.descripcion;
-    caracteristicas.tipo = datos.caracteristicas.tipo;
-    caracteristicas.peso = datos.caracteristicas.peso;
-    if (caracteristicas.tipo === 'UNIDAD'){
-        caracteristicas.unidades = datos.caracteristicas.unidades;
-    } else {
-        caracteristicas.magnitudPeso = datos.caracteristicas.magnitudPeso;
-    }
-
-    var operacion = factory.newConcept(NS_PROD, 'Operacion');
-    operacion.localizacion = factory.newRelationship(NS_ORG, 'Localizacion', localizacionId);
-    operacion.fecha = new Date();
-    operacion.orgId = participante.orgId;
-    
-    var producto = factory.newResource(NS_PROD, 'Producto', productoId);
-    if (datos.identificador){
-        producto.identificador = datos.identificador;
-    }
-    producto.caracteristicas = caracteristicas;
-    producto.operacionActual = operacion;
-    producto.operaciones = [];
-    producto.estado = 'PARADO';
-    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
-    await regProd.add(producto);
-
-    var evento = factory.newEvent(NS_PROD, 'ProductoCreado');
-    evento.productoId = productoId;
-    evento.orgId = participante.orgId;
-    evento.tipoProducto = tipoProducto;
-    evento.variedadProducto = datos.caracteristicas.variedadProducto;
-    emit(evento);
-
+async function getProducto(productoId){
+    var rexistro = await getAssetRegistry(NS_PROD + '.Producto');
+    return  await rexistro.get(productoId);
 }
+
 
 async function validarParticipante(participante){
-
     if (participante.getFullyQualifiedType() !== (NS_PAR + '.Usuario')){
         throw new Error('Participante ' + participante.getFullyQualifiedIdentifier() + ' non válido');
     }
@@ -113,23 +39,8 @@ async function validarParticipante(participante){
     }
 }
 
-function generarIdProducto(orgId){
-    //TODO Cambiar id producto
-    //console.log(Math.floor(Math.random() * 100));
-    return orgId + '-' + new Date().toJSON();
-}
-
-async function validarEstado(estado){
-
-}
-
-async function getProducto(productoId){
-    var rexistro = await getAssetRegistry(NS_PROD + '.Producto');
-    return  await rexistro.get(productoId);
-}
 
 async function traspasarProducto(productoId){
-
     var participante = getCurrentParticipant();
     const factory = getFactory();
     var regProd = await getAssetRegistry(NS_PROD + '.Producto');
@@ -152,6 +63,102 @@ async function traspasarProducto(productoId){
 
     await regProd.update(Producto);
 }
+
+
+
+
+
+/**
+ *
+ * @param {org.hyperledger.composer.productos.CrearTipoProducto} datos
+ * @transaction
+ */
+async function CrearTipoProducto(datos) {
+    var factory = getFactory();
+    var tipoProd = factory.newResource(NS_PROD, 'TipoProducto', datos.tipo);
+    var reg = await getAssetRegistry(NS_PROD + '.TipoProducto');
+    await reg.add(tipoProd);
+}
+
+
+/**
+ *
+ * @param {org.hyperledger.composer.productos.CrearProducto} datos
+ * @transaction
+ */
+ async function CrearProducto(datos){
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+
+    // Se comprueba que existe el TipoProducto solicitado
+    var regTipoProd = await getAssetRegistry(NS_PROD + '.TipoProducto');
+    const tipoProducto = datos.caracteristicas.tipoProducto.$identifier;
+    if (! await regTipoProd.exists(tipoProducto)){
+        throw new Error('El tipo de producto ' + tipoProducto 
+                + ' no existe, es necesario crearlo antes');
+    }
+    
+    const factory = getFactory();
+    const productoId = generarIdProducto(participante.orgId);
+    var regLoc = await getAssetRegistry(NS_ORG + '.Localizacion');
+
+    var localizacionId;
+    if (datos.loc){
+        // Creación de una nueva localización
+        localizacionId = new Date().toJSON(); //TODO ajustar el id
+        var loc = factory.newResource(NS_ORG, 'Localizacion', localizacionId);
+        loc.latitud = datos.loc.latitud;
+        loc.longitud = datos.loc.longitud;
+        loc.direccion = datos.loc.direccion;
+        await regLoc.add(loc);
+    } else {
+        // Comprobación de que la Localización solicitada existe
+        if (! await regLoc.exists(datos.localizacionId)){
+            throw new Error('La localización ' + datos.localizacionId + ' no existe');
+        }
+        localizacionId = datos.localizacionId;
+    }
+
+    // Características del producto
+    var caracteristicas = factory.newConcept(NS_PROD,'Caracteristicas');
+    caracteristicas.tipoProducto = factory.newRelationship(NS_PROD, 'TipoProducto', tipoProducto);
+    caracteristicas.variedadProducto = datos.caracteristicas.variedadProducto;
+    caracteristicas.descripcion = datos.caracteristicas.descripcion;
+    caracteristicas.tipo = datos.caracteristicas.tipo;
+    caracteristicas.peso = datos.caracteristicas.peso;
+    if (caracteristicas.tipo === 'UNIDAD'){
+        caracteristicas.unidades = datos.caracteristicas.unidades;
+    } else {
+        caracteristicas.magnitudPeso = datos.caracteristicas.magnitudPeso;
+    }
+
+    // Creación de la operación inicial
+    var operacion = factory.newConcept(NS_PROD, 'Operacion');
+    operacion.localizacion = factory.newRelationship(NS_ORG, 'Localizacion', localizacionId);
+    operacion.fecha = new Date();
+    operacion.orgId = participante.orgId;
+    
+    // Creación del producto
+    var producto = factory.newResource(NS_PROD, 'Producto', productoId);
+    if (datos.identificador){
+        producto.identificador = datos.identificador;
+    }
+    producto.caracteristicas = caracteristicas;
+    producto.operacionActual = operacion;
+    producto.operaciones = [];
+    producto.estado = 'PARADO';
+    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
+    await regProd.add(producto);
+
+    // Creación del evento para informar del nuevo producto
+    var evento = factory.newEvent(NS_PROD, 'ProductoCreado');
+    evento.productoId = productoId;
+    evento.orgId = participante.orgId;
+    evento.tipoProducto = tipoProducto;
+    evento.variedadProducto = datos.caracteristicas.variedadProducto;
+    emit(evento);
+}
+
 
 /**
  *
