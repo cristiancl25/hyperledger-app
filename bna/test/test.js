@@ -194,6 +194,12 @@ describe('Sample', () => {
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
+    async function ponerVentaProducto(productoId){
+        let transaction = factory.newTransaction(NS_PROD, 'PonerVentaProducto');
+        transaction.productoId = productoId;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
     async function confirmarTransaccion(productoId, confirmar){
         let transaction = factory.newTransaction(NS_PROD, 'ConfirmarTransaccion');
         transaction.productoId = productoId;
@@ -354,6 +360,49 @@ describe('Sample', () => {
         chai.expect(events).to.eql([]);
     });
 
+    it('Puesta en venta de un producto inexistente', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+
+        await chai.expect(
+            ponerVentaProducto('PRODUCTO_INEXISTENTE')
+        ).to.be.rejectedWith(Error);
+    });
+
+    
+    it('Puesta en venta de un producto válido', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+
+        await ponerVentaProducto(productoId);
+        const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        var producto = await regProd.get(productoId);
+        producto.estado.should.equal('VENTA');
+    });
+
+
+    it('Puesta en venta de un producto válido con un usuario de unha organización incorrecta', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('pes2', 'PESQUEIRA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+
+        await useIdentity('usuario1@pes2');
+        await chai.expect(
+            ponerVentaProducto(productoId)
+        ).to.be.rejectedWith(Error);
+        const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        var producto = await regProd.get(productoId);
+        producto.estado.should.equal('PARADO');
+    });
+
 
     it('Compra de un producto válido', async () => {
         await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
@@ -362,6 +411,7 @@ describe('Sample', () => {
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
+        ponerVentaProducto(productoId);
         events.should.have.lengthOf(1);
 
         await useIdentity('usuario1@res1');
@@ -376,16 +426,54 @@ describe('Sample', () => {
         transacciones[0].orgCompra.orgId.should.equal('res1');
         transacciones[0].orgCompra.confirmacion.should.equal(false);
 
-        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto')
-        var producto = await regProducto.get(productoId);
-        producto.estado.should.equal('TRANSACCION');
-        producto.transaccionId.should.equal(transacciones[0].transaccionId);
     });
 
 
+    it('Compra de un producto por la misma organización que lo vende', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
 
-    it('Comfirmación de compra de un producto por un participante de una compañía errónea', async () => {
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        ponerVentaProducto(productoId);
+        events.should.have.lengthOf(1);
 
+        await chai.expect(
+            comprarProducto(productoId)
+        ).to.be.rejectedWith(Error);
+        
+        var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion');
+        var transacciones = await regT.getAll();
+        transacciones.should.have.lengthOf(0);
+        var regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        var producto = await regProd.get(productoId);
+        producto.estado.should.equal('VENTA');
+    });
+    
+
+    it('Rechazo de compra de un producto por la compañía vendedora', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        ponerVentaProducto(productoId);
+
+        await useIdentity('usuario1@res1');
+        await comprarProducto(productoId);
+
+        await useIdentity('usuario1@pes1');
+        await confirmarTransaccion(productoId, false);
+
+        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto')
+        var producto = await regProducto.get(productoId);
+        producto.estado.should.equal('VENTA');
+        chai.expect(producto.transaccionId).to.be.undefined;
+    });
+
+
+    it('Confirmación de compra de un producto por un participante de una compañía errónea', async () => {
         await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
         await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
         await crearOrganizacionyUsuario('res2', 'COMERCIO', 'admin', 'usuario1');
@@ -393,6 +481,7 @@ describe('Sample', () => {
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
+        ponerVentaProducto(productoId);
         events.should.have.lengthOf(1);
 
         await useIdentity('usuario1@res1');

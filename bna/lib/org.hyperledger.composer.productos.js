@@ -166,6 +166,31 @@ async function CrearTipoProducto(datos) {
 }
 
 
+
+/**
+ *
+ * @param {org.hyperledger.composer.productos.PonerVentaProducto} datos
+ * @transaction
+*/
+async function PonerVentaProducto(datos){
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+    var producto = await getProducto(datos.productoId);
+    
+    if (producto.operacionActual.orgId !== participante.orgId){
+        throw new Error('Este producto no pertenece a la organización del usuario ' + participante.email);
+    }
+
+    if (producto.estado !== 'PARADO'){ 
+        throw new Error('El producto no se puede poner en venta');
+    }
+    
+    producto.estado = 'VENTA';
+
+    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
+    await regProd.update(producto);
+}
+
 /**
  *
  * @param {org.hyperledger.composer.productos.ComprarProducto} datos
@@ -176,6 +201,10 @@ async function ComprarProducto(datos){
     var participante = getCurrentParticipant();
     await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
+    
+    if (participante.orgId === producto.operacionActual.orgId) {
+        throw new Error ('El producto ya pertenece a la compañía');
+    }
     
     if (producto.estado !== 'VENTA'){
         throw new Error('El producto no está en venta');
@@ -215,13 +244,12 @@ async function ComprarProducto(datos){
  * @transaction
 */
 async function ConfirmarTransaccion(datos){
-    const factory = getFactory();
     var participante = getCurrentParticipant();
     await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
     var transaccion = await getTransaccion(producto.transaccionId);
 
-    if (participante.orgId !== transaccion.orgVenta.orgId ||
+    if (participante.orgId !== transaccion.orgVenta.orgId &&
             participante.orgId !== transaccion.orgCompra.orgId) {
         throw new Error('El usuario ' + participante.email + ' no pertenece a esta transacción');
     }
@@ -236,5 +264,5 @@ async function ConfirmarTransaccion(datos){
         delete producto.transaccionId;
     }
 
-    regProd.update(producto);
+    await regProd.update(producto);
 }

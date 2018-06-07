@@ -100,6 +100,10 @@ transaction CrearProducto {
   o Imagen imagen optional
 }
 
+transaction PonerVentaProducto {
+  o String productoId
+}
+
 transaction CrearTipoProducto {
   o String tipo
 }
