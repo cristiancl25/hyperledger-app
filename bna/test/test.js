@@ -133,6 +133,14 @@ describe('Sample', () => {
         await importCardForIdentity(emailAdmin, await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#' + emailAdmin, emailAdmin, {issuer:true}));
     }
 
+    async function crearOrganizacionyUsuario(orgId, orgTipo, admin, usuario){
+        await useIdentity('admin');
+        await crearTipoOrganizacion(orgTipo);
+        await crearOrganizacion(orgId, orgTipo, 'descripción', admin, admin + '@' + orgId);
+        await useIdentity(admin + '@' + orgId);
+        await crearParticipante(usuario + '@' + orgId, usuario, 'Usuario');
+    }
+
     async function crearProducto(identificador, c, localizacionId, localizacion, imagen){
         var caracteristicas = factory.newConcept(NS_PROD, 'Caracteristicas');
         caracteristicas.tipoProducto = factory.newRelationship(NS_PROD, 'TipoProducto', c.tipoProducto);
@@ -162,15 +170,34 @@ describe('Sample', () => {
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
+    async function crearProductoEjemplo(){
+        await crearProducto('producto1',{
+                "tipoProducto" : "PESCADO",
+                "variedadProducto" : "sardina",
+                "descripcion" : "Descripción del producto", 
+                "tipo" : "UNIDAD",
+                "unidades" : 1,
+                "peso" : 0.3,
+                "magnitudPeso" : 'kg'
+            }, undefined, {
+                "latitud" : 1.3,
+                "longitud" : 2.5,
+                "direccion" : "dirección de prueba"
+            }, 
+            undefined);
+        return events[events.length - 1].productoId;
+    }
+
     async function comprarProducto(productoId){
         let transaction = factory.newTransaction(NS_PROD, 'ComprarProducto');
         transaction.productoId = productoId;
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
-    async function confirmarTransaccion(productoId){
+    async function confirmarTransaccion(productoId, confirmar){
         let transaction = factory.newTransaction(NS_PROD, 'ConfirmarTransaccion');
         transaction.productoId = productoId;
+        transaction.confirmar = confirmar;
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
@@ -251,17 +278,13 @@ describe('Sample', () => {
     
 
     it('Creación de un participante Usuario para una organización', async () => {
-        await useIdentity('admin');
-        await crearTipoOrganizacion('LONXA');
-        await crearOrganizacion('test', 'LONXA', 'descripción', 'admin', 'admin@test');
-        await useIdentity('admin@test');
-        await crearParticipante('usuario1@test', 'usuario', 'Usuario');
+        await crearOrganizacionyUsuario('test', 'LONXA', 'admin', 'usuario1');
 
         const reg = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Usuario');
         var users = await reg.getAll();
         users.should.have.lengthOf(1);
         users[0].email.should.equal('usuario1@test');
-        users[0].nombre.should.equal('usuario');
+        users[0].nombre.should.equal('usuario1');
         users[0].orgId.should.equal('test');
 
         const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
@@ -333,30 +356,51 @@ describe('Sample', () => {
 
 
     it('Compra de un producto válido', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
 
-        await useIdentity('admin');
-        await crearTipoOrganizacion('LONXA');
-        await crearOrganizacion('pes1', 'LONXA', 'descripcion', 'admin', 'admin@pes1');
-        await crearTipoOrganizacion('RESTAURANTE');
-        await crearOrganizacion('res1', 'RESTAURANTE', 'descripcion', 'admin', 'admin@res1');
-
-        await useIdentity('admin@pes1');
-        await crearParticipante('usuario1@pes1', 'usuario', 'Usuario');
         await useIdentity('usuario1@pes1');
-        await crearProducto('XURELO', 1.2, 12, 23, 'Descripción');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
         events.should.have.lengthOf(1);
-        var productoId = events[0].productoId;
 
-        await useIdentity('admin@res1');
-        await crearParticipante('usuario1@res1', 'usuario', 'Usuario');
         await useIdentity('usuario1@res1');
         await comprarProducto(productoId);
         
+        var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion')
+        var transacciones = await regT.getAll();
+        transacciones.should.have.lengthOf(1);
+        transacciones[0].producto.$identifier.should.equal(productoId);
+        transacciones[0].orgVenta.orgId.should.equal('pes1');
+        transacciones[0].orgVenta.confirmacion.should.equal(false);
+        transacciones[0].orgCompra.orgId.should.equal('res1');
+        transacciones[0].orgCompra.confirmacion.should.equal(false);
+
         var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto')
         var producto = await regProducto.get(productoId);
-        var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion')
-        var transaccion = await regT.get(producto.transaccion.transaccionId);
-        
-        await confirmarTransaccion(productoId);
+        producto.estado.should.equal('TRANSACCION');
+        producto.transaccionId.should.equal(transacciones[0].transaccionId);
+    });
+
+
+
+    it('Comfirmación de compra de un producto por un participante de una compañía errónea', async () => {
+
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res2', 'COMERCIO', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        events.should.have.lengthOf(1);
+
+        await useIdentity('usuario1@res1');
+        await comprarProducto(productoId);
+
+        await useIdentity('usuario1@res2');
+        await chai.expect(
+            confirmarTransaccion(productoId, true)
+        ).to.be.rejectedWith(Error);
     });
 });

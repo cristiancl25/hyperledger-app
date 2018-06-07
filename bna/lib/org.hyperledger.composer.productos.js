@@ -14,6 +14,12 @@ async function getProducto(productoId){
 }
 
 
+async function getTransaccion(transaccionId){
+    var rexistro = await getAssetRegistry(NS_PROD + '.Transaccion');
+    return  await rexistro.get(transaccionId);
+}
+
+
 async function validarParticipante(participante){
     if (participante.getFullyQualifiedType() !== (NS_PAR + '.Usuario')){
         throw new Error('Participante ' + participante.getFullyQualifiedIdentifier() + ' non válido');
@@ -169,29 +175,37 @@ async function ComprarProducto(datos){
     const factory = getFactory();
     var participante = getCurrentParticipant();
     await validarParticipante(participante);
-    var Producto = await getProducto(datos.productoId);
+    var producto = await getProducto(datos.productoId);
+    
+    if (producto.estado !== 'VENTA'){
+        throw new Error('El producto no está en venta');
+    }
 
+    //Creación de los conceptos para la confirmación de la transacción
     var orgVenta = factory.newConcept(NS_PROD,'OrgConfirmacion');
-    orgVenta.orgId = Producto.operacionActual.organizacion.$identifier;
+    orgVenta.orgId = producto.operacionActual.orgId;
     orgVenta.confirmacion = false;
 
     var orgCompra = factory.newConcept(NS_PROD,'OrgConfirmacion');
     orgCompra.orgId = participante.orgId;
     orgCompra.confirmacion = false;
 
-    var transaccion = factory.newResource(NS_PROD, 'Transaccion', Producto.productoId + 
-            '-' + Producto.orgId + '-' + participante.orgId + '-' + new Date().toJSON());
-    transaccion.producto = Producto;
+    // Creación del asset Transacción
+    var transaccion = factory.newResource(NS_PROD, 'Transaccion', producto.productoId + 
+            '-' + orgVenta.orgId + '-' + orgCompra.orgId + '-' + new Date().toJSON());
+    transaccion.producto = factory.newRelationship(NS_PROD, 'Producto' ,producto.productoId);
     transaccion.orgCompra = orgCompra;
     transaccion.orgVenta = orgVenta;
 
-    Producto.estado = 'TRANSACCION';
-    Producto.transaccion = transaccion;
-    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
-    await regProd.update(Producto);
-
     var rexistroTransaccion = await getAssetRegistry(NS_PROD + '.Transaccion');
     await rexistroTransaccion.add(transaccion);
+
+    // Actualización del estado del producto
+    producto.estado = 'TRANSACCION';
+    producto.transaccionId = transaccion.transaccionId;
+
+    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
+    await regProd.update(producto);
 }
 
 
@@ -201,8 +215,26 @@ async function ComprarProducto(datos){
  * @transaction
 */
 async function ConfirmarTransaccion(datos){
-    //const factory = getFactory();
+    const factory = getFactory();
     var participante = getCurrentParticipant();
     await validarParticipante(participante);
-    //var Producto = await getProducto(datos.productoId);
+    var producto = await getProducto(datos.productoId);
+    var transaccion = await getTransaccion(producto.transaccionId);
+
+    if (participante.orgId !== transaccion.orgVenta.orgId ||
+            participante.orgId !== transaccion.orgCompra.orgId) {
+        throw new Error('El usuario ' + participante.email + ' no pertenece a esta transacción');
+    }
+
+    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
+    if (datos.confirmar) {
+        // En caso de aceptar la transacción
+
+    } else {
+        // En caso de rechazar la transacción
+        producto.estado = 'VENTA';
+        delete producto.transaccionId;
+    }
+
+    regProd.update(producto);
 }

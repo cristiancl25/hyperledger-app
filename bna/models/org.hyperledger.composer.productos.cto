@@ -36,6 +36,7 @@ asset Producto identified by productoId {
   --> Producto predecesor optional
   --> Producto[] sucesores optional
   o Estado estado
+  o String transaccionId optional
   o Imagen imagen optional
   o Caracteristicas caracteristicas
   o Operacion operacionActual
