@@ -15,7 +15,7 @@ asset Organizacion identified by orgId {
   o DateTime fechaCreacion
   --> OrgAdmin administrador
   --> Usuario[] usuarios
-  --> Localizacion[] Localizaciones optional
+  --> Localizacion[] localizaciones optional
 }
 
 asset Localizacion identified by localizacionId {
@@ -26,6 +26,7 @@ asset Localizacion identified by localizacionId {
 }
 
 transaction CrearLocalizacion {
+  o String nombre
   o Double latitud
   o Double longitud
   o String direccion

@@ -92,6 +92,7 @@ describe('Sample', () => {
 
     async function crearLocalizacion(loc){
         const transaction = factory.newTransaction(NS_ORG, 'CrearLocalizacion');
+        transaction.nombre = loc.nombre;
         transaction.latitud = loc.latitud;
         transaction.longitud = loc.longitud;
         transaction.direccion = loc.direccion;
@@ -174,23 +175,6 @@ describe('Sample', () => {
     }
 
 
-    it('Creación de una localización', async () => {
-        const addr = "Dirección de prueba";
-        await useIdentity('admin');
-        await crearLocalizacion({
-            "latitud" : 1.2,
-            "longitud" : 1.8,
-            "direccion" : addr
-        });
-        var regLoc = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Localizacion');
-        var locs = await regLoc.getAll();
-        locs.should.have.lengthOf(1);
-        locs[0].latitud.should.equal(1.2);
-        locs[0].longitud.should.equal(1.8);
-        locs[0].direccion.should.equal(addr);
-    });
-
-
     it('Creación de un tipo de producto', async () => {
         //TODO Ajustar identidades
         await useIdentity('admin');
@@ -210,14 +194,23 @@ describe('Sample', () => {
     });
 
 
+    // TODO crear más test de las organizaciones
     it('Creación de una organización y de su administrador', async () => {
         await useIdentity('admin');
         await crearTipoOrganizacion('LONXA');
-        await crearOrganizacion('OrganizacionProba', 'LONXA', 'descripcion', 'admin', 'admin@OrganizacionProba');
+        await crearOrganizacion('OrganizacionProba', 'LONXA', 'descripción', 'admin', 'admin@OrganizacionProba');
 
         const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
-        const org = await regOrg.get('OrganizacionProba');
+        var orgs = await regOrg.getAll();
+        orgs.should.have.lengthOf(1);
+        var org = await regOrg.get('OrganizacionProba');
         org.orgId.should.equal('OrganizacionProba');
+        org.tipoOrganizacion.$identifier.should.equal('LONXA');
+        org.administrador.$identifier.should.equal('admin@OrganizacionProba');
+        org.descripcion.should.equal('descripción');
+        chai.expect(org.usuarios).to.eql([]);
+        chai.expect(org.localizaciones).to.eql([]);
+
         const regPar = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.OrgAdmin');
         const par = await regPar.get('admin@OrganizacionProba');
         par.email.should.equal('admin@OrganizacionProba');
@@ -225,6 +218,63 @@ describe('Sample', () => {
 
     });
     
+
+    // TODO Crear más tests con las localizaciones
+    it('Creación de una localización', async () => {
+        const localizacionId = 'pes1-Dirección-1';
+        await useIdentity('admin');
+        await crearTipoOrganizacion('LONXA');
+        await crearOrganizacion('pes1', 'LONXA', 'descripcion', 'admin', 'admin@pes1');
+        await useIdentity('admin@pes1');
+        const addr = "Dirección de prueba";
+        await crearLocalizacion({
+            "nombre" : "  Dirección 1  ",
+            "latitud" : 1.2,
+            "longitud" : 1.8,
+            "direccion" : addr
+        });
+        
+        var regLoc = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Localizacion');
+        var locs = await regLoc.getAll();
+        locs.should.have.lengthOf(1);
+        locs[0].localizacionId.should.equal(localizacionId);
+        locs[0].latitud.should.equal(1.2);
+        locs[0].longitud.should.equal(1.8);
+        locs[0].direccion.should.equal(addr);
+
+        var regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        var orgs = await regOrg.getAll();
+        orgs.should.have.lengthOf(1);
+        orgs[0].localizaciones.should.have.lengthOf(1);
+        orgs[0].localizaciones[0].$identifier.should.equal(localizacionId);
+    });
+    
+
+    it('Creación de un participante Usuario para una organización', async () => {
+        await useIdentity('admin');
+        await crearTipoOrganizacion('LONXA');
+        await crearOrganizacion('test', 'LONXA', 'descripción', 'admin', 'admin@test');
+        await useIdentity('admin@test');
+        await crearParticipante('usuario1@test', 'usuario', 'Usuario');
+
+        const reg = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Usuario');
+        var users = await reg.getAll();
+        users.should.have.lengthOf(1);
+        users[0].email.should.equal('usuario1@test');
+        users[0].nombre.should.equal('usuario');
+        users[0].orgId.should.equal('test');
+
+        const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        const org = await regOrg.get('test');
+        org.orgId.should.equal('test');
+        org.tipoOrganizacion.$identifier.should.equal('LONXA');
+        org.administrador.$identifier.should.equal('admin@test');
+        org.descripcion.should.equal('descripción');
+        org.usuarios.should.have.lengthOf(1);
+        org.localizaciones.should.have.lengthOf(0);
+        chai.expect(org.localizaciones).to.eql([]);
+    });
+
 
     it('Creación de un producto por UNIDAD, con nueva localización', async () => {
         await useIdentity('admin');

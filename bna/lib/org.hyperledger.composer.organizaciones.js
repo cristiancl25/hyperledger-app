@@ -1,4 +1,26 @@
 
+// Devuelve el registro y la organización a la que pertenece un participante del tipo OrgAdmin
+async function getOrganizacion(participante){
+    if (participante.getFullyQualifiedType() !== (NS_PAR + '.OrgAdmin')){
+        throw new Error('Participante ' + participante.getFullyQualifiedIdentifier() + ' non válido');
+    }
+
+    try{
+        var regOrg = await getAssetRegistry(NS_ORG + '.Organizacion');
+        var organizacion = await regOrg.get(participante.orgId);
+    }catch(error){
+        throw new Error('El usuario' + participante.getFullyQualifiedIdentifier() + 
+                ' pertenece a unha organizacion no válida ( ' +  participante.orgId + ' )');
+    }
+
+    if (participante.email !== organizacion.administrador.$identifier){
+        throw new Error('El participante ' + participante.email + ' no pertenece a la organizacion ' + participante.orgId);
+    }
+    
+    return {organizacion, regOrg};
+}
+
+
 /**
  *
  * @param {org.hyperledger.composer.organizaciones.CrearOrganizacion} datos
@@ -31,7 +53,8 @@ async function CrearOrganizacion(datos){
     org.descripcion = datos.descripcion;
     org.fechaCreacion = new Date();
     org.usuarios = [];
-    org.administrador = admin;
+    org.localizaciones = [];
+    org.administrador = factory.newRelationship(NS_PAR, 'OrgAdmin', admin.email);
     var regOrg = await getAssetRegistry(NS_ORG + '.Organizacion');
     await regOrg.add(org);
 }
@@ -62,12 +85,17 @@ async function CrearTipoOrganizacion(datos){
  */
 async function CrearLocalizacion(datos) {
     var factory = getFactory();
-    //TODO localización en función del usuario
-    //TODO id de la localización
-    var loc = factory.newResource(NS_ORG, 'Localizacion', new Date().toJSON());
+    var participante = getCurrentParticipant();
+    var {organizacion, regOrg} = await getOrganizacion(participante);
+    const locId = participante.orgId + '-' + datos.nombre.trim().replace(/ /g,'-');
+
+    var loc = factory.newResource(NS_ORG, 'Localizacion', locId);
     loc.latitud = datos.latitud;
     loc.longitud = datos.longitud;
     loc.direccion = datos.direccion;
     var regLoc = await getAssetRegistry(NS_ORG + '.Localizacion');
     await regLoc.add(loc);
+
+    organizacion.localizaciones.push(factory.newRelationship(NS_ORG, 'Localizacion', locId));
+    await regOrg.update(organizacion);
 }

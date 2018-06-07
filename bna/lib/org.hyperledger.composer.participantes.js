@@ -5,6 +5,7 @@
  * @transaction
  */
 async function CrearParticipante(datos){
+    // TODO ampliar para añadir participantes del tipo Usuario e Invitado
     const factory = getFactory();
     const participanteActual = getCurrentParticipant();
 
@@ -21,6 +22,6 @@ async function CrearParticipante(datos){
     // Inserción del nuevo participante en la lista de participantes válido de la organización
     var regOrg = await getAssetRegistry(NS_ORG + '.Organizacion');
     var admin = await regOrg.get(participanteActual.orgId);
-    admin.usuarios.push(usuario);
+    admin.usuarios.push(factory.newRelationship(NS_PAR, 'Usuario', usuario.email));
     await regOrg.update(admin);
 }

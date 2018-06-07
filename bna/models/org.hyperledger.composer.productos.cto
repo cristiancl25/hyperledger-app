@@ -90,6 +90,7 @@ concept Loc {
   o   Double    longitud
   o   String    direccion
 }
+
 transaction CrearProducto {
   o String identificador
   o Caracteristicas caracteristicas
