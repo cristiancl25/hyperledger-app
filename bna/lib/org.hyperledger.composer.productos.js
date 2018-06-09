@@ -46,34 +46,6 @@ async function validarParticipante(participante){
 }
 
 
-async function traspasarProducto(productoId){
-    var participante = getCurrentParticipant();
-    const factory = getFactory();
-    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
-    var Producto = await regProd.get(productoId);
-    await validarEstado(Producto.estado);
-
-    Producto.operaciones.push(Producto.operacionActual);
-
-    var coordenadas = factory.newConcept(NS_PROD,'Coordenadas');
-    coordenadas.longitud = 12;
-    coordenadas.latitud = 34;
-
-    var operacion = factory.newConcept(NS_PROD,'Operacion');
-    operacion.captura = false;
-    operacion.coordenadas = coordenadas;
-    operacion.fecha = new Date();
-    operacion.organizacion = factory.newRelationship(NS_ORG, 'Organizacion', participante.orgId);
-
-    Producto.operacionActual = operacion;
-
-    await regProd.update(Producto);
-}
-
-
-
-
-
 /**
  *
  * @param {org.hyperledger.composer.productos.CrearTipoProducto} datos
@@ -166,13 +138,13 @@ async function CrearTipoProducto(datos) {
 }
 
 
-
 /**
  *
  * @param {org.hyperledger.composer.productos.PonerVentaProducto} datos
  * @transaction
 */
 async function PonerVentaProducto(datos){
+    const factory = getFactory();
     var participante = getCurrentParticipant();
     await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
@@ -184,12 +156,29 @@ async function PonerVentaProducto(datos){
     if (producto.estado !== 'PARADO'){ 
         throw new Error('El producto no se puede poner en venta');
     }
-    
+
+    var venta = factory.newConcept(NS_PROD, 'DatosVenta');
+    venta.tipoVenta = datos.tipoVenta;
+    venta.unidadMonetaria = datos.unidadMonetaria;
+    venta.precio = datos.precio;
+    if (venta.tipoVenta === 'PUJA'){
+        const pujaId = participante.orgId + '-' + new Date().toJSON();
+        var puja = factory.newResource(NS_PROD, 'Puja', pujaId);
+        puja.precioPartida = datos.precio;
+        puja.producto = factory.newRelationship(NS_PROD, 'Producto', producto.productoId);
+        puja.organizaciones = [];
+
+        var reg = await getAssetRegistry(NS_PROD + '.Puja');
+        await reg.add(puja);
+        venta.pujaId = pujaId;
+    }
     producto.estado = 'VENTA';
+    producto.operacionActual.datosVenta = venta;
 
     var regProd = await getAssetRegistry(NS_PROD + '.Producto');
     await regProd.update(producto);
 }
+
 
 /**
  *
@@ -225,6 +214,7 @@ async function ComprarProducto(datos){
     transaccion.producto = factory.newRelationship(NS_PROD, 'Producto' ,producto.productoId);
     transaccion.orgCompra = orgCompra;
     transaccion.orgVenta = orgVenta;
+    transaccion.nuevaLocalizacion = datos.localizacionId;
 
     var rexistroTransaccion = await getAssetRegistry(NS_PROD + '.Transaccion');
     await rexistroTransaccion.add(transaccion);

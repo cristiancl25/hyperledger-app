@@ -11,6 +11,7 @@ asset Transaccion identified by transaccionId {
   --> Producto producto
   o OrgConfirmacion orgVenta
   o OrgConfirmacion orgCompra
+  o String nuevaLocalizacion
 }
 
 concept OrgConfirmacion {
@@ -52,9 +53,15 @@ concept Operacion {
 }
 
 concept DatosVenta {
+  o TipoVenta tipoVenta
   o String unidadMonetaria
-  o Double precioVenta optional
+  o Double precio optional
   o String pujaId optional
+}
+
+enum TipoVenta {
+  o NORMAL 
+  o PUJA
 }
 
 concept Caracteristicas{
@@ -102,6 +109,9 @@ transaction CrearProducto {
 
 transaction PonerVentaProducto {
   o String productoId
+  o TipoVenta tipoVenta
+  o String unidadMonetaria
+  o Double precio optional
 }
 
 transaction CrearTipoProducto {
@@ -117,6 +127,7 @@ event ProductoCreado {
 
 transaction ComprarProducto {
   o String productoId
+  o String localizacionId
 }
 
 transaction ConfirmarTransaccion {

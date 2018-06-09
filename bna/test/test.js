@@ -139,6 +139,12 @@ describe('Sample', () => {
         await crearOrganizacion(orgId, orgTipo, 'descripción', admin, admin + '@' + orgId);
         await useIdentity(admin + '@' + orgId);
         await crearParticipante(usuario + '@' + orgId, usuario, 'Usuario');
+        await crearLocalizacion({
+            "nombre" : "loc1",
+            "latitud" : 1.2,
+            "longitud" : 1.8,
+            "direccion" : "Dirección de ejemplo" 
+        });
     }
 
     async function crearProducto(identificador, c, localizacionId, localizacion, imagen){
@@ -188,15 +194,19 @@ describe('Sample', () => {
         return events[events.length - 1].productoId;
     }
 
-    async function comprarProducto(productoId){
+    async function comprarProducto(productoId, localizacionId){
         let transaction = factory.newTransaction(NS_PROD, 'ComprarProducto');
         transaction.productoId = productoId;
+        transaction.localizacionId = localizacionId;
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
-    async function ponerVentaProducto(productoId){
+    async function ponerVentaProducto(productoId, tipoVenta, unidadMonetaria, precio){
         let transaction = factory.newTransaction(NS_PROD, 'PonerVentaProducto');
         transaction.productoId = productoId;
+        transaction.tipoVenta = tipoVenta;
+        transaction.unidadMonetaria = unidadMonetaria;
+        transaction.precio = precio;
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
@@ -300,8 +310,7 @@ describe('Sample', () => {
         org.administrador.$identifier.should.equal('admin@test');
         org.descripcion.should.equal('descripción');
         org.usuarios.should.have.lengthOf(1);
-        org.localizaciones.should.have.lengthOf(0);
-        chai.expect(org.localizaciones).to.eql([]);
+        //org.localizaciones.should.have.lengthOf(0);
     });
 
 
@@ -367,21 +376,51 @@ describe('Sample', () => {
         await crearTipoProducto('PESCADO');
 
         await chai.expect(
-            ponerVentaProducto('PRODUCTO_INEXISTENTE')
+            ponerVentaProducto('PRODUCTO_INEXISTENTE', 'NORMAL', '€', '13.4', undefined)
         ).to.be.rejectedWith(Error);
     });
 
     
-    it('Puesta en venta de un producto válido', async () => {
+    it('Puesta en venta (NORMAL) de un producto válido', async () => {
         await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
 
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
 
-        await ponerVentaProducto(productoId);
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
         const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
         var producto = await regProd.get(productoId);
+        producto.operacionActual.datosVenta.unidadMonetaria.should.equal('€');
+        producto.operacionActual.datosVenta.precio.should.equal(13.4);
+        producto.operacionActual.datosVenta.tipoVenta.should.equal('NORMAL');
+        chai.expect(producto.operacionActual.datosVenta.pujaId).to.be.undefined;
+        producto.estado.should.equal('VENTA');
+    });
+
+
+    it('Puesta en venta (PUJA) de un producto válido', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+
+        await ponerVentaProducto(productoId, 'PUJA', '€', 13.4);
+
+        const regPuja = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Puja');
+        var pujas = await regPuja.getAll();
+        pujas. should.have.lengthOf(1);
+        pujas[0].precioPartida.should.equal(13.4);
+        pujas[0].organizaciones.should.have.lengthOf(0);
+
+
+        const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        var producto = await regProd.get(productoId);
+        producto.operacionActual.datosVenta.unidadMonetaria.should.equal('€');
+        producto.operacionActual.datosVenta.precio.should.equal(13.4);
+        producto.operacionActual.datosVenta.pujaId.should.equal(pujas[0].pujaId);
+        producto.operacionActual.datosVenta.tipoVenta.should.equal('PUJA');
         producto.estado.should.equal('VENTA');
     });
 
@@ -396,7 +435,7 @@ describe('Sample', () => {
 
         await useIdentity('usuario1@pes2');
         await chai.expect(
-            ponerVentaProducto(productoId)
+            ponerVentaProducto(productoId, 'NORMAL', '€', 13.4)
         ).to.be.rejectedWith(Error);
         const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
         var producto = await regProd.get(productoId);
@@ -411,11 +450,11 @@ describe('Sample', () => {
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
-        ponerVentaProducto(productoId);
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
         events.should.have.lengthOf(1);
 
         await useIdentity('usuario1@res1');
-        await comprarProducto(productoId);
+        await comprarProducto(productoId, 'res1-loc1');
         
         var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion')
         var transacciones = await regT.getAll();
@@ -426,6 +465,11 @@ describe('Sample', () => {
         transacciones[0].orgCompra.orgId.should.equal('res1');
         transacciones[0].orgCompra.confirmacion.should.equal(false);
 
+        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto')
+        var producto = await regProducto.get(productoId);
+        producto.estado.should.equal('TRANSACCION');
+        producto.transaccionId.should.equal(transacciones[0].transaccionId);
+
     });
 
 
@@ -435,11 +479,10 @@ describe('Sample', () => {
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
-        ponerVentaProducto(productoId);
-        events.should.have.lengthOf(1);
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
 
         await chai.expect(
-            comprarProducto(productoId)
+            comprarProducto(productoId, 'pes1-loc1')
         ).to.be.rejectedWith(Error);
         
         var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion');
@@ -458,10 +501,10 @@ describe('Sample', () => {
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
-        ponerVentaProducto(productoId);
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
 
         await useIdentity('usuario1@res1');
-        await comprarProducto(productoId);
+        await comprarProducto(productoId, 'res1-loc1');
 
         await useIdentity('usuario1@pes1');
         await confirmarTransaccion(productoId, false);
@@ -481,11 +524,14 @@ describe('Sample', () => {
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
-        ponerVentaProducto(productoId);
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
         events.should.have.lengthOf(1);
 
         await useIdentity('usuario1@res1');
-        await comprarProducto(productoId);
+        await comprarProducto(productoId, 'res1-loc1');
+        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto')
+        var producto = await regProducto.get(productoId);
+        producto.estado.should.equal('TRANSACCION');
 
         await useIdentity('usuario1@res2');
         await chai.expect(
