@@ -123,7 +123,7 @@ describe('Sample', () => {
         transaction.nombre = nombre;
         transaction.tipoUsuario = tipoUsuario;
         await businessNetworkConnection.submitTransaction(transaction);
-        await importCardForIdentity(email, await businessNetworkConnection.issueIdentity(NS_PAR + '.Usuario#' + email, email));
+        await importCardForIdentity(email, await businessNetworkConnection.issueIdentity(NS_PAR + '.' + tipoUsuario + '#' + email, email));
     }
 
     async function crearOrganizacion(orgId, tipoOrganizacion, descripcion, nombreAdmin, emailAdmin){
@@ -299,7 +299,13 @@ describe('Sample', () => {
     
 
     it('Creación de un participante Usuario para una organización', async () => {
-        await crearOrganizacionyUsuario('test', 'LONXA', 'admin', 'usuario1');
+        const orgTipo = 'LONXA'; const admin = 'admin'; const orgId = 'test'; const usuario = 'usuario1';
+        await useIdentity('admin');
+        await crearTipoOrganizacion(orgTipo);
+        await crearOrganizacion(orgId, orgTipo, 'descripción', admin, admin + '@' + orgId);
+        await useIdentity(admin + '@' + orgId);
+        
+        await crearParticipante(usuario + '@' + orgId, usuario, 'Usuario');
 
         const reg = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Usuario');
         var users = await reg.getAll();
@@ -309,13 +315,111 @@ describe('Sample', () => {
         users[0].orgId.should.equal('test');
 
         const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
-        const org = await regOrg.get('test');
+        var org = await regOrg.get('test');
         org.orgId.should.equal('test');
         org.tipoOrganizacion.$identifier.should.equal('LONXA');
         org.administrador.$identifier.should.equal('admin@test');
         org.descripcion.should.equal('descripción');
         org.usuarios.should.have.lengthOf(1);
-        //org.localizaciones.should.have.lengthOf(0);
+        org.usuarios[0].$identifier.should.equal('usuario1@test');
+        org.localizaciones.should.have.lengthOf(0);
+        org.invitados.should.have.lengthOf(0);
+
+        await crearParticipante('usuario2' + '@' + orgId, 'usuario2', 'Usuario');
+
+        users = await reg.getAll();
+        users.should.have.lengthOf(2);
+        users[1].email.should.equal('usuario2@test');
+        users[1].nombre.should.equal('usuario2');
+        users[1].orgId.should.equal('test');
+
+        org = await regOrg.get('test');
+        org.orgId.should.equal('test');
+        org.tipoOrganizacion.$identifier.should.equal('LONXA');
+        org.administrador.$identifier.should.equal('admin@test');
+        org.descripcion.should.equal('descripción');
+        org.usuarios.should.have.lengthOf(2);
+        org.usuarios[1].$identifier.should.equal('usuario2@test');
+        org.localizaciones.should.have.lengthOf(0);
+        org.invitados.should.have.lengthOf(0);
+    });
+
+
+    it('Creación de un participante Invitado para una organización', async () => {
+        const orgTipo = 'LONXA'; const admin = 'admin'; const orgId = 'test'; const usuario = 'invitado1';
+        await useIdentity('admin');
+        await crearTipoOrganizacion(orgTipo);
+        await crearOrganizacion(orgId, orgTipo, 'descripción', admin, admin + '@' + orgId);
+        await useIdentity(admin + '@' + orgId);
+        
+        await crearParticipante(usuario + '@' + orgId, usuario, 'Invitado');
+
+        const reg = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Invitado');
+        var users = await reg.getAll();
+        users.should.have.lengthOf(1);
+        users[0].email.should.equal('invitado1@test');
+        users[0].nombre.should.equal('invitado1');
+        users[0].orgId.should.equal('test');
+
+        const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        var org = await regOrg.get('test');
+        org.orgId.should.equal('test');
+        org.tipoOrganizacion.$identifier.should.equal('LONXA');
+        org.administrador.$identifier.should.equal('admin@test');
+        org.descripcion.should.equal('descripción');
+        org.invitados.should.have.lengthOf(1);
+        org.invitados[0].$identifier.should.equal('invitado1@test');
+        org.localizaciones.should.have.lengthOf(0);
+        org.usuarios.should.have.lengthOf(0);
+
+        await crearParticipante('invitado2' + '@' + orgId, 'invitado2', 'Invitado');
+
+        users = await reg.getAll();
+        users.should.have.lengthOf(2);
+        users[1].email.should.equal('invitado2@test');
+        users[1].nombre.should.equal('invitado2');
+        users[1].orgId.should.equal('test');
+
+        org = await regOrg.get('test');
+        org.orgId.should.equal('test');
+        org.tipoOrganizacion.$identifier.should.equal('LONXA');
+        org.administrador.$identifier.should.equal('admin@test');
+        org.descripcion.should.equal('descripción');
+        org.invitados.should.have.lengthOf(2);
+        org.invitados[1].$identifier.should.equal('invitado2@test');
+        org.localizaciones.should.have.lengthOf(0);
+        org.usuarios.should.have.lengthOf(0);
+    });
+
+
+    it('Creación de un participante INVÁLIDO para una organización', async () => {
+        const orgTipo = 'LONXA'; const admin = 'admin'; const orgId = 'test'; const usuario = 'invitado1';
+        await useIdentity('admin');
+        await crearTipoOrganizacion(orgTipo);
+        await crearOrganizacion(orgId, orgTipo, 'descripción', admin, admin + '@' + orgId);
+        await useIdentity(admin + '@' + orgId);
+        
+        await chai.expect(
+            crearParticipante(usuario + '@' + orgId, usuario, 'ERROR')
+        ).to.be.rejectedWith(Error);
+
+        const regI = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Invitado');
+        var users = await regI.getAll();
+        users.should.have.lengthOf(0);
+
+        const regU = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Usuario');
+        users = await regU.getAll();
+        users.should.have.lengthOf(0);
+
+        const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        var org = await regOrg.get('test');
+        org.orgId.should.equal('test');
+        org.tipoOrganizacion.$identifier.should.equal('LONXA');
+        org.administrador.$identifier.should.equal('admin@test');
+        org.descripcion.should.equal('descripción');
+        org.invitados.should.have.lengthOf(0);
+        org.localizaciones.should.have.lengthOf(0);
+        org.usuarios.should.have.lengthOf(0);
     });
 
 

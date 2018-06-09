@@ -15,5 +15,5 @@ participant Invitado extends Participante { }
 transaction CrearParticipante {
   o String email
   o String nombre
-  o String tipoUsuario
+  o String tipoUsuario optional
 }

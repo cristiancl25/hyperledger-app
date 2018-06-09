@@ -2,6 +2,7 @@ namespace org.hyperledger.composer.organizaciones
 
 import org.hyperledger.composer.participantes.OrgAdmin
 import org.hyperledger.composer.participantes.Usuario
+import org.hyperledger.composer.participantes.Invitado
 
 
 asset TipoOrganizacion identified by tipo {
@@ -15,6 +16,7 @@ asset Organizacion identified by orgId {
   o DateTime fechaCreacion
   --> OrgAdmin administrador
   --> Usuario[] usuarios
+  --> Invitado[] invitados
   --> Localizacion[] localizaciones optional
 }
 
