@@ -90,6 +90,11 @@ describe('Sample', () => {
         factory = businessNetworkConnection.getBusinessNetwork().getFactory();
     }
 
+    async function getProducto(productoId){
+        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        return await regProducto.get(productoId);
+    }
+
     async function crearLocalizacion(loc){
         const transaction = factory.newTransaction(NS_ORG, 'CrearLocalizacion');
         transaction.nombre = loc.nombre;
@@ -493,6 +498,26 @@ describe('Sample', () => {
         producto.estado.should.equal('VENTA');
     });
     
+    it('Rechazo de compra de un producto por la compañía compradora', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
+
+        await useIdentity('usuario1@res1');
+        await comprarProducto(productoId, 'res1-loc1');
+        (await getProducto(productoId)).estado.should.equal('TRANSACCION');
+
+        await confirmarTransaccion(productoId, false);
+
+        var producto = await getProducto(productoId);
+        producto.operacionActual.orgId.should.equal('pes1');
+        producto.estado.should.equal('VENTA');
+        chai.expect(producto.transaccionId).to.be.undefined;
+    });
 
     it('Rechazo de compra de un producto por la compañía vendedora', async () => {
         await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
@@ -505,12 +530,13 @@ describe('Sample', () => {
 
         await useIdentity('usuario1@res1');
         await comprarProducto(productoId, 'res1-loc1');
+        (await getProducto(productoId)).estado.should.equal('TRANSACCION');
 
         await useIdentity('usuario1@pes1');
         await confirmarTransaccion(productoId, false);
 
-        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto')
-        var producto = await regProducto.get(productoId);
+        var producto = await getProducto(productoId);
+        producto.operacionActual.orgId.should.equal('pes1');
         producto.estado.should.equal('VENTA');
         chai.expect(producto.transaccionId).to.be.undefined;
     });
@@ -529,9 +555,7 @@ describe('Sample', () => {
 
         await useIdentity('usuario1@res1');
         await comprarProducto(productoId, 'res1-loc1');
-        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto')
-        var producto = await regProducto.get(productoId);
-        producto.estado.should.equal('TRANSACCION');
+        (await getProducto(productoId)).estado.should.equal('TRANSACCION');
 
         await useIdentity('usuario1@res2');
         await chai.expect(
