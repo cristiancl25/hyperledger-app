@@ -341,11 +341,15 @@ async function ConfirmarTransaccion(datos){
 
     } else if (participante.orgId === transaccion.orgCompra.orgId) {
         // Si el participante pertenece a la organización compradora
+        const regLoc = await getAssetRegistry(NS_ORG + '.Localizacion');
         if (!datos.nuevaLocalizacion){
             throw new Error("Es obligatorio especificar la nueva localización del producto");
         }
+        if (! await regLoc.exists(datos.nuevaLocalizacion)){
+            throw new Error('Localización Inválida');
+        }
         transaccion.orgCompra.confirmacion = true;
-        transaccion.nuevaLocalizacion = datos.localizacionId;
+        transaccion.nuevaLocalizacion = datos.nuevaLocalizacion;
 
     }
 
@@ -357,9 +361,11 @@ async function ConfirmarTransaccion(datos){
         operacion.localizacion = factory.newRelationship(NS_ORG, 'Localizacion', transaccion.nuevaLocalizacion);
         operacion.fecha = new Date();
         operacion.orgId = transaccion.orgCompra.orgId;
+        
         producto.operaciones.unshift(producto.operacionActual);
         producto.operacionActual = operacion;
-        // TODO Actualizar estado del producto
+        producto.estado = 'PARADO';
+        delete producto.transaccionId;
         await regTran.remove(transaccion);
         await regProd.update(producto);
     }
