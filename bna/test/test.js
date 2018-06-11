@@ -95,6 +95,11 @@ describe('Sample', () => {
         return await regProducto.get(productoId);
     }
 
+    async function getPuja(id){
+        var reg = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Puja');
+        return await reg.get(id);
+    }
+
     async function crearLocalizacion(loc){
         const transaction = factory.newTransaction(NS_ORG, 'CrearLocalizacion');
         transaction.nombre = loc.nombre;
@@ -212,6 +217,19 @@ describe('Sample', () => {
         transaction.tipoVenta = tipoVenta;
         transaction.unidadMonetaria = unidadMonetaria;
         transaction.precio = precio;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
+    async function pujarProducto(productoId, precio){
+        let transaction = factory.newTransaction(NS_PROD, 'PujarProducto');
+        transaction.productoId = productoId;
+        transaction.precio = precio;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
+    async function finalizarPuja(productoId){
+        let transaction = factory.newTransaction(NS_PROD, 'FinalizarPuja');
+        transaction.productoId = productoId;
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
@@ -531,6 +549,117 @@ describe('Sample', () => {
         producto.operacionActual.datosVenta.pujaId.should.equal(pujas[0].pujaId);
         producto.operacionActual.datosVenta.tipoVenta.should.equal('PUJA');
         producto.estado.should.equal('VENTA');
+    });
+
+
+    it('Puja de un producto por la misma organización que lo vende', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+
+        await ponerVentaProducto(productoId, 'PUJA', '€', 13.4);
+
+        await chai.expect(
+            pujarProducto(productoId, 13)
+        ).to.be.rejectedWith(Error);
+    });
+
+
+    it('Puja de un producto por un precio inferior al de partida', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+
+        await ponerVentaProducto(productoId, 'PUJA', '€', 13.4);
+
+        await useIdentity('usuario1@res1');
+        await chai.expect(
+            pujarProducto(productoId, 13)
+        ).to.be.rejectedWith(Error);
+    });
+
+    it('Puja de un producto por varias organizaciones', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'R1', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res2', 'R2', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res3', 'R3', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+
+        await ponerVentaProducto(productoId, 'PUJA', '€', 13.4);
+        const pujaId = (await getProducto(productoId)).operacionActual.datosVenta.pujaId;
+
+        await useIdentity('usuario1@res1');
+        await pujarProducto(productoId, 14.1);
+        var puja = await getPuja(pujaId);
+        puja.organizaciones.should.have.lengthOf(1);
+        puja.organizaciones[0].orgId.should.equal('res1');
+        puja.organizaciones[0].precio.should.equal(14.1);
+        await chai.expect(
+            pujarProducto(productoId, 14.1)
+        ).to.be.rejectedWith(Error);
+        await pujarProducto(productoId, 15);
+        puja = await getPuja(pujaId);
+        puja.organizaciones.should.have.lengthOf(1);
+        puja.organizaciones[0].orgId.should.equal('res1');
+        puja.organizaciones[0].precio.should.equal(15);
+
+        await useIdentity('usuario1@res2');
+        await pujarProducto(productoId, 14);
+        var puja = await getPuja(pujaId);
+        puja.organizaciones.should.have.lengthOf(2);
+        puja.organizaciones[1].orgId.should.equal('res2');
+        puja.organizaciones[1].precio.should.equal(14);
+        await chai.expect(
+            pujarProducto(productoId, 13.5)
+        ).to.be.rejectedWith(Error);
+        await pujarProducto(productoId, 16);
+        puja = await getPuja(pujaId);
+        puja.organizaciones.should.have.lengthOf(2);
+        puja.organizaciones[0].orgId.should.equal('res2');
+        puja.organizaciones[0].precio.should.equal(16);
+
+        await useIdentity('usuario1@res3');
+        await pujarProducto(productoId, 15.5);
+        var puja = await getPuja(pujaId);
+        puja.organizaciones.should.have.lengthOf(3);
+        puja.organizaciones[1].orgId.should.equal('res3');
+        puja.organizaciones[1].precio.should.equal(15.5);
+        await chai.expect(
+            pujarProducto(productoId, 10)
+        ).to.be.rejectedWith(Error);
+        await chai.expect(
+            pujarProducto(productoId, 14)
+        ).to.be.rejectedWith(Error);
+        await pujarProducto(productoId, 20);
+        puja = await getPuja(pujaId);
+        puja.organizaciones.should.have.lengthOf(3);
+        puja.organizaciones[0].orgId.should.equal('res3');
+        puja.organizaciones[0].precio.should.equal(20);
+
+    });
+
+    it('finalizar puja', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'R1', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res2', 'R2', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res3', 'R3', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+
+        await ponerVentaProducto(productoId, 'PUJA', '€', 13.4);
+
+        //await pujarProducto(productoId, 13);
+        await finalizarPuja(productoId);
     });
 
 

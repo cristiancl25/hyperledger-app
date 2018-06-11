@@ -114,6 +114,15 @@ transaction PonerVentaProducto {
   o Double precio optional
 }
 
+transaction PujarProducto {
+  o String productoId
+  o Double precio
+}
+
+transaction FinalizarPuja {
+  o String productoId
+}
+
 transaction CrearTipoProducto {
   o String tipo
 }

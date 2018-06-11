@@ -182,6 +182,59 @@ async function PonerVentaProducto(datos){
 
 /**
  *
+ * @param {org.hyperledger.composer.productos.PujarProducto} datos
+ * @transaction
+*/
+async function PujarProducto(datos){
+    const factory = getFactory();
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+    var producto = await getProducto(datos.productoId);
+
+    if (producto.operacionActual.orgId === participante.orgId){
+        throw new Error('Este producto ya pertenece a la organización del usuario ');
+    }
+
+    var regPuja = await getAssetRegistry(NS_PROD + '.Puja');
+    var puja = await regPuja.get(producto.operacionActual.datosVenta.pujaId);
+
+    if(datos.precio < puja.precioPartida){
+        throw new Error('El precio tiene que ser superior al precio de partida');
+    }
+
+    const pujaOrg = puja.organizaciones.find(x => x.orgId === participante.orgId);
+    if (pujaOrg === undefined){ //Si la organización no ha pujado se añade la puja
+        var p = factory.newConcept(NS_PROD, 'PujaOrganizacion');
+        p.precio = datos.precio;
+        p.orgId = participante.orgId;
+        puja.organizaciones.unshift(p);
+    } else if (datos.precio <= pujaOrg.precio){ // Si ya se había pujado y la nueva puja es inferior se lanza un error
+        throw new Error('El precio tiene que ser superior al anterior');
+    } else {
+        pujaOrg.precio = datos.precio;
+    }
+
+    puja.organizaciones.sort(function (a, b) {
+        return (b.precio - a.precio)
+    });
+
+    await regPuja.update(puja);
+
+}
+
+
+/**
+ *
+ * @param {org.hyperledger.composer.productos.FinalizarPuja} datos
+ * @transaction
+*/
+async function FinalizarPuja(datos){
+
+}
+
+
+/**
+ *
  * @param {org.hyperledger.composer.productos.ComprarProducto} datos
  * @transaction
 */
