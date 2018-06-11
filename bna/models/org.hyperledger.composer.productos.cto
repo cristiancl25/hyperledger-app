@@ -11,7 +11,7 @@ asset Transaccion identified by transaccionId {
   --> Producto producto
   o OrgConfirmacion orgVenta
   o OrgConfirmacion orgCompra
-  o String nuevaLocalizacion
+  o String nuevaLocalizacion optional
 }
 
 concept OrgConfirmacion {
@@ -136,10 +136,10 @@ event ProductoCreado {
 
 transaction ComprarProducto {
   o String productoId
-  o String localizacionId
 }
 
 transaction ConfirmarTransaccion {
   o String productoId
   o Boolean confirmar
+  o String nuevaLocalizacion optional
 }
