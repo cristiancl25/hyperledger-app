@@ -100,6 +100,11 @@ describe('Sample', () => {
         return await reg.get(id);
     }
 
+    async function getTransaccion(id){
+        var reg = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion');
+        return await reg.get(id);
+    }
+
     async function crearLocalizacion(loc){
         const transaction = factory.newTransaction(NS_ORG, 'CrearLocalizacion');
         transaction.nombre = loc.nombre;
@@ -549,7 +554,7 @@ describe('Sample', () => {
         producto.operacionActual.datosVenta.precio.should.equal(13.4);
         producto.operacionActual.datosVenta.pujaId.should.equal(pujas[0].pujaId);
         producto.operacionActual.datosVenta.tipoVenta.should.equal('PUJA');
-        producto.estado.should.equal('VENTA');
+        producto.estado.should.equal('PUJA');
     });
 
 
@@ -561,6 +566,8 @@ describe('Sample', () => {
         const productoId = await crearProductoEjemplo();
 
         await ponerVentaProducto(productoId, 'PUJA', '€', 13.4);
+        var producto = await getProducto(productoId);
+        producto.estado.should.equal('PUJA');
 
         await chai.expect(
             pujarProducto(productoId, 13)
@@ -582,6 +589,7 @@ describe('Sample', () => {
         await chai.expect(
             pujarProducto(productoId, 13)
         ).to.be.rejectedWith(Error);
+        (await getProducto(productoId)).estado.should.equal('PUJA');
     });
 
     it('Test de las transacción PujarProducto', async () => {
@@ -644,6 +652,7 @@ describe('Sample', () => {
         puja.organizaciones.should.have.lengthOf(3);
         puja.organizaciones[0].orgId.should.equal('res3');
         puja.organizaciones[0].precio.should.equal(20);
+        (await getProducto(productoId)).estado.should.equal('PUJA');
 
     });
 
@@ -667,6 +676,7 @@ describe('Sample', () => {
         await chai.expect(
             finalizarPuja(productoId)
         ).to.be.rejectedWith(Error);
+        (await getProducto(productoId)).estado.should.equal('PUJA');
 
         await useIdentity('usuario1@pes1');
         var puja = await getPuja(pujaId);
@@ -677,6 +687,7 @@ describe('Sample', () => {
         chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
 
         await ponerVentaProducto(productoId, 'PUJA', '€', 13);
+        (await getProducto(productoId)).estado.should.equal('PUJA');
         pujaId = (await getProducto(productoId)).operacionActual.datosVenta.pujaId;
         await useIdentity('usuario1@res1');
         await pujarProducto(productoId, 14);
@@ -1031,5 +1042,57 @@ describe('Sample', () => {
         producto.operacionActual.orgId.should.equal('pes1');
         producto.estado.should.equal('VENTA');
         chai.expect(producto.transaccionId).to.be.undefined;
+    });
+
+    it('Rechazo de todas las transaciones en estado de puja de un producto', async () => {
+        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        var regPuja = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Puja');
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'R1', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res2', 'R2', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        await ponerVentaProducto(productoId, 'PUJA', '€', 13);
+
+        await useIdentity('usuario1@res1');
+        await pujarProducto(productoId, 14);
+
+        await useIdentity('usuario1@res2');
+        await pujarProducto(productoId, 15);
+        
+        await useIdentity('usuario1@pes1');
+        await finalizarPuja(productoId);
+        var producto = await getProducto(productoId);
+        producto.estado.should.equal('TRANSACCION');
+        var tran = await getTransaccion(producto.transaccionId);
+        tran.orgCompra.orgId.should.equal('res2');
+
+        await useIdentity('usuario1@pes1');
+        await confirmarTransaccion(productoId, true, undefined);
+        (await getProducto(productoId)).estado.should.equal('TRANSACCION');
+
+        await useIdentity('usuario1@res2');
+        await confirmarTransaccion(productoId, false, undefined);
+
+        var producto = await getProducto(productoId);
+        producto.estado.should.equal('TRANSACCION');
+        var tran = await getTransaccion(producto.transaccionId);
+        tran.orgCompra.orgId.should.equal('res1');
+
+        await useIdentity('usuario1@res2');
+        await chai.expect(
+            confirmarTransaccion(productoId, true, 'res2-loc1')
+        ).to.be.rejectedWith(Error);
+
+        await useIdentity('usuario1@res1');
+        await confirmarTransaccion(productoId, false, undefined);
+        var producto = await getProducto(productoId);
+        producto.estado.should.equal('PARADO');
+        producto.operacionActual.orgId.should.equal('pes1');
+        producto.operaciones.should.have.lengthOf(0);
+        chai.expect(producto.transaccionId).to.be.undefined;
+
     });
 });

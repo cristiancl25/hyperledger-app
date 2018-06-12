@@ -200,8 +200,10 @@ async function PonerVentaProducto(datos){
         var reg = await getAssetRegistry(NS_PROD + '.Puja');
         await reg.add(puja);
         venta.pujaId = pujaId;
+        producto.estado = 'PUJA';
+    } else {
+        producto.estado = 'VENTA';
     }
-    producto.estado = 'VENTA';
     producto.operacionActual.datosVenta = venta;
 
     var regProd = await getAssetRegistry(NS_PROD + '.Producto');
@@ -251,21 +253,7 @@ async function PujarProducto(datos){
 
 }
 
-
-/**
- *
- * @param {org.hyperledger.composer.productos.FinalizarPuja} datos
- * @transaction
-*/
-async function FinalizarPuja(datos){
-    var participante = getCurrentParticipant();
-    await validarParticipante(participante);
-    var producto = await getProducto(datos.productoId);
-
-    if (producto.operacionActual.orgId !== participante.orgId){
-        throw new Error('El producto non partenece a la organización del participante');
-    }
-
+async function pujaATransaccion(producto){
     var regPuja = await getAssetRegistry(NS_PROD + '.Puja');
     var puja = await regPuja.get(producto.operacionActual.datosVenta.pujaId);
 
@@ -281,6 +269,24 @@ async function FinalizarPuja(datos){
 
         await crearTransaccion(producto, ganador);
     }
+}
+/**
+ *
+ * @param {org.hyperledger.composer.productos.FinalizarPuja} datos
+ * @transaction
+*/
+async function FinalizarPuja(datos){
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+    var producto = await getProducto(datos.productoId);
+    if (producto.estado != 'PUJA'){
+        throw new Error ('El producto non está en PUJA');
+        
+    }
+    if (producto.operacionActual.orgId !== participante.orgId){
+        throw new Error('El producto non partenece a la organización del participante');
+    }
+    await pujaATransaccion(producto);
 }
 
 
@@ -328,11 +334,13 @@ async function ConfirmarTransaccion(datos){
 
     // TODO lanzar eventos
     if (!datos.confirmar) {
-        // TODO caso rechazo en estado PUJA
         producto.estado = 'VENTA';
         delete producto.transaccionId;
         await regProd.update(producto);
         await regTran.remove(transaccion);
+        if (producto.operacionActual.datosVenta.pujaId){
+            await pujaATransaccion(producto);
+        }
         return;
 
     } else if (participante.orgId === transaccion.orgVenta.orgId) {
@@ -350,9 +358,7 @@ async function ConfirmarTransaccion(datos){
         }
         transaccion.orgCompra.confirmacion = true;
         transaccion.nuevaLocalizacion = datos.nuevaLocalizacion;
-
     }
-
     await regTran.update(transaccion);
 
     if (transaccion.orgVenta.confirmacion && transaccion.orgCompra.confirmacion){
