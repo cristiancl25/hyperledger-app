@@ -206,6 +206,7 @@ describe('Sample', () => {
                 "direccion" : "dirección de prueba"
             }, 
             undefined);
+        // TODO sacar events
         return events[events.length - 1].productoId;
     }
 
@@ -244,6 +245,30 @@ describe('Sample', () => {
         if (localizacionId) {
             transaction.nuevaLocalizacion = localizacionId;
         }
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
+
+    async function dividirProducto(productoId, t){
+        var trozos = [];
+        var unidad = false; 
+
+        for (var i = 0; i < t.length; i++) {
+            let imagen = factory.newConcept(NS_PROD, 'Imagen');
+            let trozo = factory.newConcept(NS_PROD, 'Trozo');
+            trozo.unidades = t[i].unidades;
+            trozo.peso = t[i].peso;
+            if (t[i].imagen){
+                imagen.hashImagen = t[i].imagen.hashImagen;
+                imagen.url = t[i].imagen.url;
+                imagen.algoritmo = t[i].imagen.algoritmo;
+                trozo.imagen = imagen;
+            }
+            trozos.push(trozo);
+        }
+        const transaction = factory.newTransaction(NS_PROD, 'DividirProducto');
+        transaction.productoId = productoId;
+        transaction.trozos = trozos;
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
@@ -456,11 +481,6 @@ describe('Sample', () => {
         await crearParticipante('usuario1@pes1', 'usuario', 'Usuario');
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
-//        await crearLocalizacion({
-//            "latitud" : 1.2,
-//            "longitud" : 1.8,
-//            "direccion" : 'direccion de prueba'
-//        });
         await crearProducto('producto1',{
                 "tipoProducto" : "PESCADO",
                 "variedadProducto" : "sardina",
@@ -488,10 +508,95 @@ describe('Sample', () => {
         producto.caracteristicas.tipo.should.equal('UNIDAD');
         producto.caracteristicas.unidades.should.equal(1);
         producto.caracteristicas.peso.should.equal(0.3);
-        chai.expect(producto.caracteristicas.magnitudPeso).to.be.undefined;
+        producto.caracteristicas.magnitudPeso.should.equal('kg');
         chai.expect(producto.imagen).to.be.undefined;
+        chai.expect(producto.predecesor).to.be.undefined;
+        chai.expect(producto.sucesores).to.be.undefined;
+        chai.expect(producto.transaccionId).to.be.undefined;
+        producto.estado.should.equal('PARADO');
+        producto.operaciones.should.have.lengthOf(0);
+        producto.operacionActual.orgId.should.equal('pes1');
+        chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
     });
 
+
+    it('Creación de un producto por PESO, con nueva localización', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        await crearProducto('producto1',{
+                "tipoProducto" : "PESCADO",
+                "variedadProducto" : "sardina",
+                "descripcion" : "Descripción del producto", 
+                "tipo" : "PESO",
+                "unidades" : 1,
+                "peso" : 0.3,
+                "magnitudPeso" : 'kg'
+            }, 'pes1-loc1',
+            undefined, 
+            undefined);
+
+        const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        var productos = await regProd.getAll();
+        productos.should.have.lengthOf(1);
+
+        var producto = productos[0];
+        producto.identificador.should.equal('producto1');
+        producto.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
+        producto.caracteristicas.variedadProducto.should.equal('sardina');
+        producto.caracteristicas.descripcion.should.equal('Descripción del producto');
+        producto.caracteristicas.tipo.should.equal('PESO');
+        chai.expect(producto.caracteristicas.unidades).to.be.undefined;
+        producto.caracteristicas.peso.should.equal(0.3);
+        producto.caracteristicas.magnitudPeso.should.equal('kg');
+        chai.expect(producto.imagen).to.be.undefined;
+        producto.operacionActual.localizacion.$identifier.should.equal('pes1-loc1');
+        chai.expect(producto.imagen).to.be.undefined;
+        chai.expect(producto.predecesor).to.be.undefined;
+        chai.expect(producto.sucesores).to.be.undefined;
+        chai.expect(producto.transaccionId).to.be.undefined;
+        producto.estado.should.equal('PARADO');
+        producto.operaciones.should.have.lengthOf(0);
+        producto.operacionActual.orgId.should.equal('pes1');
+        chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
+    });
+
+
+    it('Creación de un producto con tipo desconocido, con localizacion existente', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        await chai.expect(
+            crearProducto('producto1',{
+                    "tipoProducto" : "PESCADO",
+                    "variedadProducto" : "sardina",
+                    "descripcion" : "Descripción del producto", 
+                    "tipo" : "PESOoooooo",
+                    "unidades" : 1,
+                    "peso" : 0.3,
+                    "magnitudPeso" : 'kg'
+                }, 'pes1-loc1',
+                undefined, 
+                undefined)
+        ).to.be.rejectedWith(Error);
+        await chai.expect(
+            crearProducto('producto1',{
+                    "tipoProducto" : "PESCADO",
+                    "variedadProducto" : "sardina",
+                    "descripcion" : "Descripción del producto", 
+                    "tipo" : "PESO",
+                    "unidades" : 1,
+                    "peso" : 0.3,
+                    "magnitudPeso" : 'kg'
+                }, 'pes1-loc1111',
+                undefined, 
+                undefined)
+        ).to.be.rejectedWith(Error);
+
+        const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        var productos = await regProd.getAll();
+        productos.should.have.lengthOf(0);
+    });
 
     it('Creación de un producto con un participante NO válido', async () => {
         await useIdentity('admin');
@@ -1094,5 +1199,122 @@ describe('Sample', () => {
         producto.operaciones.should.have.lengthOf(0);
         chai.expect(producto.transaccionId).to.be.undefined;
 
+    });
+
+
+    it('Test División de un producto con datos incorrectos', async () => {
+        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        await crearProducto('producto1',{
+                "tipoProducto" : "PESCADO",
+                "variedadProducto" : "sardina",
+                "descripcion" : "Descripción del producto", 
+                "tipo" : "UNIDAD",
+                "unidades" : 4,
+                "peso" : 5.5,
+                "magnitudPeso" : 'kg'
+            }, undefined, {
+                "latitud" : 1.3,
+                "longitud" : 2.5,
+                "direccion" : "dirección de prueba"
+            }, 
+            undefined);
+        var productos = await regProducto.getAll();
+        productos.should.have.lengthOf(1);
+        var producto = productos[productos.length - 1];
+        await chai.expect(
+            dividirProducto(producto.productoId, [
+                {
+                    "peso" : 3.5,
+                    "imagen" : {
+                        "hashImagen": "asldjfaslddoqwhe23",
+                        "url" : "https://ejemplo1.com",
+                        "algoritmo" : "sha1"
+                    }
+                },
+                {
+                    "peso" : 9.4,
+                    "imagen" : {
+                        "hashImagen": "asldjfaslddoqwhe23",
+                        "url" : "https://ejemplo1.com",
+                        "algoritmo" : "sha1"
+                    }
+                }
+            ])
+        ).to.be.rejectedWith(Error);
+
+        var productos = await regProducto.getAll();
+        productos.should.have.lengthOf(1);
+        var producto = productos[productos.length - 1];
+        await chai.expect(
+            dividirProducto(producto.productoId, [
+                {
+                    "unidad" : 1.5,
+                    "imagen" : {
+                        "hashImagen": "asldjfaslddoqwhe23",
+                        "url" : "https://ejemplo1.com",
+                        "algoritmo" : "sha1"
+                    }
+                },
+                {
+                    "peso" : 1.4,
+                    "imagen" : {
+                        "hashImagen": "asldjfaslddoqwhe23",
+                        "url" : "https://ejemplo1.com",
+                        "algoritmo" : "sha1"
+                    }
+                }
+            ])
+        ).to.be.rejectedWith(Error);
+
+        var productos = await regProducto.getAll();
+        productos.should.have.lengthOf(1);
+        var producto = productos[productos.length - 1];
+        await chai.expect(
+            dividirProducto(producto.productoId, [
+                {
+                    "unidad" : 2,
+                    "imagen" : {
+                        "hashImagen": "asldjfaslddoqwhe23",
+                        "url" : "https://ejemplo1.com",
+                        "algoritmo" : "sha1"
+                    }
+                },
+                {
+                    "peso" : 3,
+                    "imagen" : {
+                        "hashImagen": "asldjfaslddoqwhe23",
+                        "url" : "https://ejemplo1.com",
+                        "algoritmo" : "sha1"
+                    }
+                }
+            ])
+        ).to.be.rejectedWith(Error);
+
+        var productos = await regProducto.getAll();
+        productos.should.have.lengthOf(1);
+        var producto = productos[productos.length - 1];
+        await chai.expect(
+            dividirProducto(producto.productoId, [
+                {
+                    "unidad" : 2,
+                    "imagen" : {
+                        "hashImagen": "asldjfaslddoqwhe23",
+                        "url" : "https://ejemplo1.com",
+                        "algoritmo" : "sha1"
+                    }
+                },
+                {
+                    "imagen" : {
+                        "hashImagen": "asldjfaslddoqwhe23",
+                        "url" : "https://ejemplo1.com",
+                        "algoritmo" : "sha1"
+                    }
+                }
+            ])
+        ).to.be.rejectedWith(Error);
     });
 });

@@ -63,6 +63,7 @@ enum TipoVenta {
   o PUJA
 }
 
+
 concept Caracteristicas{
   --> TipoProducto tipoProducto
   o String variedadProducto optional
@@ -89,7 +90,9 @@ enum Estado {
   o   VENTA
   o   TRANSACCION
   o   PUJA 
-  o   FINALIZADO
+  o   CONSUMIDO
+  o   PERDIDO 
+  o   DIVIDIDO
 }
 
 concept Loc {
@@ -141,4 +144,15 @@ transaction ConfirmarTransaccion {
   o String productoId
   o Boolean confirmar
   o String nuevaLocalizacion optional
+}
+
+concept Trozo {
+  o Integer unidades optional
+  o Double peso optional
+  o Imagen imagen optional
+}
+
+transaction DividirProducto {
+  o String productoId
+  o Trozo[] trozos
 }

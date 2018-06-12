@@ -133,10 +133,9 @@ async function CrearTipoProducto(datos) {
     caracteristicas.descripcion = datos.caracteristicas.descripcion;
     caracteristicas.tipo = datos.caracteristicas.tipo;
     caracteristicas.peso = datos.caracteristicas.peso;
+    caracteristicas.magnitudPeso = datos.caracteristicas.magnitudPeso;
     if (caracteristicas.tipo === 'UNIDAD'){
         caracteristicas.unidades = datos.caracteristicas.unidades;
-    } else {
-        caracteristicas.magnitudPeso = datos.caracteristicas.magnitudPeso;
     }
 
     // Creación de la operación inicial
@@ -375,4 +374,55 @@ async function ConfirmarTransaccion(datos){
         await regTran.remove(transaccion);
         await regProd.update(producto);
     }
+}
+
+
+
+/**
+ *
+ * @param {org.hyperledger.composer.productos.DividirProducto} datos
+ * @transaction
+*/
+async function DividirProducto(datos){
+    const factory = getFactory();
+    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+    var producto = await getProducto(datos.productoId);
+
+    if (producto.operacionActual.orgId !== participante.orgId){
+        throw new Error('El producto non partenece a la organización del participante');
+    }
+
+    if (producto.estado !== 'PARADO'){
+        throw new Error('El producto no se puede dividir');
+    }
+
+    let unidades = 0;
+    let peso = 0; 
+
+    for (var i = 0; i < datos.trozos.length; i++) {
+        if (datos.trozos[i].unidades){
+            unidades += datos.trozos[i].unidades;
+        } else if (datos.trozos[i].peso) {
+            peso += datos.trozos[i].peso;
+        } else {
+            throw new Error('Es necesario especificar la división por unidad o peso');
+        }
+    }
+    if (unidades > 0 && peso > 0){
+        throw new Error('La división solo se pude hacer por peso o unidad, no por ambas');
+    }
+    if ( unidades > producto.caracteristicas.unidades){
+        throw new Error('La suma de las unidades no puede ser superior a las unidades del producto');
+    }
+    if ( peso > producto.caracteristicas.peso){
+        throw new Error('La suma de los pesos no puede ser superior al peso del producto');
+    }
+
+    var sucesores = [];
+    var sucesor = factory.newRelationship(NS_PROD, 'Producto', productoId);
+
+    producto.estado = 'DIVIDIDO';
+    await regProd.update(producto);
 }
