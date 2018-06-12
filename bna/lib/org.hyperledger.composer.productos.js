@@ -87,16 +87,7 @@ async function CrearTipoProducto(datos) {
     await reg.add(tipoProd);
 }
 
-
-/**
- *
- * @param {org.hyperledger.composer.productos.CrearProducto} datos
- * @transaction
- */
- async function CrearProducto(datos){
-    var participante = getCurrentParticipant();
-    await validarParticipante(participante);
-
+async function generarProducto(datos){
     // Se comprueba que existe el TipoProducto solicitado
     var regTipoProd = await getAssetRegistry(NS_PROD + '.TipoProducto');
     const tipoProducto = datos.caracteristicas.tipoProducto.$identifier;
@@ -106,7 +97,6 @@ async function CrearTipoProducto(datos) {
     }
     
     const factory = getFactory();
-    const productoId = generarIdProducto(participante.orgId);
     var regLoc = await getAssetRegistry(NS_ORG + '.Localizacion');
 
     var localizacionId;
@@ -142,27 +132,42 @@ async function CrearTipoProducto(datos) {
     var operacion = factory.newConcept(NS_PROD, 'Operacion');
     operacion.localizacion = factory.newRelationship(NS_ORG, 'Localizacion', localizacionId);
     operacion.fecha = new Date();
-    operacion.orgId = participante.orgId;
+    operacion.orgId = datos.orgId;
     
     // Creación del producto
-    var producto = factory.newResource(NS_PROD, 'Producto', productoId);
+    var producto = factory.newResource(NS_PROD, 'Producto', datos.productoId);
     if (datos.identificador){
         producto.identificador = datos.identificador;
     }
+    producto.imagen = datos.imagen;
     producto.caracteristicas = caracteristicas;
     producto.operacionActual = operacion;
     producto.operaciones = [];
     producto.estado = 'PARADO';
+    return producto;
+}
+/**
+ *
+ * @param {org.hyperledger.composer.productos.CrearProducto} datos
+ * @transaction
+ */
+ async function CrearProducto(datos){
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+    datos.productoId = generarIdProducto(participante.orgId);
+    datos.orgId = participante.orgId;
+    var producto = await generarProducto(datos);
+
     var regProd = await getAssetRegistry(NS_PROD + '.Producto');
     await regProd.add(producto);
 
-    // Creación del evento para informar del nuevo producto
-    var evento = factory.newEvent(NS_PROD, 'ProductoCreado');
-    evento.productoId = productoId;
-    evento.orgId = participante.orgId;
-    evento.tipoProducto = tipoProducto;
-    evento.variedadProducto = datos.caracteristicas.variedadProducto;
-    emit(evento);
+//    // Creación del evento para informar del nuevo producto
+//    var evento = factory.newEvent(NS_PROD, 'ProductoCreado');
+//    evento.productoId = producto.productoId;
+//    evento.orgId = participante.orgId;
+//    evento.tipoProducto = datos.caracteristicas.tipoProducto.$identifier;
+//    evento.variedadProducto = datos.caracteristicas.variedadProducto;
+//    emit(evento);
 }
 
 
@@ -280,7 +285,6 @@ async function FinalizarPuja(datos){
     var producto = await getProducto(datos.productoId);
     if (producto.estado != 'PUJA'){
         throw new Error ('El producto non está en PUJA');
-        
     }
     if (producto.operacionActual.orgId !== participante.orgId){
         throw new Error('El producto non partenece a la organización del participante');
@@ -401,13 +405,21 @@ async function DividirProducto(datos){
     let unidades = 0;
     let peso = 0; 
 
-    for (var i = 0; i < datos.trozos.length; i++) {
-        if (datos.trozos[i].unidades){
-            unidades += datos.trozos[i].unidades;
-        } else if (datos.trozos[i].peso) {
-            peso += datos.trozos[i].peso;
-        } else {
-            throw new Error('Es necesario especificar la división por unidad o peso');
+    if (producto.caracteristicas.tipo === 'UNIDAD'){
+        for (var i = 0; i < datos.trozos.length; i++) {
+            if (datos.trozos[i].unidades){
+                unidades += datos.trozos[i].unidades;
+            } else {
+                throw new Error('Es necesario especificar la división por unidad o peso');
+            }
+        }
+    } else if (producto.caracteristicas.tipo === 'PESO'){
+        for (i = 0; i < datos.trozos.length; i++) {
+            if (datos.trozos[i].peso) {
+                peso += datos.trozos[i].peso;
+            } else {
+                throw new Error('Es necesario especificar la división por unidad o peso');
+            }
         }
     }
     if (unidades > 0 && peso > 0){
@@ -421,8 +433,36 @@ async function DividirProducto(datos){
     }
 
     var sucesores = [];
-    var sucesor = factory.newRelationship(NS_PROD, 'Producto', productoId);
+    for (i = 0; i < datos.trozos.length; i++) {
+        let productoId = generarIdProducto(participante.orgId);
+        sucesores.push(factory.newRelationship(NS_PROD, 'Producto', productoId));
 
+        let caracteristicas = factory.newConcept(NS_PROD,'Caracteristicas');
+        caracteristicas.tipoProducto = producto.caracteristicas.tipoProducto;
+        caracteristicas.variedadProducto = producto.caracteristicas.variedadProducto;
+        caracteristicas.descripcion = producto.caracteristicas.descripcion;
+        caracteristicas.tipo = producto.caracteristicas.tipo;
+        caracteristicas.magnitudPeso = producto.caracteristicas.magnitudPeso;
+        if (producto.caracteristicas.tipo == 'UNIDAD'){
+            caracteristicas.unidades = datos.trozos[i].unidades;
+            caracteristicas.peso = producto.caracteristicas.peso;
+        } else {
+            caracteristicas.peso = datos.trozos[i].peso;
+        }
+
+        let p = await generarProducto({
+            "productoId": productoId,
+            "identificador" : datos.trozos[i].identificador,
+            "orgId" : participante.orgId,
+            "caracteristicas" : caracteristicas,
+            "localizacionId" : producto.operacionActual.localizacion.$identifier,
+            "imagen" : producto.imagen
+        });
+
+        p.predecesor = factory.newRelationship(NS_PROD, 'Producto', producto.productoId);
+        await regProd.add(p);
+    }
+    producto.sucesores = sucesores; 
     producto.estado = 'DIVIDIDO';
     await regProd.update(producto);
 }

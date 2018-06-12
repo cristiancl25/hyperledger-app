@@ -150,6 +150,7 @@ concept Trozo {
   o Integer unidades optional
   o Double peso optional
   o Imagen imagen optional
+  o String identificador optional
 }
 
 transaction DividirProducto {

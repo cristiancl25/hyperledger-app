@@ -207,7 +207,10 @@ describe('Sample', () => {
             }, 
             undefined);
         // TODO sacar events
-        return events[events.length - 1].productoId;
+        const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        var productos = await regProd.getAll();
+        return productos[productos.length - 1].productoId;
+        //return events[events.length - 1].productoId;
     }
 
     async function comprarProducto(productoId){
@@ -258,6 +261,7 @@ describe('Sample', () => {
             let trozo = factory.newConcept(NS_PROD, 'Trozo');
             trozo.unidades = t[i].unidades;
             trozo.peso = t[i].peso;
+            trozo.identificador = t[i].identificador;
             if (t[i].imagen){
                 imagen.hashImagen = t[i].imagen.hashImagen;
                 imagen.url = t[i].imagen.url;
@@ -604,7 +608,9 @@ describe('Sample', () => {
         await chai.expect(
             crearProducto('producto1', 1.2, 12, 23, 'Descripción')
         ).to.be.rejectedWith(Error);
-        chai.expect(events).to.eql([]);
+        const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        var productos = await regProd.getAll();
+        productos.should.have.lengthOf(0);
     });
 
     it('Puesta en venta de un producto inexistente', async () => {
@@ -1316,5 +1322,201 @@ describe('Sample', () => {
                 }
             ])
         ).to.be.rejectedWith(Error);
+    });
+
+
+    it('Test División de un producto por UNIDAD', async () => {
+        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        await crearProducto('producto1',{
+                "tipoProducto" : "PESCADO",
+                "variedadProducto" : "sardina",
+                "descripcion" : "Descripción del producto", 
+                "tipo" : "UNIDAD",
+                "unidades" : 4,
+                "peso" : 5.5,
+                "magnitudPeso" : 'kg'
+            }, undefined, {
+                "latitud" : 1.3,
+                "longitud" : 2.5,
+                "direccion" : "dirección de prueba"
+            }, 
+            undefined);
+        var productos = await regProducto.getAll();
+        productos.should.have.lengthOf(1);
+        var producto = productos[productos.length - 1];
+        await dividirProducto(producto.productoId, [{
+                "unidades" : 3,
+                "identificador" : "id1",
+                "imagen" : {
+                    "hashImagen": "hash1",
+                    "url" : "https://ejemplo1.com",
+                    "algoritmo" : "sha1"
+                }
+            },{
+                "unidades" : 1,
+                "identificador" : "id2",
+                "imagen" : {
+                    "hashImagen": "hash2",
+                    "url" : "https://ejemplo2.com",
+                    "algoritmo" : "sha1"
+                }
+            }
+        ]);
+
+        var productos = await regProducto.getAll();
+        productos.should.have.lengthOf(3);
+        var producto = productos[0];
+        producto.identificador.should.equal('producto1');
+        producto.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
+        producto.caracteristicas.variedadProducto.should.equal('sardina');
+        producto.caracteristicas.descripcion.should.equal('Descripción del producto');
+        producto.caracteristicas.tipo.should.equal('UNIDAD');
+        producto.caracteristicas.unidades.should.equal(4);
+        producto.caracteristicas.peso.should.equal(5.5);
+        producto.caracteristicas.magnitudPeso.should.equal('kg');
+        chai.expect(producto.imagen).to.be.undefined;
+        chai.expect(producto.predecesor).to.be.undefined;
+        producto.sucesores.should.have.lengthOf(2);
+        chai.expect(producto.transaccionId).to.be.undefined;
+        producto.estado.should.equal('DIVIDIDO');
+        producto.operaciones.should.have.lengthOf(0);
+        producto.operacionActual.orgId.should.equal('pes1');
+        chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
+
+        var sucesor1 = await regProducto.get(producto.sucesores[0].$identifier);
+        sucesor1.identificador.should.equal('id1');
+        sucesor1.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
+        sucesor1.caracteristicas.variedadProducto.should.equal('sardina');
+        sucesor1.caracteristicas.descripcion.should.equal('Descripción del producto');
+        sucesor1.caracteristicas.tipo.should.equal('UNIDAD');
+        sucesor1.caracteristicas.unidades.should.equal(3);
+        sucesor1.caracteristicas.peso.should.equal(5.5);
+        sucesor1.caracteristicas.magnitudPeso.should.equal('kg');
+        sucesor1.predecesor.$identifier.should.equal(producto.productoId);
+        chai.expect(sucesor1.sucesores).to.be.undefined;
+        chai.expect(sucesor1.transaccionId).to.be.undefined;
+        sucesor1.estado.should.equal('PARADO');
+        sucesor1.operaciones.should.have.lengthOf(0);
+        sucesor1.operacionActual.orgId.should.equal('pes1');
+        chai.expect(sucesor1.operacionActual.datosVenta).to.be.undefined;
+
+        var sucesor2 = await regProducto.get(producto.sucesores[1].$identifier);
+        sucesor2.identificador.should.equal('id2');
+        sucesor2.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
+        sucesor2.caracteristicas.variedadProducto.should.equal('sardina');
+        sucesor2.caracteristicas.descripcion.should.equal('Descripción del producto');
+        sucesor2.caracteristicas.tipo.should.equal('UNIDAD');
+        sucesor2.caracteristicas.unidades.should.equal(1);
+        sucesor2.caracteristicas.peso.should.equal(5.5);
+        sucesor2.caracteristicas.magnitudPeso.should.equal('kg');
+        sucesor2.predecesor.$identifier.should.equal(producto.productoId);
+        chai.expect(sucesor2.sucesores).to.be.undefined;
+        chai.expect(sucesor2.transaccionId).to.be.undefined;
+        sucesor2.estado.should.equal('PARADO');
+        sucesor2.operaciones.should.have.lengthOf(0);
+        sucesor2.operacionActual.orgId.should.equal('pes1');
+        chai.expect(sucesor1.operacionActual.datosVenta).to.be.undefined;
+    });
+
+
+    it('Test División de un producto por PESO', async () => {
+        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        await crearProducto('producto1',{
+                "tipoProducto" : "PESCADO",
+                "variedadProducto" : "sardina",
+                "descripcion" : "Descripción del producto", 
+                "tipo" : "PESO",
+                "unidades" : 4,
+                "peso" : 5.5,
+                "magnitudPeso" : 'kg'
+            }, undefined, {
+                "latitud" : 1.3,
+                "longitud" : 2.5,
+                "direccion" : "dirección de prueba"
+            }, 
+            undefined);
+        var productos = await regProducto.getAll();
+        productos.should.have.lengthOf(1);
+        var producto = productos[productos.length - 1];
+        await dividirProducto(producto.productoId, [{
+                "peso" : 3,
+                "identificador" : "id1",
+                "imagen" : {
+                    "hashImagen": "hash1",
+                    "url" : "https://ejemplo1.com",
+                    "algoritmo" : "sha1"
+                }
+            },{
+                "peso" : 1.5,
+                "identificador" : "id2",
+                "imagen" : {
+                    "hashImagen": "hash2",
+                    "url" : "https://ejemplo2.com",
+                    "algoritmo" : "sha1"
+                }
+            }
+        ]);
+
+        var productos = await regProducto.getAll();
+        productos.should.have.lengthOf(3);
+        var producto = productos[0];
+        producto.identificador.should.equal('producto1');
+        chai.expect(producto.caracteristicas.unidades).to.be.undefined;
+        producto.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
+        producto.caracteristicas.variedadProducto.should.equal('sardina');
+        producto.caracteristicas.descripcion.should.equal('Descripción del producto');
+        producto.caracteristicas.tipo.should.equal('PESO');
+        producto.caracteristicas.peso.should.equal(5.5);
+        producto.caracteristicas.magnitudPeso.should.equal('kg');
+        chai.expect(producto.imagen).to.be.undefined;
+        chai.expect(producto.predecesor).to.be.undefined;
+        producto.sucesores.should.have.lengthOf(2);
+        chai.expect(producto.transaccionId).to.be.undefined;
+        producto.estado.should.equal('DIVIDIDO');
+        producto.operaciones.should.have.lengthOf(0);
+        producto.operacionActual.orgId.should.equal('pes1');
+        chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
+
+        var sucesor1 = await regProducto.get(producto.sucesores[0].$identifier);
+        sucesor1.identificador.should.equal('id1');
+        chai.expect(sucesor1.caracteristicas.unidades).to.be.undefined;
+        sucesor1.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
+        sucesor1.caracteristicas.variedadProducto.should.equal('sardina');
+        sucesor1.caracteristicas.descripcion.should.equal('Descripción del producto');
+        sucesor1.caracteristicas.tipo.should.equal('PESO');
+        sucesor1.caracteristicas.peso.should.equal(3);
+        sucesor1.caracteristicas.magnitudPeso.should.equal('kg');
+        sucesor1.predecesor.$identifier.should.equal(producto.productoId);
+        chai.expect(sucesor1.sucesores).to.be.undefined;
+        chai.expect(sucesor1.transaccionId).to.be.undefined;
+        sucesor1.estado.should.equal('PARADO');
+        sucesor1.operaciones.should.have.lengthOf(0);
+        sucesor1.operacionActual.orgId.should.equal('pes1');
+        chai.expect(sucesor1.operacionActual.datosVenta).to.be.undefined;
+
+        var sucesor2 = await regProducto.get(producto.sucesores[1].$identifier);
+        chai.expect(sucesor2.caracteristicas.unidades).to.be.undefined;
+        sucesor2.identificador.should.equal('id2');
+        sucesor2.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
+        sucesor2.caracteristicas.variedadProducto.should.equal('sardina');
+        sucesor2.caracteristicas.descripcion.should.equal('Descripción del producto');
+        sucesor2.caracteristicas.tipo.should.equal('PESO');
+        sucesor2.caracteristicas.peso.should.equal(1.5);
+        sucesor2.caracteristicas.magnitudPeso.should.equal('kg');
+        sucesor2.predecesor.$identifier.should.equal(producto.productoId);
+        chai.expect(sucesor2.sucesores).to.be.undefined;
+        chai.expect(sucesor2.transaccionId).to.be.undefined;
+        sucesor2.estado.should.equal('PARADO');
+        sucesor2.operaciones.should.have.lengthOf(0);
+        sucesor2.operacionActual.orgId.should.equal('pes1');
+        chai.expect(sucesor1.operacionActual.datosVenta).to.be.undefined;
     });
 });
