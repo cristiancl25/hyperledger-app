@@ -230,6 +230,10 @@ async function PujarProducto(datos){
         throw new Error('Este producto ya pertenece a la organización del usuario ');
     }
 
+    if (producto.estado !== 'PUJA'){
+        throw new Error('El producto no está en Puja');
+    }
+
     var regPuja = await getAssetRegistry(NS_PROD + '.Puja');
     var puja = await regPuja.get(producto.operacionActual.datosVenta.pujaId);
 
@@ -328,6 +332,10 @@ async function ConfirmarTransaccion(datos){
     await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
     var transaccion = await getTransaccion(producto.transaccionId);
+
+    if (producto.estado !== 'TRANSACCION') {
+        throw new Error('El  producto no está en estado TRANSACCIÓN');
+    }
 
     if (participante.orgId !== transaccion.orgVenta.orgId && 
             participante.orgId !== transaccion.orgCompra.orgId) {
