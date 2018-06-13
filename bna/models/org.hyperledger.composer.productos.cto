@@ -162,10 +162,10 @@ transaction ConsumirProducto {
   o String productoId
 }
 
-transaction productoPerdido {
+transaction ProductoPerdido {
   o String productoId
 }
 
-transaction cancelarVenta {
+transaction CancelarVenta {
   o String productoId
 }

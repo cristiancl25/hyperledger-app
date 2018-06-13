@@ -466,3 +466,96 @@ async function DividirProducto(datos){
     producto.estado = 'DIVIDIDO';
     await regProd.update(producto);
 }
+
+/**
+ *
+ * @param {org.hyperledger.composer.productos.CancelarVenta} datos
+ * @transaction
+*/
+async function CancelarVenta(datos){
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+    var producto = await getProducto(datos.productoId);
+    
+    if (participante.orgId !== producto.operacionActual.orgId) {
+        throw new Error ('El producto no pertenece a la compañía');
+    }
+    
+    if (producto.estado !== 'VENTA' && producto.estado !== 'PUJA'){
+        throw new Error('El producto no está en venta o puja para poder cacelarlo');
+    }
+
+    if (producto.estado == 'PUJA'){
+        // Si está en estado PUJA se borra el registro de la puja
+        var regPuja = await getAssetRegistry(NS_PROD + '.Puja');
+        let puja = await regPuja.get(producto.operacionActual.datosVenta.pujaId);
+        await regPuja.remove(puja);
+    }
+
+    producto.estado = 'PARADO';
+    delete producto.operacionActual.datosVenta;
+
+    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
+    await regProd.update(producto);
+}
+
+/**
+ *
+ * @param {org.hyperledger.composer.productos.ConsumirProducto} datos
+ * @transaction
+*/
+async function ConsumirProducto(datos){
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+    var producto = await getProducto(datos.productoId);
+    
+    if (participante.orgId !== producto.operacionActual.orgId) {
+        throw new Error ('El producto no pertenece a la compañía');
+    }
+    
+    if (producto.estado !== 'PARADO'){
+        throw new Error('El producto no se puede consumir');
+    }
+    
+    producto.estado = 'CONSUMIDO';
+
+    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
+    await regProd.update(producto);
+}
+
+
+/**
+ *
+ * @param {org.hyperledger.composer.productos.ProductoPerdido} datos
+ * @transaction
+*/
+async function ProductoPerdido(datos){
+// TODO lanzar eventos correspondientes
+    var participante = getCurrentParticipant();
+    await validarParticipante(participante);
+    var producto = await getProducto(datos.productoId);
+    
+    if (participante.orgId !== producto.operacionActual.orgId) {
+        throw new Error ('El producto no pertenece a la compañía');
+    }
+    
+    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
+    var regPuja = await getAssetRegistry(NS_PROD + '.Puja');
+
+    if (producto.estado === 'CONSUMIDO' || producto.estado === 'PERDIDO' || producto.estado == 'DIVIDIDO'){
+        throw new Error('El producto ya está en un estado de finlalización');
+
+    } else if (producto.estado === 'PUJA') {
+        // Si está en estado PUJA se borra el registro de la puja
+        let puja = await regPuja.get(producto.operacionActual.datosVenta.pujaId);
+        await regPuja.remove(puja);
+
+    } else if (producto.estado === 'TRANSACCION'){
+        throw new Error ('Primero es necesario Cancelar la transacción');
+    }
+
+    producto.estado = 'PERDIDO';
+    delete producto.operacionActual.datosVenta;
+
+    await regProd.update(producto);
+}

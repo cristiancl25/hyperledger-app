@@ -276,6 +276,26 @@ describe('Sample', () => {
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
+    async function cancelarVenta(productoId){
+        let transaction = factory.newTransaction(NS_PROD, 'CancelarVenta');
+        transaction.productoId = productoId;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
+    async function consumirProducto(productoId){
+        let transaction = factory.newTransaction(NS_PROD, 'ConsumirProducto');
+        transaction.productoId = productoId;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
+    async function productoPerdido(productoId){
+        let transaction = factory.newTransaction(NS_PROD, 'ProductoPerdido');
+        transaction.productoId = productoId;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
+
+
 
     it('Creación de un tipo de producto', async () => {
         //TODO Ajustar identidades
@@ -1518,5 +1538,233 @@ describe('Sample', () => {
         sucesor2.operaciones.should.have.lengthOf(0);
         sucesor2.operacionActual.orgId.should.equal('pes1');
         chai.expect(sucesor1.operacionActual.datosVenta).to.be.undefined;
+    });
+
+
+
+    it('Test transacción ConsumirProducto', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
+
+        await useIdentity('usuario1@res1');
+        await chai.expect(
+            consumirProducto(productoId)
+        ).to.be.rejectedWith(Error);
+        await comprarProducto(productoId);
+        var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion');
+        var transacciones = await regT.getAll();
+        transacciones.should.have.lengthOf(1);
+        (await getProducto(productoId)).estado.should.equal('TRANSACCION');
+        await confirmarTransaccion(productoId, true, 'res1-loc1');
+        await chai.expect(
+            consumirProducto(productoId)
+        ).to.be.rejectedWith(Error);
+
+        await useIdentity('usuario1@pes1');
+        await confirmarTransaccion(productoId, true, undefined);
+        (await getProducto(productoId)).estado.should.equal('PARADO');
+        transacciones = await regT.getAll();
+        transacciones.should.have.lengthOf(0);
+
+        await useIdentity('usuario1@res1');
+        await consumirProducto(productoId);
+        var producto = await getProducto(productoId);
+        producto.operacionActual.orgId.should.equal('res1');
+        producto.estado.should.equal('CONSUMIDO');
+        chai.expect(producto.transaccionId).to.be.undefined;
+    });
+
+
+    it('Test trasacción CancelarVenta (NORMAL)', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        await chai.expect(
+            cancelarVenta(productoId)
+        ).to.be.rejectedWith(Error);
+        (await getProducto(productoId)).estado.should.equal('PARADO');
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
+        (await getProducto(productoId)).estado.should.equal('VENTA');
+        await cancelarVenta(productoId);
+        var producto = await getProducto(productoId);
+        producto.estado.should.equal('PARADO');
+        chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
+
+    });
+
+
+    it('Test trasacción CancelarVenta (PUJA)', async () => {
+        var regPuja = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Puja');
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        await chai.expect(
+            cancelarVenta(productoId)
+        ).to.be.rejectedWith(Error);
+        await ponerVentaProducto(productoId, 'PUJA', '€', 13.4);
+        (await regPuja.getAll()).should.have.lengthOf(1);
+        var producto = await getProducto(productoId);
+        producto.estado.should.equal('PUJA');
+        await getPuja(producto.operacionActual.datosVenta.pujaId);
+        await cancelarVenta(productoId);
+        (await regPuja.getAll()).should.have.lengthOf(0);
+        (await getProducto(productoId)).estado.should.equal('PARADO');
+
+    });
+
+
+    it('Test trasacción ProductoPerdido con producto en estado CONSUMIDO', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        await consumirProducto(productoId);
+        (await getProducto(productoId)).estado.should.equal('CONSUMIDO');
+        await chai.expect(
+            productoPerdido(productoId)
+        ).to.be.rejectedWith(Error);
+        var producto = await getProducto(productoId);
+        (await getProducto(productoId)).estado.should.equal('CONSUMIDO');
+    });
+
+    it('Test trasacción ProductoPerdido con producto en estado PERDIDO', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        (await getProducto(productoId)).estado.should.equal('PARADO');
+        await productoPerdido(productoId);
+        await chai.expect(
+            productoPerdido(productoId)
+        ).to.be.rejectedWith(Error);
+        var producto = await getProducto(productoId);
+        (await getProducto(productoId)).estado.should.equal('PERDIDO');
+
+    });
+
+    it('Test trasacción ProductoPerdido con producto en estado DIVIDIDO', async () => {
+        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        await crearProducto('producto1',{
+                "tipoProducto" : "PESCADO",
+                "variedadProducto" : "sardina",
+                "descripcion" : "Descripción del producto", 
+                "tipo" : "PESO",
+                "unidades" : 4,
+                "peso" : 5.5,
+                "magnitudPeso" : 'kg'
+            }, undefined, {
+                "latitud" : 1.3,
+                "longitud" : 2.5,
+                "direccion" : "dirección de prueba"
+            }, 
+            undefined);
+        var productos = await regProducto.getAll();
+        productos.should.have.lengthOf(1);
+        var producto = productos[productos.length - 1];
+        await dividirProducto(producto.productoId, [{
+                "peso" : 3,
+                "identificador" : "id1",
+                "imagen" : {
+                    "hashImagen": "hash1",
+                    "url" : "https://ejemplo1.com",
+                    "algoritmo" : "sha1"
+                }
+            },{
+                "peso" : 1.5,
+                "identificador" : "id2",
+                "imagen" : {
+                    "hashImagen": "hash2",
+                    "url" : "https://ejemplo2.com",
+                    "algoritmo" : "sha1"
+                }
+            }
+        ]);
+
+        (await getProducto(producto.productoId)).estado.should.equal('DIVIDIDO');
+        await chai.expect(
+            productoPerdido(producto.productoId)
+        ).to.be.rejectedWith(Error);
+        (await getProducto(producto.productoId)).estado.should.equal('DIVIDIDO');
+
+    });
+
+    it('Test trasacción ProductoPerdido con producto en estado PARADO', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        (await getProducto(productoId)).estado.should.equal('PARADO');
+        await productoPerdido(productoId);
+        var producto = await getProducto(productoId);
+        (await getProducto(productoId)).estado.should.equal('PERDIDO');
+
+    });
+
+    it('Test trasacción ProductoPerdido con producto en estado VENTA', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
+
+        (await getProducto(productoId)).estado.should.equal('VENTA');
+        await productoPerdido(productoId);
+        var producto = await getProducto(productoId);
+        (await getProducto(productoId)).estado.should.equal('PERDIDO');
+
+    });
+
+    it('Test trasacción ProductoPerdido con producto en estado PUJA', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        await ponerVentaProducto(productoId, 'PUJA', '€', 13.4);
+
+        (await getProducto(productoId)).estado.should.equal('PUJA');
+        await productoPerdido(productoId);
+        var producto = await getProducto(productoId);
+        (await getProducto(productoId)).estado.should.equal('PERDIDO');
+
+    });
+
+    it('Test trasacción ProductoPerdido con producto en estado TRANSACCION', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
+
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId = await crearProductoEjemplo();
+        (await getProducto(productoId)).estado.should.equal('PARADO');
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
+        (await getProducto(productoId)).estado.should.equal('VENTA');
+        await useIdentity('usuario1@res1');
+        await comprarProducto(productoId);
+
+        (await getProducto(productoId)).estado.should.equal('TRANSACCION');
+        await chai.expect(
+            productoPerdido(productoId)
+        ).to.be.rejectedWith(Error);
+        var producto = await getProducto(productoId);
+        (await getProducto(productoId)).estado.should.equal('TRANSACCION');
+
     });
 });
