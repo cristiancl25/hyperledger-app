@@ -160,14 +160,6 @@ async function generarProducto(datos){
 
     var regProd = await getAssetRegistry(NS_PROD + '.Producto');
     await regProd.add(producto);
-
-//    // Creación del evento para informar del nuevo producto
-//    var evento = factory.newEvent(NS_PROD, 'ProductoCreado');
-//    evento.productoId = producto.productoId;
-//    evento.orgId = participante.orgId;
-//    evento.tipoProducto = datos.caracteristicas.tipoProducto.$identifier;
-//    evento.variedadProducto = datos.caracteristicas.variedadProducto;
-//    emit(evento);
 }
 
 
@@ -212,6 +204,15 @@ async function PonerVentaProducto(datos){
 
     var regProd = await getAssetRegistry(NS_PROD + '.Producto');
     await regProd.update(producto);
+
+    // Creación del evento para informar del nuevo producto
+    var evento = factory.newEvent(NS_PROD, 'ProductoEnVenta');
+    evento.orgOrigen = participante.orgId;
+    evento.productoId = producto.productoId;
+    evento.tipoProducto = producto.caracteristicas.tipoProducto.$identifier;
+    evento.tipoVenta = producto.operacionActual.datosVenta.tipoVenta;
+    evento.variedadProducto = producto.caracteristicas.variedadProducto;
+    emit(evento);
 }
 
 
@@ -258,6 +259,11 @@ async function PujarProducto(datos){
     });
 
     await regPuja.update(puja);
+    var evento = factory.newEvent(NS_PROD, 'NuevaPuja');
+    evento.orgOrigen = participante.orgId;
+    evento.orgDestino = producto.operacionActual.orgId;
+    evento.productoId = producto.productoId;
+    emit(evento);
 
 }
 
@@ -352,11 +358,28 @@ async function ConfirmarTransaccion(datos){
         if (producto.operacionActual.datosVenta.pujaId){
             await pujaATransaccion(producto);
         }
+        let evento = factory.newEvent(NS_PROD, 'EstadoTransaccion');
+        if (participante.orgId === transaccion.orgVenta.orgId) {
+            evento.orgDestino = transaccion.orgCompra.orgId;
+            evento.orgOrigen = transaccion.orgVenta.orgId;
+        }else{
+            evento.orgDestino = transaccion.orgVenta.orgId;
+            evento.orgOrigen = transaccion.orgCompra.orgId;
+        }
+        evento.productoId = producto.productoId;
+        evento.confirmacion = false;
+        emit(evento);
         return;
 
     } else if (participante.orgId === transaccion.orgVenta.orgId) {
         // Si el participante pertenece a la organización vendedora
         transaccion.orgVenta.confirmacion = true;
+        let evento = factory.newEvent(NS_PROD, 'EstadoTransaccion');
+        evento.orgDestino = transaccion.orgCompra.orgId;
+        evento.orgOrigen = transaccion.orgVenta.orgId;
+        evento.productoId = producto.productoId;
+        evento.confirmacion = true;
+        emit(evento);
 
     } else if (participante.orgId === transaccion.orgCompra.orgId) {
         // Si el participante pertenece a la organización compradora
@@ -369,6 +392,12 @@ async function ConfirmarTransaccion(datos){
         }
         transaccion.orgCompra.confirmacion = true;
         transaccion.nuevaLocalizacion = datos.nuevaLocalizacion;
+        let evento = factory.newEvent(NS_PROD, 'EstadoTransaccion');
+        evento.orgDestino = transaccion.orgVenta.orgId;
+        evento.orgOrigen = transaccion.orgCompra.orgId;
+        evento.productoId = producto.productoId;
+        evento.confirmacion = true;
+        emit(evento);
     }
     await regTran.update(transaccion);
 

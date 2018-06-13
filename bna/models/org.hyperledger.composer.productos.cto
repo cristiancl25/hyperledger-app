@@ -115,10 +115,22 @@ transaction PonerVentaProducto {
   o String unidadMonetaria
   o Double precio optional
 }
+event ProductoEnVenta {
+  o String orgOrigen
+  o String productoId
+  o String tipoProducto
+  o TipoVenta tipoVenta
+  o String variedadProducto
+}
 
 transaction PujarProducto {
   o String productoId
   o Double precio
+}
+event NuevaPuja{
+  o String orgDestino
+  o String orgOrigen
+  o String productoId
 }
 
 transaction FinalizarPuja {
@@ -129,12 +141,6 @@ transaction CrearTipoProducto {
   o String tipo
 }
 
-event ProductoCreado {
-  o String productoId
-  o String orgId
-  o String tipoProducto
-  o String variedadProducto
-}
 
 transaction ComprarProducto {
   o String productoId
@@ -144,6 +150,12 @@ transaction ConfirmarTransaccion {
   o String productoId
   o Boolean confirmar
   o String nuevaLocalizacion optional
+}
+event EstadoTransaccion{
+  o String orgDestino
+  o String orgOrigen
+  o String productoId
+  o Boolean confirmacion
 }
 
 concept Trozo {

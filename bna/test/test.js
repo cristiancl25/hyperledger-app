@@ -660,6 +660,9 @@ describe('Sample', () => {
         producto.operacionActual.datosVenta.tipoVenta.should.equal('NORMAL');
         chai.expect(producto.operacionActual.datosVenta.pujaId).to.be.undefined;
         producto.estado.should.equal('VENTA');
+        events[0].orgOrigen.should.equal('pes1');
+        events[0].productoId.should.equal(productoId);
+        events[0].tipoVenta.should.equal('NORMAL');
     });
 
 
@@ -686,6 +689,9 @@ describe('Sample', () => {
         producto.operacionActual.datosVenta.pujaId.should.equal(pujas[0].pujaId);
         producto.operacionActual.datosVenta.tipoVenta.should.equal('PUJA');
         producto.estado.should.equal('PUJA');
+        events[0].orgOrigen.should.equal('pes1');
+        events[0].productoId.should.equal(productoId);
+        events[0].tipoVenta.should.equal('PUJA');
     });
 
 
@@ -697,12 +703,14 @@ describe('Sample', () => {
         const productoId = await crearProductoEjemplo();
 
         await ponerVentaProducto(productoId, 'PUJA', '€', 13.4);
+        events.should.have.lengthOf(1);
         var producto = await getProducto(productoId);
         producto.estado.should.equal('PUJA');
 
         await chai.expect(
             pujarProducto(productoId, 13)
         ).to.be.rejectedWith(Error);
+        events.should.have.lengthOf(1);
     });
 
 
@@ -750,6 +758,10 @@ describe('Sample', () => {
         puja.organizaciones.should.have.lengthOf(1);
         puja.organizaciones[0].orgId.should.equal('res1');
         puja.organizaciones[0].precio.should.equal(15);
+        events.should.have.lengthOf(2);
+        events[0].$type.should.equal('NuevaPuja');
+        events[0].orgOrigen.should.equal('res1');
+        events[0].orgDestino.should.equal('pes1');
 
         await useIdentity('usuario1@res2');
         await pujarProducto(productoId, 14);
@@ -765,6 +777,10 @@ describe('Sample', () => {
         puja.organizaciones.should.have.lengthOf(2);
         puja.organizaciones[0].orgId.should.equal('res2');
         puja.organizaciones[0].precio.should.equal(16);
+        events.should.have.lengthOf(2);
+        events[0].$type.should.equal('NuevaPuja');
+        events[0].orgOrigen.should.equal('res2');
+        events[0].orgDestino.should.equal('pes1');
 
         await useIdentity('usuario1@res3');
         await pujarProducto(productoId, 15.5);
@@ -785,6 +801,10 @@ describe('Sample', () => {
         puja.organizaciones[0].precio.should.equal(20);
         (await getProducto(productoId)).estado.should.equal('PUJA');
 
+        events.should.have.lengthOf(2);
+        events[0].$type.should.equal('NuevaPuja');
+        events[0].orgOrigen.should.equal('res3');
+        events[0].orgDestino.should.equal('pes1');
     });
 
 
@@ -935,7 +955,7 @@ describe('Sample', () => {
         await confirmarTransaccion(productoId, false, undefined);
         transacciones = await regT.getAll();
         transacciones.should.have.lengthOf(0);
-
+        
         var producto = await getProducto(productoId);
         producto.operacionActual.orgId.should.equal('pes1');
         producto.estado.should.equal('VENTA');
