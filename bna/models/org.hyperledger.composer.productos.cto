@@ -157,3 +157,15 @@ transaction DividirProducto {
   o String productoId
   o Trozo[] trozos
 }
+
+transaction ConsumirProducto {
+  o String productoId
+}
+
+transaction productoPerdido {
+  o String productoId
+}
+
+transaction cancelarVenta {
+  o String productoId
+}
