@@ -206,11 +206,9 @@ describe('Sample', () => {
                 "direccion" : "dirección de prueba"
             }, 
             undefined);
-        // TODO sacar events
         const regProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
         var productos = await regProd.getAll();
         return productos[productos.length - 1].productoId;
-        //return events[events.length - 1].productoId;
     }
 
     async function comprarProducto(productoId){
