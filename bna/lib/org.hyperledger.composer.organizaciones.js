@@ -29,8 +29,7 @@ async function getOrganizacion(participante){
 async function CrearOrganizacion(datos){
     var factory = getFactory();
 
-    /* TODO mejorar el control de acceso: NetworkAdmin */
-    if (getCurrentParticipant().$namespace !== 'org.hyperledger.composer.system'){
+    if (getCurrentParticipant().$namespace + '.' + getCurrentParticipant().$type !== 'org.hyperledger.composer.system.NetworkAdmin'){
         throw new Error('participante inválido');
     }
 
@@ -68,8 +67,7 @@ async function CrearOrganizacion(datos){
 async function CrearTipoOrganizacion(datos){
     var factory = getFactory();
 
-    /* TODO Crear función para el control de acceso */
-    if (getCurrentParticipant().$namespace !== 'org.hyperledger.composer.system'){
+    if (getCurrentParticipant().$namespace + '.' + getCurrentParticipant().$type !== 'org.hyperledger.composer.system.NetworkAdmin'){
         throw new Error('participante inválido');
     }
 
@@ -85,6 +83,10 @@ async function CrearTipoOrganizacion(datos){
  * @transaction
  */
 async function CrearLocalizacion(datos) {
+
+    if (getCurrentParticipant().$namespace + '.' + getCurrentParticipant().$type !== 'org.hyperledger.composer.participantes.OrgAdmin'){
+        throw new Error('participante inválido');
+    }
     var factory = getFactory();
     var participante = getCurrentParticipant();
     var {organizacion, regOrg} = await getOrganizacion(participante);

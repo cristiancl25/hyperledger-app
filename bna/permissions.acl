@@ -1,0 +1,192 @@
+
+// Lectura de todos los los recursos por todos los participantes
+rule ParticipantesLectura {
+  description: ""
+  participant: "ANY"
+  operation: READ
+  resource: "org.hyperledger.composer.**"
+  action: ALLOW  
+}
+
+
+
+// Acceso a los recursos del systema por parte del NetworkAdmin
+rule NetworkAdminSystem {
+  description:  ""
+  participant: "org.hyperledger.composer.system.NetworkAdmin"
+  operation: ALL
+  resource: "org.hyperledger.composer.system.*"
+  action: ALLOW  
+}
+
+
+
+// Acceso del OrgAdmin al HistorianRecord
+rule OrgAdminHistorianRecord {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.system.HistorianRecord"
+  transaction: "org.hyperledger.composer.**"
+  action: ALLOW  
+}
+
+
+
+// Transacción CrearTipoOrganización --> NetworkAdmin
+rule NetworkAdminCrearTipoOrganizacion{
+  description:  ""
+  participant: "org.hyperledger.composer.system.NetworkAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.organizaciones.CrearTipoOrganizacion"
+  action: ALLOW  
+}
+
+rule NetworkAdminCrearTipoOrganizacionRecurso {
+  description:  ""
+  participant: "org.hyperledger.composer.system.NetworkAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.organizaciones.TipoOrganizacion"
+  transaction: "org.hyperledger.composer.organizaciones.CrearTipoOrganizacion"
+  action: ALLOW  
+}
+
+
+
+// Transacción CrearOrganización --> NetworkAdmin
+rule NetworkAdminCrearOrganizacion{
+  description:  ""
+  participant: "org.hyperledger.composer.system.NetworkAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.organizaciones.CrearOrganizacion"
+  action: ALLOW  
+}
+
+rule NetworkAdminCrearOrganizacionRecurso {
+  description:  ""
+  participant: "org.hyperledger.composer.system.NetworkAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.organizaciones.Organizacion"
+  transaction: "org.hyperledger.composer.organizaciones.CrearOrganizacion"
+  action: ALLOW  
+}
+
+rule NetworkAdminCrearOrganizacionRecurso2 {
+  description:  ""
+  participant: "org.hyperledger.composer.system.NetworkAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.participantes.OrgAdmin"
+  transaction: "org.hyperledger.composer.organizaciones.CrearOrganizacion"
+  action: ALLOW  
+}
+
+
+
+// Transacción CrearLocalización --> OrgAdmin
+rule OrgAdminCrearLocalizacion{
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.organizaciones.CrearLocalizacion"
+  action: ALLOW  
+}
+
+rule OrgAdminCrearLocalizacionRecurso {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.organizaciones.Localizacion"
+  transaction: "org.hyperledger.composer.organizaciones.CrearLocalizacion"
+  action: ALLOW  
+}
+
+
+
+// Transacción CrearParticipante --> OrgAdmin
+rule OrgAdminCrearParticipante{
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.participantes.CrearParticipante"
+  action: ALLOW  
+}
+
+rule OrgAdminCrearParticipanteRecurso1 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.participantes.Usuario"
+  transaction: "org.hyperledger.composer.participantes.CrearParticipante"
+  action: ALLOW  
+}
+
+rule OrgAdminCrearParticipanteRecurso2 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.participantes.Invitado"
+  transaction: "org.hyperledger.composer.participantes.CrearParticipante"
+  action: ALLOW  
+}
+
+rule OrgAdminCrearParticipanteRecurso3 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: UPDATE
+  resource: "org.hyperledger.composer.organizaciones.Organizacion"
+  transaction: "org.hyperledger.composer.participantes.CrearParticipante"
+  action: ALLOW  
+}
+
+rule OrgAdminCrearParticipanteRecurso4 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: UPDATE
+  resource: "org.hyperledger.composer.organizaciones.Organizacion"
+  transaction: "org.hyperledger.composer.organizaciones.CrearLocalizacion"
+  action: ALLOW  
+}
+
+rule OrgAdminCrearParticipanteRecurso5 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.system.IssueIdentity"
+  action: ALLOW  
+}
+
+rule OrgAdminCrearParticipanteRecurso6 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.system.Identity"
+  action: ALLOW  
+}
+
+// Acceco a los productos por parte del participante Usuario
+rule UsuarioProductos {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.Usuario"
+  operation: CREATE, UPDATE, DELETE
+  resource: "org.hyperledger.composer.productos.*"
+  transaction: "org.hyperledger.composer.productos.*"
+  action: ALLOW  
+}
+
+rule UsuarioProductosLocalizacion {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.Usuario"
+  operation: CREATE
+  resource: "org.hyperledger.composer.organizaciones.Localizacion"
+  transaction: "org.hyperledger.composer.productos.*"
+  action: ALLOW  
+}
+
+rule UsuarioProductosHistorian {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.Usuario"
+  operation: CREATE
+  resource: "org.hyperledger.composer.system.HistorianRecord"
+  transaction: "org.hyperledger.composer.productos.*"
+  action: ALLOW  
+}

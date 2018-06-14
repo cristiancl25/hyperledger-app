@@ -297,17 +297,6 @@ describe('Sample', () => {
 
 
 
-    it('Creación de un tipo de producto', async () => {
-        //TODO Ajustar identidades
-        await useIdentity('admin');
-        await crearTipoProducto('NUEVO_TIPO_PRODUCTO'); 
-        var regTipoProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.TipoProducto');
-        var tipoProd = await regTipoProd.getAll();
-        tipoProd.should.have.lengthOf(1);
-        tipoProd[0].tipo.should.equal('NUEVO_TIPO_PRODUCTO');
-    });
-
-
     it('Creación de un tipo de organización', async () => {
         await useIdentity('admin');
         await crearTipoOrganizacion('PESQUEIRA');
@@ -496,6 +485,17 @@ describe('Sample', () => {
         org.usuarios.should.have.lengthOf(0);
     });
 
+    it('Creación de un tipo de producto', async () => {
+        //TODO Ajustar identidades
+        await useIdentity('admin');
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('NUEVO_TIPO_PRODUCTO');
+        var regTipoProd = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.TipoProducto');
+        var tipoProd = await regTipoProd.getAll();
+        tipoProd.should.have.lengthOf(1);
+        tipoProd[0].tipo.should.equal('NUEVO_TIPO_PRODUCTO');
+    });
 
     it('Creación de un producto por UNIDAD, con nueva localización', async () => {
         await useIdentity('admin');
