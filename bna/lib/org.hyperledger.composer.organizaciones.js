@@ -68,7 +68,6 @@ async function CrearOrganizacion(datos){
 async function CrearTipoOrganizacion(datos){
     var factory = getFactory();
 
-    /* TODO Crear función para el control de acceso */
     if (getCurrentParticipant().$namespace !== 'org.hyperledger.composer.system'){
         throw new Error('participante inválido');
     }

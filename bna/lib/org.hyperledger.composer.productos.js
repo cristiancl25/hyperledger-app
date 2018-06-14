@@ -102,7 +102,7 @@ async function generarProducto(datos){
     var localizacionId;
     if (datos.loc){
         // Creación de una nueva localización
-        localizacionId = new Date().toJSON(); //TODO ajustar el id
+        localizacionId = new Date().toJSON();
         var loc = factory.newResource(NS_ORG, 'Localizacion', localizacionId);
         loc.latitud = datos.loc.latitud;
         loc.longitud = datos.loc.longitud;
@@ -349,7 +349,6 @@ async function ConfirmarTransaccion(datos){
         throw new Error('El usuario ' + participante.email + ' no pertenece a esta transacción');
     }
 
-    // TODO lanzar eventos
     if (!datos.confirmar) {
         producto.estado = 'VENTA';
         delete producto.transaccionId;
