@@ -484,7 +484,6 @@ describe('Sample', () => {
     });
 
     it('Creación de un tipo de producto', async () => {
-        //TODO Ajustar identidades
         await useIdentity('admin');
         await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
         await useIdentity('usuario1@pes1');

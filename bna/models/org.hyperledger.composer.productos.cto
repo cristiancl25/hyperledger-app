@@ -113,7 +113,7 @@ transaction PonerVentaProducto {
   o String productoId
   o TipoVenta tipoVenta
   o String unidadMonetaria
-  o Double precio optional
+  o Double precio
 }
 event ProductoEnVenta {
   o String orgOrigen

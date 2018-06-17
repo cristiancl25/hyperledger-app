@@ -1,4 +1,4 @@
-
+// TODO ACLs nombradas
 // Lectura de todos los los recursos por todos los participantes
 rule ParticipantesLectura {
   description: ""

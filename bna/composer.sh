@@ -69,4 +69,29 @@ composer transaction submit -c admin@res1@bna -d '{
 composer identity issue -c admin@res1@bna -f ~/.composer/usuario1_res1.card -u usuario1@res1 -a "resource:org.hyperledger.composer.participantes.Usuario#usuario1@res1"
 composer card import -f ~/.composer/usuario1_res1.card
 
+composer transaction submit -c usuario1@pes1@bna -d '{
+  "$class": "org.hyperledger.composer.productos.CrearTipoProducto",
+  "tipo": "Pescado"
+}'
+
+composer transaction submit -c usuario1@pes1@bna -d '{
+  "$class": "org.hyperledger.composer.productos.CrearProducto",
+  "identificador": "id1",
+  "caracteristicas": {
+    "$class": "org.hyperledger.composer.productos.Caracteristicas",
+    "tipoProducto": "resource:org.hyperledger.composer.productos.TipoProducto#Pescado",
+    "tipo": "UNIDAD",
+    "variedadProducto": "variedad1",
+    "descripcion" : "descripcion del producto",
+    "unidades" : 1,
+    "peso" : 3.5,
+	"magnitudPeso" : "kg"    
+  },
+  "loc" : {
+    "$class": "org.hyperledger.composer.productos.Loc",
+    "latitud": 3.14,
+    "longitud": 5.3,
+    "direccion": "direccion1"
+  }
+}'
 echo composer-dev iniciado
