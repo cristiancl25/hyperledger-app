@@ -1,6 +1,6 @@
 .DS_Store
 node_modules/
-src/components/peixe/key.js
+key.js
 dist/
 npm-debug.log
 yarn-error.log
