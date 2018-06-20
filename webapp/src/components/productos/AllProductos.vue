@@ -7,12 +7,12 @@
       <ul class="list-group">
         <router-link
           class="list-group-item"
-          :to="'/peixe/' + peixe"
+          :to="'/productos/' + producto"
           tag="li"
-          :key="peixe"
-          v-for="(peixe) in peixes"
+          :key="producto"
+          v-for="(producto) in productos"
           active-class="active">
-        <a>{{peixe}}</a>
+        <a>{{producto}}</a>
         </router-link>
       </ul>
     </div>
@@ -22,7 +22,6 @@
 
 <script>
   export default {
-    name: 'peixe',
     data : function() {
       return {
         error : {
@@ -31,15 +30,15 @@
         },
         markers: [],
         showMap: false,
-        peixes : []
+        productos : []
       }
     },
     created: function () {
-      this.$http.get('http://localhost:3000/api/org.peixeencadeado.peixe.Peixe/')
+      this.$axios.get('/api/org.hyperledger.composer.productos.Producto')
         .then(response => {
-          let peixes = [];
-          response.data.forEach((peixe) => peixes.push(peixe.peixeId));
-          this.peixes=peixes;
+          let productos = [];
+          response.data.forEach((producto) => productos.push(producto.productoId));
+          this.productos=productos;
         }).catch(error => {
           this.error.e = true;
           this.error.message = error.bodyText;

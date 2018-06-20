@@ -5,7 +5,7 @@
         <li class="list-group-item"
             @click="center=mark"
             :key="mark"
-            v-for="(mark) in markers">{{mark}}
+            v-for="(mark) in markers">{{mark.info}}
         </li>
       </ul>
     </div>
