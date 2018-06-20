@@ -9,8 +9,8 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-              <router-link class="nav-item nav-link" to="/" tag="a" active-class="active" exact><a>Páxina Principal</a></router-link>
-              <router-link class="nav-item nav-link" to="/peixe" tag="a" active-class="active"><a>Peixes</a></router-link>
+              <router-link class="nav-item nav-link" to="/" tag="a" active-class="active" exact><a>Página Principal</a></router-link>
+              <router-link class="nav-item nav-link" to="/productos" tag="a" active-class="active"><a>Productos</a></router-link>
             </div>
           </div>
         </nav>
@@ -22,17 +22,18 @@
       </div>
       -->
       <div id="body">
-        <div v-if="event.show" class="alert alert-info alert-dismissible fade show" role="alert">
+        <!-- TODO modificar eventos de los websockets -->
+        <!-- <div v-if="event.show" class="alert alert-info alert-dismissible fade show" role="alert">
           <strong>Info:</strong>
           <router-link
-            :to="'/peixe/' + event.data"
+            :to="'/productos/' + event.data"
             active-class="active">
             <a>Novo peixe capturado {{event.data}}</a>
           </router-link>
           <button @click="event.show = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
-        </div>
+        </div> -->
         <router-view></router-view>
       </div>
       <!--<div id="footer">

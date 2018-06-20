@@ -3,18 +3,16 @@ import App from './App.vue'
 import VueNativeSock from 'vue-native-websocket'
 import VueRouter from 'vue-router';
 import { routes } from './routes';
-import VueResource from 'vue-resource';
-
+import axios from 'axios';
 
 Vue.use(VueRouter);
 
-Vue.use(VueResource);
-
 const router = new VueRouter({
   routes,
-  mode: 'history'
+  //mode: 'history'
 });
 
+// TODO parametrizar dirección IP
 Vue.use(VueNativeSock, 'ws://localhost:3000', {
   reconnection: true, // (Boolean) whether to reconnect automatically (false)
   reconnectionAttempts: 5, // (Number) number of reconnection attempts before giving up (Infinity),
@@ -22,6 +20,12 @@ Vue.use(VueNativeSock, 'ws://localhost:3000', {
   format: 'json'
 })
 
+Vue.prototype.$http = axios;
+Vue.prototype.$axios = axios.create({
+  baseURL: 'http://localhost:3000',
+  //timeout: 1000,
+  //headers: {'X-Custom-Header': 'foobar'}
+});
 new Vue({
   el: '#app',
   router,
