@@ -41,6 +41,7 @@
       }
     },
     created() {
+       
       this.$axios.get('/api/org.hyperledger.composer.productos.Producto/' + this.$route.params.id)
         .then(response => {
             this.datosProducto = response.data;
@@ -70,6 +71,8 @@
               'lng': operacion.coordenadas.lonxitude,
               'info': 'Descripcion'});
           });*/
+          
+          
           this.markers = [{
             'lat': 43,
             'lng': -8,
@@ -79,9 +82,24 @@
             'lng': -10,
             'info': "Localización2"
           }];
+          if ("geolocation" in navigator) {
+            /* la geolocalización está disponible */
+            let self = this;
+            navigator.geolocation.getCurrentPosition(function(position) {
+              const latitud = position.coords.latitude;
+              const longitud = position.coords.longitude;
+              self.markers.push({
+                'lat': latitud,
+                'lng': longitud,
+                'info': "Localización Actual"
+              });
+              console.log(markers);
+            });
+          } else {
+            /* la geolocalización NO está disponible */
+          }
           this.showMap = true;
         }
-
       }
     }
   }

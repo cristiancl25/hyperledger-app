@@ -1,15 +1,15 @@
 import Vue from 'vue'
 import App from './App.vue'
 import VueNativeSock from 'vue-native-websocket'
-import VueRouter from 'vue-router';
-import { routes } from './routes';
-import axios from 'axios';
+import VueRouter from 'vue-router'
+import { routes } from './routes'
+import axios from 'axios'
 
 Vue.use(VueRouter);
 
 const router = new VueRouter({
   routes,
-  //mode: 'history'
+  mode: 'history'
 });
 
 // TODO parametrizar dirección IP

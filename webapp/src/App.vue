@@ -66,8 +66,8 @@
         let peixe = JSON.parse(data.data);
         this.event.data = peixe.peixeId;
         this.event.show = true;
-        setTimeout(()=>{
-          this.event.show = false;
+        setTimeout(() => {
+          this.event.show = false
         }, 10000);
       }
     },
