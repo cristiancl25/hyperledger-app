@@ -9,11 +9,10 @@ Vue.use(VueRouter);
 
 const router = new VueRouter({
   routes,
-  mode: 'history'
+  mode: 'hash'
 });
 
-// TODO parametrizar dirección IP
-Vue.use(VueNativeSock, 'ws://localhost:3000', {
+Vue.use(VueNativeSock, 'ws://' + process.env.REST_SERVER, {
   reconnection: true, // (Boolean) whether to reconnect automatically (false)
   reconnectionAttempts: 5, // (Number) number of reconnection attempts before giving up (Infinity),
   reconnectionDelay: 3000, // (Number) how long to initially wait before attempting a new (1000)
@@ -22,7 +21,7 @@ Vue.use(VueNativeSock, 'ws://localhost:3000', {
 
 Vue.prototype.$http = axios;
 Vue.prototype.$axios = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: 'http://' + process.env.REST_SERVER,
   //timeout: 1000,
   //headers: {'X-Custom-Header': 'foobar'}
 });

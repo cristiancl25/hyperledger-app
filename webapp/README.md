@@ -16,6 +16,9 @@ npm run build
 
 # build for production and view the bundle analyzer report
 npm run build --report
+
+# Run webapp in a nginx server
+docker run --name nginx -d -p 80:80 -v $PWD/dist:/usr/share/nginx/html nginx
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
