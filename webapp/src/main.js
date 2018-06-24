@@ -22,6 +22,7 @@ Vue.use(VueNativeSock, 'ws://' + process.env.REST_SERVER, {
 Vue.prototype.$http = axios;
 Vue.prototype.$axios = axios.create({
   baseURL: 'http://' + process.env.REST_SERVER,
+  withCredentials : true,
   //timeout: 1000,
   //headers: {'X-Custom-Header': 'foobar'}
 });
