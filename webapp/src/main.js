@@ -23,6 +23,7 @@ Vue.prototype.$http = axios;
 Vue.prototype.$axios = axios.create({
   baseURL: 'http://' + process.env.REST_SERVER,
   withCredentials : true,
+  Accept : "application/json"
   //timeout: 1000,
   //headers: {'X-Custom-Header': 'foobar'}
 });

@@ -26,9 +26,9 @@
 
 <script>
 
-  import * as VueGoogleMaps from 'vue2-google-maps';
-  import Vue from 'vue';
-  import { mapsKey } from './key';
+  import * as VueGoogleMaps from 'vue2-google-maps'
+  import Vue from 'vue'
+  import { mapsKey } from './key'
 
   Vue.use(VueGoogleMaps, {
     load: {
