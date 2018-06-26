@@ -13,6 +13,19 @@ const router = new VueRouter({
   mode: 'hash'
 });
 
+router.beforeResolve((to, from, next) => {
+  if (to.fullPath === "/"){
+    next()
+  } else if (to.fullPath === from.fullPath) {
+    next(); //TODO problema
+  } else if (!store.state.sesionIniciada) {
+    next('/');
+  } else {
+    next();
+  } 
+})
+// TODO else next('/')
+
 store.commit('setBaseUrl', process.env.REST_SERVER);
 
 Vue.use(VueNativeSock, 'ws://' + store.state.baseUrl, {

@@ -2,11 +2,8 @@
   <div>
     <h1>Producto - {{ $route.params.id }}</h1>
     <h2></h2>
-    <div v-if="error.show" class="alert alert-danger alert-dismissible fade show" role="alert">
-      <strong>Error</strong> {{ error.message }}
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
+    <div v-if="error.show" class="alert alert-danger">
+      <strong>Error:</strong> {{ error.message }}
     </div>
     <div v-else>
       <p>{{datosProducto}}</p>
@@ -23,6 +20,7 @@
 
 <script>
   import googleMap from './Mapa';
+  import {composer} from '../../ComposerAPI'
 
   export default {
     components : {
@@ -40,15 +38,15 @@
         id : this.$route.params.id
       }
     },
-    created() {
-       
-      this.$axios.get('/api/org.hyperledger.composer.productos.Producto/' + this.$route.params.id)
-        .then(response => {
-            this.datosProducto = response.data;
-        }).catch(error => {
-          this.error.show = true;
-          this.error.message = error.bodyText;
-      })
+    created : async function () {
+      let response = await composer.getProducto(this.$axios, this.$route.params.id);
+      if (response.statusCode === 200){
+        this.error.e = false
+        this.datosProducto = response.data
+      } else {
+        this.error.show = true
+        this.error.message = response.message
+      }
     },
     watch: {
       '$route'(to, from) {

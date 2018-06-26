@@ -39,6 +39,14 @@ export const composer = {
             return returnError(error);
         }
     },
+    getProducto : async function(axios, productoId){
+        try{
+            let response = await axios.get('/api/org.hyperledger.composer.productos.Producto/' + productoId);
+            return returnResponse(response);
+        }catch(error){
+            return returnError(error);
+        }
+    },
     getProductos : async function(axios){
         try{
             let response = await axios.get('/api/org.hyperledger.composer.productos.Producto/');
@@ -46,7 +54,6 @@ export const composer = {
         }catch(error){
             return returnError(error);
         }
-
     }
 }
 

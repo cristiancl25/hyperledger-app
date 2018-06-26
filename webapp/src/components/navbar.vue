@@ -11,21 +11,20 @@
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
               <router-link class="nav-item nav-link" to="/" tag="a" active-class="active" exact><a>Página Principal</a></router-link>
-              <router-link class="nav-item nav-link" to="/productos" tag="a" active-class="active"><a>Productos</a></router-link>
+              <router-link class="nav-item nav-link" to="/productos" tag="a" active-class="active" v-if="sesionIniciada"><a>Productos</a></router-link>
+              <a class="nav-item nav-link" active-class="active" v-if="!sesionIniciada" :href="logIn">Iniciar Sesión</a>
             </div>
-            <div class="nav navbar-nav navbar-right">
+            <div class="nav navbar-nav navbar-right" v-if="sesionIniciada">
               <ul class="navbar-nav">
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                     Sesión
                   </a>
-                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                    <!-- TODO elimiar URL HARCODEADA -->
-                    <a class="dropdown-item" active-class="active" v-if="!sesionIniciada" :href="logIn">Iniciar Sesión</a>
-                    <a class="dropdown-item" data-toggle="modal" v-if="sesionIniciada" data-target="#ModalPerfiles">Perfiles</a>
-                    <a class="dropdown-item" data-toggle="modal" v-if="sesionIniciada" data-target="#ModalPing" @click="ping()">Ping</a>
-                    <div class="dropdown-divider" v-if="sesionIniciada"></div>
-                    <a class=" dropdown-item" active-class="active" v-if="sesionIniciada" :href="logOut">Cerrar Sesión </a>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">                    
+                    <a class="dropdown-item" data-toggle="modal"  data-target="#ModalPerfiles">Perfiles</a>
+                    <a class="dropdown-item" data-toggle="modal" data-target="#ModalPing" @click="ping()">Ping</a>
+                    <div class="dropdown-divider"></div>
+                    <a class=" dropdown-item" active-class="active" @click="cerrarSesion">Cerrar Sesión </a>
                   </div>
                 </li>
               </ul>  
@@ -104,7 +103,6 @@ import {composer} from '../ComposerAPI'
 export default {
   data() {
     return {
-      sesionIniciada : false,
       pingData : {},
       perfiles : [],
       errorModal :{
@@ -123,9 +121,22 @@ export default {
     },
     logOut() {
       return 'http://' + this.$store.state.baseUrl + '/auth/logout'
+    },
+    sesionIniciada:{
+      get() {
+        return this.$store.state.sesionIniciada
+      },
+      set(value) {
+        this.$store.commit('setSesionIniciada', value);
+      }
     }
   },
   methods: {
+    cerrarSesion :async function(){
+      await this.$axios.get(this.logOut);
+      this.sesionIniciada = false;
+      this.$router.push('/');
+    },
     actualizarPerfiles : async function (){
       var perfiles = await composer.getWallet(this.$axios);
       this.perfiles = perfiles.data;
@@ -163,14 +174,13 @@ export default {
         this.errorModal.message = response.message;
       }
       await this.actualizarPerfiles();
-      
     }
   },
   created: async function () {
     var response = await composer.getWallet(this.$axios);
-    console.log(response);
     if (response.statusCode === 401) {
       this.sesionIniciada = false
+      this.$router.push('/')
     } else if (response.statusCode === 200) {
       this.sesionIniciada = true
       this.perfiles = response.data;

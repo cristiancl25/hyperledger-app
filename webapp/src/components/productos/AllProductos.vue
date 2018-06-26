@@ -1,7 +1,7 @@
 <template>
   <div class="row">
-    <div v-if="error.e" class="alert alert-danger col-md-8">
-      <strong>Error:</strong> {{ error.message }}.
+    <div v-if="error.show" class="alert alert-danger col-md-8">
+      <strong>Error:</strong> {{ error.message }}
     </div>
     <div v-else class="col-md-4">
       <ul class="list-group">
@@ -21,30 +21,32 @@
 </template>
 
 <script>
-  export default {
-    data : function() {
-      return {
-        error : {
-          e: false,
-          message : ''
-        },
-        markers: [],
-        showMap: false,
-        productos : []
-      }
-    },
-    created: function () {
-      this.$axios.get('/api/org.hyperledger.composer.productos.Producto')
-        .then(response => {
-          let productos = [];
-          response.data.forEach((producto) => productos.push(producto.productoId));
-          this.productos=productos;
-        }).catch(error => {
-          this.error.e = true;
-          this.error.message = error.bodyText;
-        })
+import {composer} from '../../ComposerAPI'
+export default {
+  data : function() {
+    return {
+      error : {
+        show: false,
+        message : ''
+      },
+      markers: [],
+      showMap: false,
+      productos : []
+    }
+  },
+  created: async function () {
+    let response = await composer.getProductos(this.$axios);
+    if (response.statusCode === 200){
+      let productos = []
+      this.error.show = false
+      response.data.forEach((producto) => productos.push(producto.productoId))
+      this.productos=productos
+    } else {
+      this.error.show = true
+      this.error.message = response.message
     }
   }
+}
 </script>
 
 <style>
