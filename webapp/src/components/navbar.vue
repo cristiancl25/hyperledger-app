@@ -10,23 +10,23 @@
               <router-link class="nav-item nav-link" to="/" tag="a" active-class="active" exact><a>Página Principal</a></router-link>
               <router-link class="nav-item nav-link" to="/productos" tag="a" active-class="active"><a>Productos</a></router-link>
             </div>
-          </div>
-          <div class="nav navbar-nav navbar-right">
-            <ul class="navbar-nav">
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Sesión
-                </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                  <!-- TODO elimiar URL HARCODEADA -->
-                  <a class="dropdown-item" active-class="active" href="http://localhost:3000/auth/google">Iniciar Sesión</a>
-                  <a class="dropdown-item" data-toggle="modal" data-target="#ModalPerfiles">Perfiles</a>
-                  <a class="dropdown-item" data-toggle="modal" data-target="#ModalPing" @click="ping()">Ping</a>
-                  <div class="dropdown-divider"></div>
-                  <a class=" dropdown-item" active-class="active" href="http://localhost:3000/auth/logout">Cerrar Sesión </a>
-                </div>
-              </li>
-            </ul>  
+            <div class="nav navbar-nav navbar-right">
+              <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Sesión
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    <!-- TODO elimiar URL HARCODEADA -->
+                    <a class="dropdown-item" active-class="active" href="http://localhost:3000/auth/google">Iniciar Sesión</a>
+                    <a class="dropdown-item" data-toggle="modal" data-target="#ModalPerfiles">Perfiles</a>
+                    <a class="dropdown-item" data-toggle="modal" data-target="#ModalPing" @click="ping()">Ping</a>
+                    <div class="dropdown-divider"></div>
+                    <a class=" dropdown-item" active-class="active" href="http://localhost:3000/auth/logout">Cerrar Sesión </a>
+                  </div>
+                </li>
+              </ul>  
+            </div>
           </div>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>

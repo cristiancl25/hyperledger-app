@@ -21,11 +21,14 @@ Vue.use(VueNativeSock, 'ws://' + process.env.REST_SERVER, {
 
 Vue.prototype.$http = axios;
 Vue.prototype.$axios = axios.create({
-  baseURL: 'http://' + process.env.REST_SERVER,
-  withCredentials : true,
-  Accept : "application/json"
+  'baseURL' : 'http://' + process.env.REST_SERVER,
+  'withCredentials' : true,
+  'headers': {
+    'Accept' : "application/json",
+    'Access-Control-Allow-Credentials' : true
+  }
   //timeout: 1000,
-  //headers: {'X-Custom-Header': 'foobar'}
+  
 });
 new Vue({
   el: '#app',
