@@ -5,6 +5,9 @@
       <div>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
           <a class="navbar-brand" href="#">Navbar</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
               <router-link class="nav-item nav-link" to="/" tag="a" active-class="active" exact><a>Página Principal</a></router-link>
@@ -18,19 +21,16 @@
                   </a>
                   <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                     <!-- TODO elimiar URL HARCODEADA -->
-                    <a class="dropdown-item" active-class="active" href="http://localhost:3000/auth/google">Iniciar Sesión</a>
-                    <a class="dropdown-item" data-toggle="modal" data-target="#ModalPerfiles">Perfiles</a>
-                    <a class="dropdown-item" data-toggle="modal" data-target="#ModalPing" @click="ping()">Ping</a>
-                    <div class="dropdown-divider"></div>
-                    <a class=" dropdown-item" active-class="active" href="http://localhost:3000/auth/logout">Cerrar Sesión </a>
+                    <a class="dropdown-item" active-class="active" v-if="!sesionIniciada" :href="logIn">Iniciar Sesión</a>
+                    <a class="dropdown-item" data-toggle="modal" v-if="sesionIniciada" data-target="#ModalPerfiles">Perfiles</a>
+                    <a class="dropdown-item" data-toggle="modal" v-if="sesionIniciada" data-target="#ModalPing" @click="ping()">Ping</a>
+                    <div class="dropdown-divider" v-if="sesionIniciada"></div>
+                    <a class=" dropdown-item" active-class="active" v-if="sesionIniciada" :href="logOut">Cerrar Sesión </a>
                   </div>
                 </li>
               </ul>  
             </div>
           </div>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
         </nav>
       </div>
 
@@ -57,7 +57,10 @@
                   <span v-if="perfil.default" class="badge badge-success">Activa</span>
                 </li>
               </ul>
-              <input class="dropdown-item" type="file" @change="onFileChanged" >
+              <br>
+              <label>Importar Perfil</label>
+              <br>
+              <input type="file" @change="onFileChanged">
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
@@ -101,6 +104,7 @@ import {composer} from '../ComposerAPI'
 export default {
   data() {
     return {
+      sesionIniciada : false,
       pingData : {},
       perfiles : [],
       errorModal :{
@@ -113,7 +117,19 @@ export default {
       },
     }
   },
+  computed : {
+    logIn () {
+      return 'http://' + this.$store.state.baseUrl + '/auth/google'
+    },
+    logOut() {
+      return 'http://' + this.$store.state.baseUrl + '/auth/logout'
+    }
+  },
   methods: {
+    actualizarPerfiles : async function (){
+      var perfiles = await composer.getWallet(this.$axios);
+      this.perfiles = perfiles.data;
+    },
     onFileChanged : async function (event) {
       if (event.target.files.lenght > 1) {
         this.errorModal.show = true;
@@ -127,9 +143,7 @@ export default {
           this.errorModal.message = response.message;
         }
       }
-      var perfiles = await composer.getWallet(this.$axios);
-      this.perfiles = perfiles.data;
-      
+      await this.actualizarPerfiles();
     },
     ping : async function(){
       let response = await composer.ping(this.$axios);
@@ -142,15 +156,25 @@ export default {
       }
     },
     cambiarPerfil : async function(index){
+      this.errorModal.show = false;
       let response = await composer.setDefault(this.$axios, this.perfiles[index].name);
-      var perfiles = await composer.getWallet(this.$axios);
-      this.perfiles = perfiles.data;
+      if (response.statusCode !== 204){
+        this.errorModal.show = true;
+        this.errorModal.message = response.message;
+      }
+      await this.actualizarPerfiles();
       
     }
   },
   created: async function () {
-    var perfiles = await composer.getWallet(this.$axios);
-    this.perfiles = perfiles.data;
+    var response = await composer.getWallet(this.$axios);
+    console.log(response);
+    if (response.statusCode === 401) {
+      this.sesionIniciada = false
+    } else if (response.statusCode === 200) {
+      this.sesionIniciada = true
+      this.perfiles = response.data;
+    }
   }
 }
 </script>

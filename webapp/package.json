@@ -9,14 +9,15 @@
     "start": "npm run dev",
     "lint": "eslint --ext .js,.vue src",
     "build": "node build/build.js",
-    "envprod" : "./envprod.sh && npm run build"
+    "envprod": "./envprod.sh && npm run build"
   },
   "dependencies": {
-    "vue": "^2.5.11",
-    "vue-router": "^3.0.1",
     "axios": "^0.18.0",
+    "vue": "^2.5.11",
     "vue-native-websocket": "^2.0.6",
-    "vue2-google-maps": "^0.8.12"
+    "vue-router": "^3.0.1",
+    "vue2-google-maps": "^0.8.12",
+    "vuex": "^3.0.1"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
