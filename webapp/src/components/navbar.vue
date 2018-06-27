@@ -133,13 +133,22 @@ export default {
   },
   methods: {
     cerrarSesion :async function(){
-      await this.$axios.get(this.logOut);
+      try{
+        await this.$axios.get(this.logOut);
+      } catch (error){
+        // TODO Ajustar error
+        console.log(error);
+      }
       this.sesionIniciada = false;
-      this.$router.push('/');
+      this.$router.push({"path" : '/'});
     },
     actualizarPerfiles : async function (){
-      var perfiles = await composer.getWallet(this.$axios);
-      this.perfiles = perfiles.data;
+      var response = await composer.getWallet(this.$axios);
+      this.perfiles = reponse.data;
+      if (response.statusCode !== 200){
+        this.errorModal.show = true;
+        this.errorModal.message = response.message;
+      }
     },
     onFileChanged : async function (event) {
       if (event.target.files.lenght > 1) {

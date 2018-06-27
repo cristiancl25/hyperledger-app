@@ -51,7 +51,7 @@
         this.showMap = false;
         let response = await composer.getProducto(this.$axios, this.$route.params.id);
         if (response.statusCode === 200){
-          this.error.e = false
+          this.error.show = false
           this.datosProducto = response.data
         } else {
           this.error.show = true
@@ -73,7 +73,6 @@
               'info': 'Descripcion'});
           });*/
           
-          
           this.markers = [{
             'lat': 43,
             'lng': -8,
@@ -94,7 +93,6 @@
                 'lng': longitud,
                 'info': "Localización Actual"
               });
-              console.log(markers);
             });
           } else {
             /* la geolocalización NO está disponible */

@@ -17,14 +17,13 @@ router.beforeResolve((to, from, next) => {
   if (to.fullPath === "/"){
     next()
   } else if (to.fullPath === from.fullPath) {
-    next(); //TODO problema
+    next();
   } else if (!store.state.sesionIniciada) {
     next('/');
   } else {
     next();
   } 
 })
-// TODO else next('/')
 
 store.commit('setBaseUrl', process.env.REST_SERVER);
 
