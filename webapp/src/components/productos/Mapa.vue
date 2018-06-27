@@ -3,18 +3,19 @@
     <div class="col-md-4">
       <ul class="list-group" style="text-align:center" >
         <li class="list-group-item"
-            @click="center=mark"
-            :key="mark"
-            v-for="(mark) in markers">{{mark.info}}
+            @click="center=mark; seleccionada=index"
+            :key="mark.info"
+            v-for="(mark,index) in markers">{{mark.info}}
+            <span v-if="seleccionada===index" class="badge badge-success">Seleccionada</span>
         </li>
       </ul>
     </div>
     <div class="col-md-8">
       <gmap-map :center="center" :zoom="7" class="google-map">
         <gmap-marker
-          :key="index"
-          v-for="(m, index) in markers"
-          :position="m"
+          :key="mark.info"
+          v-for="(mark, index) in markers"
+          :position="mark"
           :clickable="true"
           :draggable="true"
         ></gmap-marker>
@@ -41,7 +42,8 @@
     props : ['markers'],
     data () {
       return {
-        center : this.markers[0]
+        center : this.markers[0],
+        seleccionada : 0
       }
     }
   }

@@ -7,6 +7,7 @@ export const routes = [
   { path: '', component: HomePage },
   { path: '/productos', component: Productos, children: [
       { path: '', component: AllProductos },
-      { path: ':id/', component: Producto },
-  ]}
+      { path: ':id/', component: Producto }]
+  },
+  { path: '*', redirect: '/'}
 ];

@@ -39,22 +39,25 @@
       }
     },
     created : async function () {
-      let response = await composer.getProducto(this.$axios, this.$route.params.id);
-      if (response.statusCode === 200){
-        this.error.e = false
-        this.datosProducto = response.data
-      } else {
-        this.error.show = true
-        this.error.message = response.message
-      }
+      await this.inicializar();
     },
     watch: {
-      '$route'(to, from) {
-        this.id = to.params.id;
-        this.showMap = false;
+      '$route' : async function(to, from) {
+        await this.inicializar();
       }
     },
     methods : {
+      inicializar : async function() {
+        this.showMap = false;
+        let response = await composer.getProducto(this.$axios, this.$route.params.id);
+        if (response.statusCode === 200){
+          this.error.e = false
+          this.datosProducto = response.data
+        } else {
+          this.error.show = true
+          this.error.message = response.message
+        }
+      },
       showMapMethod () {
         if (this.showMap){
           this.showMap = false;
