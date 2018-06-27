@@ -2,11 +2,23 @@ import Vue from 'vue'
 import App from './App.vue'
 import VueNativeSock from 'vue-native-websocket'
 import VueRouter from 'vue-router'
+import VueI18n from 'vue-i18n'
 import { routes } from './routes'
 import axios from 'axios'
 import { store } from './store/store';
+import {es} from './i18n/es'
+import {en} from './i18n/en'
 
-Vue.use(VueRouter);
+store.commit('setBaseUrl', process.env.REST_SERVER);
+
+Vue.use(VueRouter)
+Vue.use(VueI18n)
+Vue.use(VueNativeSock, 'ws://' + store.state.baseUrl, {
+  reconnection: true, // (Boolean) whether to reconnect automatically (false)
+  reconnectionAttempts: 5, // (Number) number of reconnection attempts before giving up (Infinity),
+  reconnectionDelay: 3000, // (Number) how long to initially wait before attempting a new (1000)
+  format: 'json'
+})
 
 const router = new VueRouter({
   routes,
@@ -25,13 +37,9 @@ router.beforeResolve((to, from, next) => {
   } 
 })
 
-store.commit('setBaseUrl', process.env.REST_SERVER);
-
-Vue.use(VueNativeSock, 'ws://' + store.state.baseUrl, {
-  reconnection: true, // (Boolean) whether to reconnect automatically (false)
-  reconnectionAttempts: 5, // (Number) number of reconnection attempts before giving up (Infinity),
-  reconnectionDelay: 3000, // (Number) how long to initially wait before attempting a new (1000)
-  format: 'json'
+const i18n = new VueI18n({
+  locale: 'en',
+  messages : {es,en}
 })
 
 Vue.prototype.$http = axios;
@@ -46,6 +54,7 @@ Vue.prototype.$axios = axios.create({
 
 new Vue({
   el: '#app',
+  i18n,
   router,
   store,
   render: h => h(App)

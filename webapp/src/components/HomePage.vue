@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Página Principal</h1>
+    <h1>{{$t('homePage')}}</h1>
     <hr>
     <h4> Cookies </h4>
     <h6>{{cookie}}</h6>

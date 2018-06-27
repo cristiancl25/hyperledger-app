@@ -10,21 +10,34 @@
           </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-              <router-link class="nav-item nav-link" to="/" tag="a" active-class="active" exact><a>Página Principal</a></router-link>
-              <router-link class="nav-item nav-link" to="/productos" tag="a" active-class="active" v-if="sesionIniciada"><a>Productos</a></router-link>
-              <a class="nav-item nav-link" active-class="active" v-if="!sesionIniciada" :href="logIn">Iniciar Sesión</a>
+              <router-link class="nav-item nav-link" to="/" tag="a" active-class="active" exact><a>{{$t('homePage')}}</a></router-link>
+              <router-link class="nav-item nav-link" to="/productos" tag="a" active-class="active" v-if="sesionIniciada"><a>{{$t('products')}}</a></router-link>
+              <a class="nav-item nav-link" active-class="active" v-if="!sesionIniciada" :href="logIn">{{$t('log.in')}}</a>
             </div>
             <div class="nav navbar-nav navbar-right" v-if="sesionIniciada">
               <ul class="navbar-nav">
                 <li class="nav-item dropdown">
                   <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Sesión
+                    {{$t('session')}}
                   </a>
                   <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">                    
-                    <a class="dropdown-item" data-toggle="modal"  data-target="#ModalPerfiles">Perfiles</a>
+                    <a class="dropdown-item" data-toggle="modal"  data-target="#ModalPerfiles">{{$t('profiles')}}</a>
                     <a class="dropdown-item" data-toggle="modal" data-target="#ModalPing" @click="ping()">Ping</a>
                     <div class="dropdown-divider"></div>
-                    <a class=" dropdown-item" active-class="active" @click="cerrarSesion">Cerrar Sesión </a>
+                    <a class=" dropdown-item" active-class="active" @click="cerrarSesion">{{$t('log.out')}} </a>
+                  </div>
+                </li>
+              </ul>  
+            </div>
+            <div class="nav navbar-nav navbar-right">
+              <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {{$t('language')}}
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" @click="cambiarIdioma('es')">Español <span v-if="lang==='es'">&#9989;</span></a>
+                    <a class="dropdown-item" @click="cambiarIdioma('en')">English <span v-if="lang==='en'">&#9989;</span></a>                
                   </div>
                 </li>
               </ul>  
@@ -38,7 +51,7 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Perfiles de conexión</h5>
+              <h5 class="modal-title" id="exampleModalLabel">{{$t('conectionProfiles')}}</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -53,16 +66,16 @@
                   @click="cambiarPerfil(index)"
                   v-for="(perfil, index) in perfiles">
                   {{ perfil.name }}
-                  <span v-if="perfil.default" class="badge badge-success">Activa</span>
+                  <span v-if="perfil.default" class="badge badge-success">{{$t('active')}}</span>
                 </li>
               </ul>
               <br>
-              <label>Importar Perfil</label>
+              <label>{{$t('import.profile')}}</label>
               <br>
               <input type="file" @change="onFileChanged">
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">{{$t('close')}}</button>
             </div>
           </div>
         </div>
@@ -88,7 +101,7 @@
               </div>
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">{{$t('close')}}</button>
             </div>
           </div>
         </div>
@@ -103,6 +116,7 @@ import {composer} from '../ComposerAPI'
 export default {
   data() {
     return {
+      lang : 'en',
       pingData : {},
       perfiles : [],
       errorModal :{
@@ -132,6 +146,10 @@ export default {
     }
   },
   methods: {
+    cambiarIdioma(lang) {
+      this.lang = lang
+      this.$i18n.locale = lang
+    },
     cerrarSesion :async function(){
       try{
         await this.$axios.get(this.logOut);
@@ -144,7 +162,7 @@ export default {
     },
     actualizarPerfiles : async function (){
       var response = await composer.getWallet(this.$axios);
-      this.perfiles = reponse.data;
+      this.perfiles = response.data;
       if (response.statusCode !== 200){
         this.errorModal.show = true;
         this.errorModal.message = response.message;
