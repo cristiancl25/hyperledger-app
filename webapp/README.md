@@ -18,7 +18,10 @@ npm run build
 npm run build --report
 
 # Run webapp in a nginx server
-docker run --name nginx -d -p 80:80 -v $PWD/dist:/usr/share/nginx/html nginx
+docker rm -f nginx && docker run --name nginx -d -p 80:80 -p 443:443 -v $PWD/dist:/usr/share/nginx/html -v $PWD/nginx:/etc/nginx/conf.d/ nginx
+
+# Certificado autofirmado
+openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out MyCertificate.crt -keyout MyKey.key
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).

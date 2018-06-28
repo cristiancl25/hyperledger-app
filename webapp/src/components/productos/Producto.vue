@@ -82,8 +82,9 @@
             'lng': -10,
             'info': "Localización2"
           }];
+          /* Geolocalización */
           if ("geolocation" in navigator) {
-            /* la geolocalización está disponible */
+            this.error.show = false
             let self = this;
             navigator.geolocation.getCurrentPosition(function(position) {
               const latitud = position.coords.latitude;
@@ -93,9 +94,12 @@
                 'lng': longitud,
                 'info': "Localización Actual"
               });
+            },function(error){
+              console.log(error)
+              self.error.show = true
+              self.error.message = error.message
+              
             });
-          } else {
-            /* la geolocalización NO está disponible */
           }
           this.showMap = true;
         }
