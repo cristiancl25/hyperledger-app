@@ -67,7 +67,7 @@ composer transaction submit -c admin@res1@bna -d '{
     "tipoUsuario":"Usuario"
 }'
 composer identity issue -c admin@res1@bna -f ~/.composer/usuario1_res1.card -u usuario1@res1 -a "resource:org.hyperledger.composer.participantes.Usuario#usuario1@res1"
-composer card import -f ~/.composer/usuario1_res1.card
+#composer card import -f ~/.composer/usuario1_res1.card
 
 composer transaction submit -c usuario1@pes1@bna -d '{
   "$class": "org.hyperledger.composer.productos.CrearTipoProducto",
