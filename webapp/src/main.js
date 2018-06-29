@@ -9,11 +9,12 @@ import { store } from './store/store';
 import {es} from './i18n/es'
 import {en} from './i18n/en'
 
-store.commit('setBaseUrl', process.env.REST_SERVER);
+store.commit('setRestServer', process.env.REST_SERVER);
+store.commit('setWsServer', process.env.WS_SERVER);
 
 Vue.use(VueRouter)
 Vue.use(VueI18n)
-Vue.use(VueNativeSock, 'ws://' + store.state.baseUrl, {
+Vue.use(VueNativeSock, store.state.wsServer, {
   reconnection: true, // (Boolean) whether to reconnect automatically (false)
   reconnectionAttempts: 5, // (Number) number of reconnection attempts before giving up (Infinity),
   reconnectionDelay: 3000, // (Number) how long to initially wait before attempting a new (1000)
@@ -44,7 +45,7 @@ const i18n = new VueI18n({
 
 Vue.prototype.$http = axios;
 Vue.prototype.$axios = axios.create({
-  'baseURL' : 'http://' + store.state.baseUrl,
+  'baseURL' : store.state.restServer,
   'withCredentials' : true,
   'headers': {
     'Accept' : "application/json",

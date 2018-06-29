@@ -131,10 +131,10 @@ export default {
   },
   computed : {
     logIn () {
-      return 'http://' + this.$store.state.baseUrl + '/auth/google'
+      return this.$store.state.restServer + '/auth/google'
     },
     logOut() {
-      return 'http://' + this.$store.state.baseUrl + '/auth/logout'
+      return this.$store.state.restServer + '/auth/logout'
     },
     sesionIniciada:{
       get() {

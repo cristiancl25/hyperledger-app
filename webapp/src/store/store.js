@@ -5,15 +5,19 @@ Vue.use(Vuex);
 
 export const store = new Vuex.Store({
     state: {
-        baseUrl : 'localhost',
+        restServer: '',
+        wsServer: '',
         sesionIniciada : false
     },
     getters : {
 
     },
     mutations : {
-        setBaseUrl(state, url){
-            state.baseUrl = url
+        setRestServer(state, url){
+            state.restServer = url
+        },
+        setWsServer(state, url){
+            state.wsServer = url
         },
         setSesionIniciada(state, sesion){
             state.sesionIniciada = sesion
