@@ -18,30 +18,31 @@ npm run build
 npm run build --report
 
 # Build de la aplicación y establecimiento de la IP del servidor rest
-export REST_SERVER=composer-server.ddns.net:2000
+export REST_SERVER=composer-server.ddns.net:3000
 npm run envprod
 
 # Servidor para los perfiles de conexión en el puerto 8080
 docker run -d -v ~/.composer:/var/www:ro -p 8080:8080 trinitronx/python-simplehttpserver
 
 # Nginx dockerizado con la aplicación web
-docker run --name nginx -d -p 80:80 -p 443:443 -v $PWD/dist:/usr/share/nginx/html -v $PWD/nginx:/etc/nginx/conf.d/ nginx
+docker run --name nginx -d -p 80:80 -p 443:443 -v $PWD/dist:/usr/share/nginx/html -v $PWD/nginx:/etc/nginx/conf.d/ -v $PWD/certs:/etc/letsencrypt nginx
 
 # Certificado autofirmado
 openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out MyCertificate.crt -keyout MyKey.key
-```
 
-docker run --name node -v $PWD:/home/node/webapp -it node:8.11.3-jessie /bin/bash
-
-For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
-
+# Certificado con letsEncrypt
 docker run -it --rm \
--v $PWD/nginx/certs/etc/letsencrypt:/etc/letsencrypt \
--v $PWD/nginx/certs/var/lib/letsencrypt:/var/lib/letsencrypt \
+-v $PWD/certs/:/etc/letsencrypt \
 -v $PWD/dist:/data/letsencrypt \
 certbot/certbot \
 certonly --webroot \
---register-unsafely-without-email --agree-tos \
+--email ccl251996@gmail.com --agree-tos --no-eff-email \
 --webroot-path=/data/letsencrypt \
---staging \
 -d composer-server.ddns.net
+
+# Contenedor docker con node y npm 
+docker run --name node -v $PWD:/home/node/webapp -it node:8.11.3-jessie /bin/bash
+```
+
+
+
