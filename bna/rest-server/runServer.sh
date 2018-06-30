@@ -9,8 +9,8 @@ docker run \
 -e COMPOSER_NAMESPACES=always \
 -e COMPOSER_WEBSOCKETS=true \
 -e COMPOSER_TLS=false \
--e COMPOSER_TLS_CERTIFICATE=/etc/letsencrypt/live/composer-server.ddns.net/fullchain.pem \
--e COMPOSER_TLS_KEY=/etc/letsencrypt/live/composer-server.ddns.net/privkey.pem \
+-e COMPOSER_TLS_CERTIFICATE= \
+-e COMPOSER_TLS_KEY= \
 -e COMPOSER_AUTHENTICATION=false \
 -e COMPOSER_MULTIUSER=false \
 -e COMPOSER_PROVIDERS='{
@@ -22,8 +22,8 @@ docker run \
         "authPath": "/auth/google",
         "callbackURL": "/auth/google/callback",
         "scope": "https://www.googleapis.com/auth/plus.login",
-        "successRedirect": "https://composer-server.ddns.net",
-        "failureRedirect": "https://composer-server.ddns.net"
+        "successRedirect": "/",
+        "failureRedirect": "/"
     }
 }' \
 -e COMPOSER_DATASOURCES='{

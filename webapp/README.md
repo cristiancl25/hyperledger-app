@@ -22,15 +22,15 @@ docker run --name node -v $PWD:/home/node/webapp -it node:8.11.3-jessie /bin/bas
 
 # Build de la aplicación y establecimiento de la IP del servidor rest
 npm install
-export REST_SERVER=https://composer-server.ddns.net:3000
-export WS_SERVER=ws://composer-server.ddns.net:3000
+export REST_SERVER=https://IP
+export WS_SERVER=ws://IP
 npm run envprod
 
 # Servidor para los perfiles de conexión en el puerto 9090
 docker run -d -v ~/.composer:/var/www:ro -p 9090:8080 trinitronx/python-simplehttpserver
 
 # Nginx dockerizado con la aplicación web
-docker run --name nginx -d -p 80:80 -p 443:443 -v $PWD/dist:/usr/share/nginx/html -v $PWD/nginx:/etc/nginx/conf.d/ -v $PWD/certs:/etc/letsencrypt nginx
+docker run --name nginx -d -p 80:80 -p 443:443 -v $PWD/dist:/usr/share/nginx/html -v $PWD/nginx:/etc/nginx/conf.d/ -v /etc/letsencrypt:/etc/letsencrypt nginx
 
 # Certificado autofirmado
 openssl req -new -newkey rsa:4096 -x509 -sha256 -days 365 -nodes -out MyCertificate.crt -keyout MyKey.key
@@ -41,14 +41,8 @@ docker run -it --rm \
 -v $PWD/dist:/data/letsencrypt \
 certbot/certbot \
 certonly --webroot \
---email ccl251996@gmail.com --agree-tos --no-eff-email \
+--email EMAIL --agree-tos --no-eff-email \
 --webroot-path=/data/letsencrypt \
--d composer-server.ddns.net
-
-# Copia de los certificados para el servidor rest
-sudo mkdir /etc/letsencrypt/
-sudo cp -R certs/* /etc/letsencrypt/
-```
-
+-d DOMINIO-http://example.com
 
 
