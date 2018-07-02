@@ -43,6 +43,7 @@ transaction CrearOrganizacion {
   o String orgId
   o String tipoOrganizacion
   o String descripcion
+  o String idAdmin
   o String nombreAdmin
   o String emailAdmin
 }

@@ -29,7 +29,8 @@ async function CrearParticipante(datos){
     }
 
     var regPar = await getParticipantRegistry(NS_PAR + '.' + tipo);
-    var usuario = factory.newResource(NS_PAR, tipo, datos.email);
+    var usuario = factory.newResource(NS_PAR, tipo, datos.id);
+    usuario.email = datos.email;
     usuario.nombre = datos.nombre;
     usuario.orgId = participanteActual.orgId;
     await regPar.add(usuario);

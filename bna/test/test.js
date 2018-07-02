@@ -129,6 +129,7 @@ describe('Sample', () => {
     async function crearParticipante(email, nombre, tipoUsuario) {
         const transaction = factory.newTransaction(NS_PAR, 'CrearParticipante');
 
+        transaction.id = email;
         transaction.email = email;
         transaction.nombre = nombre;
         transaction.tipoUsuario = tipoUsuario;
@@ -143,6 +144,7 @@ describe('Sample', () => {
         transaction.tipoOrganizacion = tipoOrganizacion;
         transaction.descripcion = descripcion;
         transaction.nombreAdmin = nombreAdmin;
+        transaction.idAdmin=emailAdmin;
         transaction.emailAdmin = emailAdmin;
         await businessNetworkConnection.submitTransaction(transaction);
         await importCardForIdentity(emailAdmin, await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#' + emailAdmin, emailAdmin, {issuer:true}));
@@ -322,6 +324,7 @@ describe('Sample', () => {
 
         const regPar = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.OrgAdmin');
         const par = await regPar.get('admin@OrganizacionProba');
+        par.id.should.equal('admin@OrganizacionProba');
         par.email.should.equal('admin@OrganizacionProba');
         par.nombre.should.equal('admin');
 
@@ -371,6 +374,7 @@ describe('Sample', () => {
         const reg = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Usuario');
         var users = await reg.getAll();
         users.should.have.lengthOf(1);
+        users[0].id.should.equal('usuario1@test');
         users[0].email.should.equal('usuario1@test');
         users[0].nombre.should.equal('usuario1');
         users[0].orgId.should.equal('test');
@@ -390,6 +394,7 @@ describe('Sample', () => {
 
         users = await reg.getAll();
         users.should.have.lengthOf(2);
+        users[1].id.should.equal('usuario2@test');
         users[1].email.should.equal('usuario2@test');
         users[1].nombre.should.equal('usuario2');
         users[1].orgId.should.equal('test');

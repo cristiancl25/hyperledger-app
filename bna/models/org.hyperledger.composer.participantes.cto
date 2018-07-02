@@ -1,6 +1,7 @@
 namespace org.hyperledger.composer.participantes
 
-abstract participant Participante identified by email {
+abstract participant Participante identified by id {
+  o String id
   o String email
   o String nombre
   o String orgId
@@ -13,7 +14,17 @@ participant Usuario extends Participante { }
 participant Invitado extends Participante { }
 
 transaction CrearParticipante {
+  o String id
   o String email
   o String nombre
   o String tipoUsuario optional
+}
+
+transaction ActualizarParticipante {
+  o String email
+  o String nombre
+}
+
+transaction EliminarParticipante {
+  o String id
 }

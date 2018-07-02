@@ -39,7 +39,8 @@ async function CrearOrganizacion(datos){
     }
 
     /* Creación del administrador para la organización */
-    var admin = factory.newResource(NS_PAR, 'OrgAdmin', datos.emailAdmin);
+    var admin = factory.newResource(NS_PAR, 'OrgAdmin', datos.idAdmin);
+    admin.email = datos.emailAdmin;
     admin.nombre = datos.nombreAdmin;
     admin.orgId = datos.orgId;
 
