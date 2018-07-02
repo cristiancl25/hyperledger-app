@@ -27,4 +27,5 @@ transaction ActualizarParticipante {
 
 transaction EliminarParticipante {
   o String id
+  o String tipoUsuario
 }

@@ -137,6 +137,20 @@ describe('Sample', () => {
         await importCardForIdentity(email, await businessNetworkConnection.issueIdentity(NS_PAR + '.' + tipoUsuario + '#' + email, email));
     }
 
+    async function actualizarParticipante(email, nombre) {
+        const transaction = factory.newTransaction(NS_PAR, 'ActualizarParticipante');
+        transaction.email = email;
+        transaction.nombre = nombre;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
+    async function eliminarParticipante(id, tipoUsuario) {
+        const transaction = factory.newTransaction(NS_PAR, 'EliminarParticipante');
+        transaction.id = id;
+        transaction.tipoUsuario = tipoUsuario;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
     async function crearOrganizacion(orgId, tipoOrganizacion, descripcion, nombreAdmin, emailAdmin){
         const transaction = factory.newTransaction(NS_ORG, 'CrearOrganizacion');
 
@@ -151,7 +165,7 @@ describe('Sample', () => {
         await importCardForIdentity(emailAdmin, await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#' + emailAdmin, emailAdmin, {issuer:true}));
     }
 
-    async function actualizarOrganizacion(orgId, nombre, descripcion){
+    async function actualizarOrganizacion(nombre, descripcion){
         const transaction = factory.newTransaction(NS_ORG, 'ActualizarOrganizacion');
 
         transaction.nombre = nombre;
@@ -346,7 +360,7 @@ describe('Sample', () => {
         await crearOrganizacion('OrganizacionProba', 'LONXA', 'descripción', 'admin', 'admin@OrganizacionProba');
 
         await useIdentity('admin@OrganizacionProba');
-        await actualizarOrganizacion('OrganizacionProba', 'nuevoNombre', 'nuevaDescripcion');
+        await actualizarOrganizacion('nuevoNombre', 'nuevaDescripcion');
         const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
         var orgs = await regOrg.getAll();
         orgs.should.have.lengthOf(1);
@@ -445,6 +459,83 @@ describe('Sample', () => {
         org.usuarios[1].$identifier.should.equal('usuario2@test');
         org.localizaciones.should.have.lengthOf(0);
         org.invitados.should.have.lengthOf(0);
+    });
+
+
+    it('Actualización de un participante para una organización', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await useIdentity('usuario1@pes1');
+
+        await actualizarParticipante('nuevoemail@email.es', 'nombreActualizado');
+
+        const regPar = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Usuario');
+        var users = await regPar.getAll();
+        users[0].email.should.equal('nuevoemail@email.es');
+        users[0].nombre.should.equal('nombreActualizado');
+
+    });
+
+
+    it ('Eliminación de un participante Usuario para una organización', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await useIdentity('admin@pes1');
+        
+        await crearParticipante('usuario2@pes1', 'usuario2', 'Usuario');
+
+        const regPar = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Usuario');
+        var users = await regPar.getAll();
+        users.should.have.lengthOf(2);
+        users[0].email.should.equal('usuario1@pes1');
+        users[1].email.should.equal('usuario2@pes1');
+
+        const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        var orgs = await regOrg.getAll();
+        orgs.should.have.lengthOf(1);
+        orgs[0].usuarios.should.have.lengthOf(2);
+
+        await eliminarParticipante('usuario1@pes1', 'Usuario');
+
+        users = await regPar.getAll();
+        users.should.have.lengthOf(1);
+        users[0].email.should.equal('usuario2@pes1');
+
+        orgs = await regOrg.getAll();
+        orgs.should.have.lengthOf(1);
+        orgs[0].usuarios.should.have.lengthOf(1);
+        orgs[0].usuarios[0].$identifier.should.equal('usuario2@pes1');
+    });
+
+    it('Eliminación de un participante Invitado para una organización', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await useIdentity('admin@pes1');
+        
+        await crearParticipante('invitado1@pes1', 'invitado1', 'Invitado');
+        await crearParticipante('invitado2@pes1', 'invitado2', 'Invitado');
+        await crearParticipante('invitado3@pes1', 'invitado3', 'Invitado');
+
+        const regPar = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Invitado');
+        var users = await regPar.getAll();
+        users.should.have.lengthOf(3);
+        users[0].email.should.equal('invitado1@pes1');
+        users[1].email.should.equal('invitado2@pes1');
+
+        const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        var orgs = await regOrg.getAll();
+        orgs.should.have.lengthOf(1);
+        orgs[0].invitados.should.have.lengthOf(3);
+
+        await eliminarParticipante('invitado2@pes1', 'Invitado');
+
+        users = await regPar.getAll();
+        users.should.have.lengthOf(2);
+        users[0].email.should.equal('invitado1@pes1');
+        users[1].email.should.equal('invitado3@pes1');
+
+        orgs = await regOrg.getAll();
+        orgs.should.have.lengthOf(1);
+        orgs[0].invitados.should.have.lengthOf(2);
+        orgs[0].invitados[0].$identifier.should.equal('invitado1@pes1');
+        orgs[0].invitados[1].$identifier.should.equal('invitado3@pes1');
     });
 
 

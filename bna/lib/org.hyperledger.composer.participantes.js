@@ -39,3 +39,66 @@ async function CrearParticipante(datos){
     lista.push(factory.newRelationship(NS_PAR, tipo, usuario.email));
     await regOrg.update(org);
 }
+
+/**
+ *
+ * @param {org.hyperledger.composer.participantes.ActualizarParticipante} datos
+ * @transaction
+ */
+async function ActualizarParticipante(datos){
+    const participanteActual = getCurrentParticipant();
+    const tipo = participanteActual.$type;
+    const id = participanteActual.$identifier;
+
+    var regPar = await getParticipantRegistry(NS_PAR + '.' + tipo);
+    var usuario = await regPar.get(id);
+
+    if (datos.email){
+        usuario.email = datos.email;
+    }
+
+    if (datos.nombre){
+        usuario.nombre = datos.nombre;
+    }
+
+    await regPar.update(usuario);
+}
+
+
+/**
+ *
+ * @param {org.hyperledger.composer.participantes.EliminarParticipante} datos
+ * @transaction
+ */
+async function EliminarParticipante(datos){
+    const participanteActual = getCurrentParticipant();
+    var regOrg = await getAssetRegistry(NS_ORG + '.Organizacion');
+    var org = await regOrg.get(participanteActual.orgId);
+
+    var lista = [];
+    
+    var tipo;
+    if (datos.tipoUsuario == 'Usuario'){
+        lista = org.usuarios;
+        tipo = 'Usuario';
+    } else if (datos.tipoUsuario == 'Invitado'){
+        lista = org.invitados;
+        tipo = 'Invitado';
+    } else {
+        throw new Error ('El tipo de usuario especificado no es válido');
+    }
+    const index = lista.findIndex((user) => {
+        return user.$identifier === datos.id;
+    });
+    
+    if (index === -1) {
+        throw new Error('El participante especificado no existe');
+    }
+    lista.splice(index, 1);
+
+    await regOrg.update(org);
+
+    var regPar = await getParticipantRegistry(NS_PAR + '.' + tipo);
+    var usuario = await regPar.get(datos.id);
+    await regPar.remove(usuario);
+}

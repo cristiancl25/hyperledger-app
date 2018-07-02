@@ -100,6 +100,15 @@ rule OrgAdminCrearLocalizacionRecurso {
   action: ALLOW  
 }
 
+rule OrgAdminCrearLocalizacionRecurso2 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: UPDATE
+  resource: "org.hyperledger.composer.organizaciones.Organizacion"
+  transaction: "org.hyperledger.composer.organizaciones.CrearLocalizacion"
+  action: ALLOW  
+}
+
 // Transacción ActualizarOrganizacion --> OrgAdmin
 rule OrgAdminActualizarOrganizacion {
   description:  ""
@@ -118,52 +127,52 @@ rule OrgAdminActualizarOrganizacionRecurso1 {
   action: ALLOW  
 }
 
+rule ActualizarParticipante1 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.*"
+  operation: CREATE
+  resource: "org.hyperledger.composer.participantes.ActualizarParticipante"
+  action: ALLOW  
+}
+
+rule ActualizarParticipante2 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.*"
+  operation: CREATE, UPDATE, DELETE
+  resource: "org.hyperledger.composer.participantes.*"
+  transaction: "org.hyperledger.composer.participantes.ActualizarParticipante"
+  action: ALLOW  
+}
+
+rule ActualizarParticipante3 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.*"
+  operation: CREATE
+  resource: "org.hyperledger.composer.system.HistorianRecord"
+  transaction: "org.hyperledger.composer.participantes.ActualizarParticipante"
+  action: ALLOW  
+}
+
 // Transacción CrearParticipante --> OrgAdmin
-rule OrgAdminCrearParticipante{
+rule OrgAdminParticipantes {
   description:  ""
   participant: "org.hyperledger.composer.participantes.OrgAdmin"
-  operation: CREATE
-  resource: "org.hyperledger.composer.participantes.CrearParticipante"
+  operation: CREATE, UPDATE, DELETE
+  resource: "org.hyperledger.composer.participantes.*"
+  transaction: "org.hyperledger.composer.participantes.*"
   action: ALLOW  
 }
 
-rule OrgAdminCrearParticipanteRecurso1 {
-  description:  ""
-  participant: "org.hyperledger.composer.participantes.OrgAdmin"
-  operation: CREATE
-  resource: "org.hyperledger.composer.participantes.Usuario"
-  transaction: "org.hyperledger.composer.participantes.CrearParticipante"
-  action: ALLOW  
-}
-
-rule OrgAdminCrearParticipanteRecurso2 {
-  description:  ""
-  participant: "org.hyperledger.composer.participantes.OrgAdmin"
-  operation: CREATE
-  resource: "org.hyperledger.composer.participantes.Invitado"
-  transaction: "org.hyperledger.composer.participantes.CrearParticipante"
-  action: ALLOW  
-}
-
-rule OrgAdminCrearParticipanteRecurso3 {
+rule OrgAdminOrganizacion {
   description:  ""
   participant: "org.hyperledger.composer.participantes.OrgAdmin"
   operation: UPDATE
   resource: "org.hyperledger.composer.organizaciones.Organizacion"
-  transaction: "org.hyperledger.composer.participantes.CrearParticipante"
+  transaction: "org.hyperledger.composer.participantes.*"
   action: ALLOW  
 }
 
-rule OrgAdminCrearParticipanteRecurso4 {
-  description:  ""
-  participant: "org.hyperledger.composer.participantes.OrgAdmin"
-  operation: UPDATE
-  resource: "org.hyperledger.composer.organizaciones.Organizacion"
-  transaction: "org.hyperledger.composer.organizaciones.CrearLocalizacion"
-  action: ALLOW  
-}
-
-rule OrgAdminCrearParticipanteRecurso5 {
+rule OrgAdminIssueIdentity {
   description:  ""
   participant: "org.hyperledger.composer.participantes.OrgAdmin"
   operation: CREATE
@@ -171,7 +180,7 @@ rule OrgAdminCrearParticipanteRecurso5 {
   action: ALLOW  
 }
 
-rule OrgAdminCrearParticipanteRecurso6 {
+rule OrgAdminIdentity {
   description:  ""
   participant: "org.hyperledger.composer.participantes.OrgAdmin"
   operation: CREATE
