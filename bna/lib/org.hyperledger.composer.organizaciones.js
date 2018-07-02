@@ -56,6 +56,8 @@ async function CrearOrganizacion(datos){
     org.usuarios = [];
     org.invitados = [];
     org.localizaciones = [];
+    org.email = datos.email;
+    org.telefono = datos.telefono;
     org.administrador = factory.newRelationship(NS_PAR, 'OrgAdmin', admin.email);
     var regOrg = await getAssetRegistry(NS_ORG + '.Organizacion');
     await regOrg.add(org);

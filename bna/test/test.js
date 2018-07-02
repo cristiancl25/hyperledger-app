@@ -160,6 +160,8 @@ describe('Sample', () => {
         transaction.descripcion = descripcion;
         transaction.nombreAdmin = nombreAdmin;
         transaction.idAdmin=emailAdmin;
+        transaction.email = 'prueba@email.com';
+        transaction.telefono = '123456789';
         transaction.emailAdmin = emailAdmin;
         await businessNetworkConnection.submitTransaction(transaction);
         await importCardForIdentity(emailAdmin, await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#' + emailAdmin, emailAdmin, {issuer:true}));
@@ -343,6 +345,8 @@ describe('Sample', () => {
         org.tipoOrganizacion.$identifier.should.equal('LONXA');
         org.administrador.$identifier.should.equal('admin@OrganizacionProba');
         org.descripcion.should.equal('descripción');
+        org.email.should.equal('prueba@email.com');
+        org.telefono.should.equal('123456789');
         chai.expect(org.usuarios).to.eql([]);
         chai.expect(org.localizaciones).to.eql([]);
 
