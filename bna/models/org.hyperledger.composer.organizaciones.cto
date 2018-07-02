@@ -11,6 +11,7 @@ asset TipoOrganizacion identified by tipo {
 
 asset Organizacion identified by orgId {
   o String orgId
+  o String nombre
   --> TipoOrganizacion tipoOrganizacion
   o String descripcion
   o DateTime fechaCreacion
@@ -42,8 +43,14 @@ transaction CrearTipoOrganizacion {
 transaction CrearOrganizacion {
   o String orgId
   o String tipoOrganizacion
+  o String nombre
   o String descripcion
   o String idAdmin
   o String nombreAdmin
   o String emailAdmin
+}
+
+transaction ActualizarOrganizacion {
+  o String nombre optional
+  o String descripcion optional
 }

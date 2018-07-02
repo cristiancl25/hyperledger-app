@@ -100,7 +100,23 @@ rule OrgAdminCrearLocalizacionRecurso {
   action: ALLOW  
 }
 
+// Transacción ActualizarOrganizacion --> OrgAdmin
+rule OrgAdminActualizarOrganizacion {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.organizaciones.ActualizarOrganizacion"
+  action: ALLOW  
+}
 
+rule OrgAdminActualizarOrganizacionRecurso1 {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: UPDATE
+  resource: "org.hyperledger.composer.organizaciones.Organizacion"
+  transaction: "org.hyperledger.composer.organizaciones.ActualizarOrganizacion"
+  action: ALLOW  
+}
 
 // Transacción CrearParticipante --> OrgAdmin
 rule OrgAdminCrearParticipante{
@@ -163,7 +179,7 @@ rule OrgAdminCrearParticipanteRecurso6 {
   action: ALLOW  
 }
 
-// Acceco a los productos por parte del participante Usuario
+// Acceso a los productos por parte del participante Usuario
 rule UsuarioProductos {
   description:  ""
   participant: "org.hyperledger.composer.participantes.Usuario"

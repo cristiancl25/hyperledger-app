@@ -51,6 +51,7 @@ async function CrearOrganizacion(datos){
     var org = factory.newResource(NS_ORG, 'Organizacion', datos.orgId);
     org.tipoOrganizacion = factory.newRelationship(NS_ORG, 'TipoOrganizacion', datos.tipoOrganizacion);
     org.descripcion = datos.descripcion;
+    org.nombre = datos.nombre;
     org.fechaCreacion = new Date();
     org.usuarios = [];
     org.invitados = [];
@@ -101,5 +102,29 @@ async function CrearLocalizacion(datos) {
     await regLoc.add(loc);
 
     organizacion.localizaciones.push(factory.newRelationship(NS_ORG, 'Localizacion', locId));
+    await regOrg.update(organizacion);
+}
+
+
+/**
+ *
+ * @param {org.hyperledger.composer.organizaciones.ActualizarOrganizacion} datos
+ * @transaction
+ */
+async function ActualizarOrganizacion(datos){
+    if (getCurrentParticipant().$namespace + '.' + getCurrentParticipant().$type !== 'org.hyperledger.composer.participantes.OrgAdmin'){
+        throw new Error('participante inválido');
+    }
+    var participante = getCurrentParticipant();
+    var {organizacion, regOrg} = await getOrganizacion(participante);
+
+    if (datos.nombre) {
+        organizacion.nombre = datos.nombre;
+    }
+
+    if (datos.descripcion) {
+        organizacion.descripcion = datos.descripcion;
+    }
+
     await regOrg.update(organizacion);
 }

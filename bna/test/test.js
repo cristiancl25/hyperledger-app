@@ -141,6 +141,7 @@ describe('Sample', () => {
         const transaction = factory.newTransaction(NS_ORG, 'CrearOrganizacion');
 
         transaction.orgId = orgId;
+        transaction.nombre = 'Nombre de la organización';
         transaction.tipoOrganizacion = tipoOrganizacion;
         transaction.descripcion = descripcion;
         transaction.nombreAdmin = nombreAdmin;
@@ -148,6 +149,14 @@ describe('Sample', () => {
         transaction.emailAdmin = emailAdmin;
         await businessNetworkConnection.submitTransaction(transaction);
         await importCardForIdentity(emailAdmin, await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#' + emailAdmin, emailAdmin, {issuer:true}));
+    }
+
+    async function actualizarOrganizacion(orgId, nombre, descripcion){
+        const transaction = factory.newTransaction(NS_ORG, 'ActualizarOrganizacion');
+
+        transaction.nombre = nombre;
+        transaction.descripcion = descripcion;
+        await businessNetworkConnection.submitTransaction(transaction);
     }
 
     async function crearOrganizacionyUsuario(orgId, orgTipo, admin, usuario){
@@ -316,9 +325,37 @@ describe('Sample', () => {
         orgs.should.have.lengthOf(1);
         var org = await regOrg.get('OrganizacionProba');
         org.orgId.should.equal('OrganizacionProba');
+        org.nombre.should.equal('Nombre de la organización');
         org.tipoOrganizacion.$identifier.should.equal('LONXA');
         org.administrador.$identifier.should.equal('admin@OrganizacionProba');
         org.descripcion.should.equal('descripción');
+        chai.expect(org.usuarios).to.eql([]);
+        chai.expect(org.localizaciones).to.eql([]);
+
+        const regPar = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.OrgAdmin');
+        const par = await regPar.get('admin@OrganizacionProba');
+        par.id.should.equal('admin@OrganizacionProba');
+        par.email.should.equal('admin@OrganizacionProba');
+        par.nombre.should.equal('admin');
+
+    });
+
+    it('Creación de una organización y posterior actualización', async () => {
+        await useIdentity('admin');
+        await crearTipoOrganizacion('LONXA');
+        await crearOrganizacion('OrganizacionProba', 'LONXA', 'descripción', 'admin', 'admin@OrganizacionProba');
+
+        await useIdentity('admin@OrganizacionProba');
+        await actualizarOrganizacion('OrganizacionProba', 'nuevoNombre', 'nuevaDescripcion');
+        const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        var orgs = await regOrg.getAll();
+        orgs.should.have.lengthOf(1);
+        var org = await regOrg.get('OrganizacionProba');
+        org.orgId.should.equal('OrganizacionProba');
+        org.nombre.should.equal('nuevoNombre');
+        org.tipoOrganizacion.$identifier.should.equal('LONXA');
+        org.administrador.$identifier.should.equal('admin@OrganizacionProba');
+        org.descripcion.should.equal('nuevaDescripcion');
         chai.expect(org.usuarios).to.eql([]);
         chai.expect(org.localizaciones).to.eql([]);
 
