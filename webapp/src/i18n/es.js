@@ -13,5 +13,6 @@ export const es = {
   "close" : "Cerrar",
   "import": {
     "profile": "Importar perfil"
-  }
+  },
+  "organizations" : "Organizaciones"
 }

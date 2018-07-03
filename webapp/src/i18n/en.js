@@ -13,5 +13,6 @@ export const en = {
     "close" : "Close",
     "import": {
       "profile": "Import profile"
-    }
+    },
+    "organizations" : "Organizations"
 }

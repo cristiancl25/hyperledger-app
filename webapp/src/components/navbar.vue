@@ -12,6 +12,7 @@
             <div class="navbar-nav">
               <router-link class="nav-item nav-link" to="/" tag="a" active-class="active" exact><a>{{$t('homePage')}}</a></router-link>
               <router-link class="nav-item nav-link" to="/productos" tag="a" active-class="active" v-if="sesionIniciada"><a>{{$t('products')}}</a></router-link>
+              <router-link class="nav-item nav-link" to="/organizaciones" tag="a" active-class="active" v-if="sesionIniciada"><a>{{$t('organizations')}}</a></router-link>
               <a class="nav-item nav-link" active-class="active" v-if="!sesionIniciada" :href="logIn">{{$t('log.in')}}</a>
             </div>
             <div class="nav navbar-nav navbar-right" v-if="sesionIniciada">
@@ -63,6 +64,7 @@
               <ul class="list-group" >
                 <li
                   class="list-group-item"
+                  :key="perfil.name"
                   @click="cambiarPerfil(index)"
                   v-for="(perfil, index) in perfiles">
                   {{ perfil.name }}
@@ -116,7 +118,7 @@ import {composer} from '../ComposerAPI'
 export default {
   data() {
     return {
-      lang : 'en',
+      lang : 'es',
       pingData : {},
       perfiles : [],
       errorModal :{
@@ -211,6 +213,20 @@ export default {
     } else if (response.statusCode === 200) {
       this.sesionIniciada = true
       this.perfiles = response.data;
+    }
+
+    // TODO Ajustar Navbar
+    response = await composer.ping(this.$axios);
+    if (response.statusCode === 200){
+      if (response.data.participant.includes('org.hyperledger.composer.participantes.')){
+        var user = response.data.participant.replace('org.hyperledger.composer.participantes.', '');
+        var perfil = user.split('#');
+        this.$store.commit('setParticipante', {'rol': perfil[0], 'id': perfil[1]});
+      }
+    } else {
+      this.errorPing.show = true;
+      this.errorPing.message = response.message;
+      
     }
   }
 }

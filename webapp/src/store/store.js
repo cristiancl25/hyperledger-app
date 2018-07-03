@@ -7,7 +7,10 @@ export const store = new Vuex.Store({
     state: {
         restServer: '',
         wsServer: '',
-        sesionIniciada : false
+        sesionIniciada : false,
+        rolParticipante : '', 
+        participante : '',
+        organizacion : ''
     },
     getters : {
 
@@ -21,6 +24,13 @@ export const store = new Vuex.Store({
         },
         setSesionIniciada(state, sesion){
             state.sesionIniciada = sesion
+        },
+        setParticipante(state, participante){
+            state.rolParticipante = participante.rol;
+            state.participante = participante.id;
+        },
+        setOrganizacion(state, organizacion){
+            state.organizacion = organizacion;
         }
     },
     actions : {

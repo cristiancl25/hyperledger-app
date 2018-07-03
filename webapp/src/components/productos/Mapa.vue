@@ -14,7 +14,7 @@
       <gmap-map :center="center" :zoom="7" class="google-map">
         <gmap-marker
           :key="mark.info"
-          v-for="(mark, index) in markers"
+          v-for="(mark) in markers"
           :position="mark"
           :clickable="true"
           :draggable="true"

@@ -39,7 +39,7 @@ router.beforeResolve((to, from, next) => {
 })
 
 const i18n = new VueI18n({
-  locale: 'en',
+  locale: 'es',
   messages : {es,en}
 })
 

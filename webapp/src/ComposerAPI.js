@@ -54,7 +54,24 @@ export const composer = {
         }catch(error){
             return returnError(error);
         }
-    }
+    },
+    getParticipante : async function(axios, rol, id){
+        try{
+            let response = await axios.get('/api/org.hyperledger.composer.participantes.' + rol + '/' + id);
+            return returnResponse(response);
+        }catch(error){
+            return returnError(error);
+        }
+    },
+    getOrganizacion : async function(axios, id){
+        try{
+            let response = await axios.get('/api/org.hyperledger.composer.organizaciones.Organizacion/' + id);
+            return returnResponse(response);
+        }catch(error){
+            return returnError(error);
+        }
+    },
+
 }
 
 function returnResponse(response){
