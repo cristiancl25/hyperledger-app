@@ -39,6 +39,25 @@ export const composer = {
             return returnError(error);
         }
     },
+    getTipoProducto : async function(axios){
+        try{
+            let response = await axios.get('/api/org.hyperledger.composer.productos.TipoProducto');
+            return returnResponse(response);
+        }catch(error){
+            return returnError(error);
+        }
+    },
+    crearTipoProducto : async function(axios, tipo){
+        try{
+            let response = await axios.post('/api/org.hyperledger.composer.productos.CrearTipoProducto',{
+                "$class": "org.hyperledger.composer.productos.CrearTipoProducto",
+                "tipo": tipo
+            });
+            return returnResponse(response);
+        }catch(error){
+            return returnError(error);
+        }
+    },
     getProducto : async function(axios, productoId){
         try{
             let response = await axios.get('/api/org.hyperledger.composer.productos.Producto/' + productoId);
@@ -47,9 +66,9 @@ export const composer = {
             return returnError(error);
         }
     },
-    getProductos : async function(axios){
+    crearProducto : async function(axios, producto){
         try{
-            let response = await axios.get('/api/org.hyperledger.composer.productos.Producto/');
+            let response = await axios.post('/api/org.hyperledger.composer.productos.CrearProducto/', producto);
             return returnResponse(response);
         }catch(error){
             return returnError(error);

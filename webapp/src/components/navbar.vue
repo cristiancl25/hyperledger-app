@@ -206,7 +206,7 @@ export default {
     }
   },
   created: async function () {
-    var response = await composer.getWallet(this.$axios);
+    let response = await composer.getWallet(this.$axios);
     if (response.statusCode === 401) {
       this.sesionIniciada = false
       this.$router.push('/')
@@ -222,11 +222,13 @@ export default {
         var user = response.data.participant.replace('org.hyperledger.composer.participantes.', '');
         var perfil = user.split('#');
         this.$store.commit('setParticipante', {'rol': perfil[0], 'id': perfil[1]});
+        // TODO Controlar Errores
+        let res = await composer.getParticipante(this.$axios, this.$store.state.rolParticipante, this.$store.state.participante);
+        this.$store.commit('setOrganizacion', res.data.orgId);
       }
     } else {
       this.errorPing.show = true;
       this.errorPing.message = response.message;
-      
     }
   }
 }

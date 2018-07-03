@@ -1,5 +1,6 @@
 import Productos from './components/productos/Productos';
 import AllProductos from './components/productos/AllProductos';
+import CrearProducto from './components/productos/CrearProducto';
 import Producto from './components/productos/Producto';
 import participantes from './components/participantes/participantes';
 import participante from './components/participantes/participante';
@@ -11,7 +12,9 @@ import HomePage from './components/HomePage';
 export const routes = [
   { path: '', component: HomePage },
   { path: '/productos', component: Productos, children: [
-      { path: '', component: AllProductos },
+//      { path: '', component: AllProductos },
+      { path: 'crear', component: CrearProducto },
+      { path: 'all', component: AllProductos },
       { path: ':id/', component: Producto }]
   },
   { path: '/participantes', component: participantes, children: [

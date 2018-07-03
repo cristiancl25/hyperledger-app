@@ -35,7 +35,7 @@ export default {
     }
   },
   created: async function () {
-    let response = await composer.getProductos(this.$axios);
+    let response = await composer.getProducto(this.$axios, '');
     if (response.statusCode === 200){
       let productos = []
       this.error.show = false
