@@ -1,25 +1,39 @@
 <template>
   <div>
-    <h1>Producto - {{ $route.params.id }}</h1>
-    <h2></h2>
-    <div v-if="error.show" class="alert alert-danger">
-      <strong>Error:</strong> {{ error.message }}
-    </div>
-    <div v-else>
-      <p>{{datosProducto}}</p>
-      <button class="btn btn-primary" @click="showMapMethod">Mostrar Mapa</button>
-      <div v-if="showMap">
-        <h2>Mapa de Google</h2>
-        <google-map :markers='markers'></google-map>
+    <div class="row justify-content-center">
+      <div class="col-md-10" v-if="info.show" v-bind:class="info.tipo" role="alert">
+        <strong></strong> {{ info.message }}
       </div>
     </div>
 
+
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div>
+          <h1>Producto - {{ $route.params.id }}</h1>
+          <p>{{datosProducto}}</p>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <div>
+          <button class="btn btn-primary" @click="showMapMethod">Mostrar Mapa</button>
+          <div v-if="showMap">
+            <h2>Mapa de Google</h2>
+            <google-map v-bind:markers='markers' v-bind:lista='true'></google-map>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
 </template>
 
 <script>
-  import googleMap from './Mapa';
+  import googleMap from '../mapas/Mapa';
   import {composer} from '../../ComposerAPI'
 
   export default {
@@ -28,14 +42,14 @@
     },
     data() {
       return{
-        error :{
+        info : {
           show : false,
-          message : ''
+          message : '',
+          tipo : ''
         },
         markers: [],
         showMap: false,
-        datosProducto : {},
-        id : this.$route.params.id
+        datosProducto : {}
       }
     },
     created : async function () {
@@ -51,28 +65,17 @@
         this.showMap = false;
         let response = await composer.getProducto(this.$axios, this.$route.params.id);
         if (response.statusCode === 200){
-          this.error.show = false
+          this.info.show = false
           this.datosProducto = response.data
         } else {
-          this.error.show = true
-          this.error.message = response.message
+          this.info.show = true
+          this.info.message = response.message
         }
       },
       showMapMethod () {
         if (this.showMap){
           this.showMap = false;
-        } else {
-          // TODO Solucionar coordenadas hardcodeadas
-          /*var coordenadas = [];
-          let coor = this.peixeData.operacionActual.coordenadas;
-          coordenadas.push({'lat': coor.latitude, 'lng': coor.lonxitude, 'info' : 'Descripcion'});
-          this.peixeData.operacions.forEach( operacion => {
-            coordenadas.push({
-              'lat': operacion.coordenadas.latitude,
-              'lng': operacion.coordenadas.lonxitude,
-              'info': 'Descripcion'});
-          });*/
-          
+        } else {          
           this.markers = [{
             'lat': 43,
             'lng': -8,
@@ -84,7 +87,7 @@
           }];
           /* Geolocalización */
           if ("geolocation" in navigator) {
-            this.error.show = false
+            this.info.show = false
             let self = this;
             navigator.geolocation.getCurrentPosition(function(position) {
               const latitud = position.coords.latitude;
@@ -95,9 +98,8 @@
                 'info': "Localización Actual"
               });
             },function(error){
-              console.log(error)
-              self.error.show = true
-              self.error.message = error.message
+              self.info.show = true
+              self.info.message = error.message
               
             });
           }

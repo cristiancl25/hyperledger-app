@@ -3,7 +3,7 @@
       
       <div class="row justify-content-center">
         
-        <div class="col-md-10 col-lg-7">
+        <div class="col-md-10">
           <h1>Crear Producto</h1>
           <div class="progress" v-if= "progress">
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
@@ -114,9 +114,16 @@
                     @click="localizacionId=loc.localizacionId"
                     >{{loc.direccion}}
                     <span v-if="localizacionId === loc.localizacionId" class="badge badge-success">{{$t('active')}}</span>
-                    
                   </li>
                 </ul>
+              </div>
+              <div class="col-md-12">
+                <!-- TODO Mejorar integración mapa -->
+                <small class="form-text text-muted">
+                    <button class="btn btn-link" v-if="!mapa" @click="mapa=!mapa" >Mostrar Localización</button>
+                    <button class="btn btn-link" v-if="mapa" @click="mapa=!mapa" >Ocultar Localización</button>
+                </small>
+                <google-map v-if="mapa" v-bind:markers='markers' v-bind:lista='false'></google-map>
               </div>
             </div>
           
@@ -125,7 +132,6 @@
               <input type="checkbox" id="jack" value="Jack" v-model="imagen.incluir">
               <label for="jack">Añadir datos imagen  </label>
               <small id="emailHelp" class="form-text text-muted">Opcional</small>
-              
             </div>
             <div v-if="imagen.incluir"> 
               <div class="form-group col-md-12">
@@ -145,8 +151,7 @@
                 </select>
               </div>
             </div>
-            
-            
+
           </form>
           <div class="col-sm-12">
             <button @click="crearProducto" class="btn btn-primary">Submit</button>
@@ -198,9 +203,13 @@
 
 <script>
 import {composer} from '../../ComposerAPI'
+import googleMap from '../mapas/Mapa'
 import crypto from 'crypto-js'
 
 export default {
+  components : {
+    googleMap
+  },
   data(){
     return {
       caracteristicas :{
@@ -241,6 +250,7 @@ export default {
       tiposProducto:[],
       nuevoTipoProducto : '',
       gps : false,
+      mapa : false,
     }
   },
   computed : {

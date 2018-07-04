@@ -1,5 +1,5 @@
 import Productos from './components/productos/Productos';
-import AllProductos from './components/productos/AllProductos';
+import ListaProductos from './components/productos/ListaProductos';
 import CrearProducto from './components/productos/CrearProducto';
 import Producto from './components/productos/Producto';
 import participantes from './components/participantes/participantes';
@@ -14,7 +14,7 @@ export const routes = [
   { path: '/productos', component: Productos, children: [
 //      { path: '', component: AllProductos },
       { path: 'crear', component: CrearProducto },
-      { path: 'all', component: AllProductos },
+      { path: 'all', component: ListaProductos },
       { path: ':id/', component: Producto }]
   },
   { path: '/participantes', component: participantes, children: [

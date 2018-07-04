@@ -1,21 +1,15 @@
 <template>
   <div id="app">
     <div id="container">
-      <custom-navbar></custom-navbar>
-      <div id="body">
-        <!-- TODO modificar eventos de los websockets -->
-        <!-- <div v-if="event.show" class="alert alert-info alert-dismissible fade show" role="alert">
-          <strong>Info:</strong>
-          <router-link
-            :to="'/productos/' + event.data"
-            active-class="active">
-            <a>Novo peixe capturado {{event.data}}</a>
-          </router-link>
-          <button @click="event.show = false" type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div> -->
-        <router-view></router-view>
+      <div class="row justify-content-center">
+        <div class="col-md-12 col-lg-10">
+          <custom-navbar></custom-navbar>
+        </div>
+      </div>
+      <div class="row justify-content-center" id="body">
+        <div class="col-md-12 col-lg-10">
+          <router-view></router-view>
+        </div>
       </div>
       <!--<div id="footer">
         <hr>

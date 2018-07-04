@@ -4,16 +4,42 @@
       <!-- Navbar -->
       <div>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-          <a class="navbar-brand" href="#">Navbar</a>
+          <router-link class="navbar-brand" to="/" tag="a">{{$t('homePage')}}</router-link>
           <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
           </button>
           <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
             <div class="navbar-nav">
-              <router-link class="nav-item nav-link" to="/" tag="a" active-class="active" exact><a>{{$t('homePage')}}</a></router-link>
-              <router-link class="nav-item nav-link" to="/productos" tag="a" active-class="active" v-if="sesionIniciada"><a>{{$t('products')}}</a></router-link>
-              <router-link class="nav-item nav-link" to="/organizaciones" tag="a" active-class="active" v-if="sesionIniciada"><a>{{$t('organizations')}}</a></router-link>
               <a class="nav-item nav-link" active-class="active" v-if="!sesionIniciada" :href="logIn">{{$t('log.in')}}</a>
+            </div>
+            <div class="nav navbar-nav navbar-right" v-if="sesionIniciada">
+              <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {{$t('products')}}
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">                    
+                    <router-link class="dropdown-item" to="/productos/crear" tag="a" active-class="active" exact><a>Crear Producto</a></router-link>
+                    <router-link class="dropdown-item" to="/productos/all" tag="a" active-class="active" exact><a>Productos</a></router-link>
+                  </div>
+                </li>
+              </ul>  
+            </div>
+            <div class="nav navbar-nav navbar-right" v-if="sesionIniciada">
+              <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {{$t('organizations')}}
+                  </a>
+                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">                    
+                    <router-link class="dropdown-item" to="/organizaciones" tag="a" active-class="active"><a>{{$t('organizations')}}</a></router-link>
+                  </div>
+                </li>
+              </ul>  
+            </div>
+            <div class="navbar-nav" v-if="sesionIniciada">
+              <router-link class="nav-item nav-link" to="/" tag="a">Transacciones</router-link>
+              <router-link class="nav-item nav-link" to="/" tag="a"><a>Eventos <span class="badge badge-success badge-pill"> 0</span></a></router-link>
             </div>
             <div class="nav navbar-nav navbar-right" v-if="sesionIniciada">
               <ul class="navbar-nav">
