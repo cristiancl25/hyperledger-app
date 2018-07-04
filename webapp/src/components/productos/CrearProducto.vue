@@ -47,20 +47,20 @@
                 </div>
                 <div v-if="caracteristicas.tipo==='UNIDAD'" class="form-group col-md-3">
                   <label for="Unidades">Unidades</label>
-                  <input v-model="caracteristicas.unidades" type="number" class="form-control" aria-describedby="emailHelp" placeholder="Unidades">
+                  <input v-model="caracteristicas.unidades" type="number" min="1" class="form-control" aria-describedby="emailHelp" placeholder="Unidades">
                 </div>
                 <div v-if="caracteristicas.tipo==='UNIDAD'" class="form-group col-md-3">
                   <label for="Peso Medio">Peso medio</label>
-                  <input v-model="caracteristicas.peso" type=number step=0.01 class="form-control" aria-describedby="emailHelp" placeholder="Peso medio">
+                  <input v-model="caracteristicas.peso" type=number step=0.01 min="0.01" class="form-control" aria-describedby="emailHelp" placeholder="Peso medio">
                 </div>
                 <div v-if="caracteristicas.tipo==='PESO'" class="form-group col-md-3">
                   <label for="Peso">Peso</label>
-                  <input v-model="caracteristicas.peso" type=number step=0.01 class="form-control" aria-describedby="emailHelp" placeholder="Peso">
+                  <input v-model="caracteristicas.peso" type=number step=0.01 min="0.01" class="form-control" aria-describedby="emailHelp" placeholder="Peso">
                 </div>
                 <div class="form-group col-md-3">
                   <label for="inputState">Magnitud</label>
                   <select v-model="caracteristicas.magnitud" id="inputState" class="form-control">
-                    <option selected>Kilogramos</option>
+                    <option selected>kilogramos</option>
                     <option>gramos</option>
                   </select>
                 </div>
@@ -77,7 +77,7 @@
             <div>
               <fieldset class="form-group col-md-12">
                 <div class="row">
-                  <legend class="col-form-label col-sm-3 pt-0">Localización</legend>
+                  <legend class="col-form-label col-sm-3 pt-0">Métodos</legend>
                   <div class="col-sm-9">
                     <div class="form-check">
                       <input v-model="loc" @click="geolocalizacion" class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="gps" checked>
@@ -103,7 +103,7 @@
                 <div class="form-group col-md-12">
                   <label for="direccion">Dirección</label>
                   <input v-model="coordenadas.direccion" class="form-control" aria-describedby="emailHelp" placeholder="Dirección de la nueva localización">
-            </div>
+                </div>
               </div>
               <div class="col-md-10" v-if="loc === 'org'">
                 <h5>Localizaciones de la organizacion</h5>
@@ -121,6 +121,31 @@
             </div>
           
             <h3>Imagen</h3>
+            <div class="form-group col-md-12">
+              <input type="checkbox" id="jack" value="Jack" v-model="imagen.incluir">
+              <label for="jack">Añadir datos imagen  </label>
+              <small id="emailHelp" class="form-text text-muted">Opcional</small>
+              
+            </div>
+            <div v-if="imagen.incluir"> 
+              <div class="form-group col-md-12">
+                <label for="url">URL</label>
+                <input v-model="imagen.url" class="form-control" aria-describedby="emailHelp" placeholder="Url de la imagen">
+              </div>
+              <div class="form-group col-md-12">
+                <label for="hash">Hash</label>
+                <input v-model="imagen.hashImagen" class="form-control" aria-describedby="emailHelp" placeholder="Hash de la imagen">
+              </div>
+              <div class="form-group col-md-3">
+                <label for="inputState">Algoritmo</label>
+                <select v-model="imagen.algoritmo" id="inputState" class="form-control">
+                  <option selected>sha1</option>
+                  <option>sha256</option>
+                  <option>md5</option>
+                </select>
+              </div>
+            </div>
+            
             
           </form>
           <div class="col-sm-12">
@@ -173,6 +198,7 @@
 
 <script>
 import {composer} from '../../ComposerAPI'
+import crypto from 'crypto-js'
 
 export default {
   data(){
@@ -185,7 +211,7 @@ export default {
         descripcion : '',
         unidades : 0,
         peso:0,
-        magnitud:'',
+        magnitud:'kilogramos',
       },
       loc:'',
       localizacionId:'',
@@ -193,6 +219,12 @@ export default {
         latitud: '',
         longitud:'',
         direccion:''
+      },
+      imagen : {
+        incluir : false,
+        hashImagen : '',
+        url : '',
+        algoritmo : 'sha1'
       },
       localizaciones : [],
       progress : false,
@@ -223,6 +255,12 @@ export default {
           "magnitudPeso" : this.caracteristicas.magnitud,
         }
       };
+      let imagen = {
+        "$class": "org.hyperledger.composer.productos.Imagen",
+        "hashImagen": this.imagen.hashImagen,
+        "url": this.imagen.url,
+        "algoritmo": this.imagen.algoritmo
+      };
 
       let loc = {
         "$class": "org.hyperledger.composer.productos.Loc",
@@ -247,6 +285,10 @@ export default {
         producto.caracteristicas.descripcion = this.caracteristicas.descripcion;
       }
 
+      if (this.imagen.incluir) {
+        producto.imagen = imagen;
+      }
+
       if (this.loc === 'gps'){
         producto.loc = loc;
       } else {
@@ -261,7 +303,7 @@ export default {
     }
   },
   created : async function(){
-    await this.actualizarTipoProducto();   
+    await this.actualizarTipoProducto();
    
   },
   methods : {
@@ -305,8 +347,14 @@ export default {
           return;
         }
       } else {
-        if (this.coordenadas.direccion === ''){
+        if (this.coordenadas.direccion === '' && this.loc === 'gps'){
           this.info.show = true; this.info.message = 'Dirección no válida'; this.info.tipo = "alert alert-warning";
+          return;
+        }
+      }
+      if (this.imagen.incluir){
+        if(this.imagen.hashImagen === '' || this.imagen.url === ''){
+          this.info.show = true; this.info.message = 'Datos de la imagen inválidos'; this.info.tipo = "alert alert-warning";
           return;
         }
       }
@@ -343,7 +391,6 @@ export default {
       }
     },
     getLocalizaciones : async function() {
-      // TODO Mejorar
       let response = await composer.getOrganizacion(this.$axios, this.$store.state.organizacion);
       if (response.statusCode === 200){
         this.info.show = false;
@@ -366,7 +413,6 @@ export default {
         this.info.tipo = "alert alert-danger";
       }
     }
-
   }
 }
 </script>
