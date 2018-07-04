@@ -102,7 +102,7 @@ concept Loc {
 }
 
 transaction CrearProducto {
-  o String identificador
+  o String identificador optional
   o Caracteristicas caracteristicas
   o String localizacionId optional
   o Loc loc optional
