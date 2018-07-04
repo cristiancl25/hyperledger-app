@@ -39,6 +39,14 @@ export const composer = {
             return returnError(error);
         }
     },
+    getLocalizacion : async function(axios, loc){
+        try{
+            let response = await axios.get('/api/org.hyperledger.composer.organizaciones.Localizacion/' + loc);
+            return returnResponse(response);
+        }catch(error){
+            return returnError(error);
+        }
+    },
     getTipoProducto : async function(axios){
         try{
             let response = await axios.get('/api/org.hyperledger.composer.productos.TipoProducto');
