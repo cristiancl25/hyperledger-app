@@ -46,6 +46,11 @@
       markers : Array,
       lista : Boolean
     },
+    watch : {
+      'markers' : function(){
+        this.center = this.markers[0];
+      }
+    },
     data () {
       return {
         center : this.markers[0],

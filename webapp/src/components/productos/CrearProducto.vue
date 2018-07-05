@@ -75,55 +75,58 @@
 
             <h3>Localización Inicial</h3>
             <div>
-              <fieldset class="form-group col-md-12">
-                <div class="row">
-                  <legend class="col-form-label col-sm-3 pt-0">Métodos</legend>
-                  <div class="col-sm-9">
-                    <div class="form-check">
-                      <input v-model="loc" @click="geolocalizacion" class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="gps" checked>
-                      <label class="form-check-label" for="gridRadios1">
-                        GPS
-                      </label>
-                    </div>
-                    <div class="form-check">
-                      <input v-model="loc" @click="getLocalizaciones" class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="org">
-                      <label class="form-check-label" for="gridRadios2">
-                        Organización
-                      </label>
+              <div>
+                <fieldset class="form-group col-md-12">
+                  <div class="row">
+                    <legend class="col-form-label col-sm-3 pt-0">Métodos</legend>
+                    <div class="col-sm-9">
+                      <div class="form-check">
+                        <input v-model="loc" @click="geolocalizacion" class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="gps" checked>
+                        <label class="form-check-label" for="gridRadios1">
+                          GPS
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input v-model="loc" @click="getLocalizaciones" class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="org">
+                        <label class="form-check-label" for="gridRadios2">
+                          Organización
+                        </label>
+                      </div>
                     </div>
                   </div>
+                </fieldset>
+                <div class="col-md-10" v-if="loc === 'gps'">
+                  <h5>Coordenadas</h5>
+                  <ul class="list-group">
+                    <li><strong>Latitud:</strong> {{coordenadas.latitud}}</li>
+                    <li><strong>Longitud:</strong> {{coordenadas.longitud}}</li>
+                  </ul>
+                  <div class="form-group col-md-12">
+                    <label for="direccion">Dirección</label>
+                    <input v-model="coordenadas.direccion" class="form-control" aria-describedby="emailHelp" placeholder="Dirección de la nueva localización">
+                    <small id="emailHelp" class="form-text text-muted">Obligatorio</small>
+                  </div>
                 </div>
-              </fieldset>
-              <div class="col-md-10" v-if="loc === 'gps'">
-                <h5>Coordenadas</h5>
-                <ul class="list-group">
-                  <li><strong>Latitud:</strong> {{coordenadas.latitud}}</li>
-                  <li><strong>Longitud:</strong> {{coordenadas.longitud}}</li>
-                </ul>
-                <div class="form-group col-md-12">
-                  <label for="direccion">Dirección</label>
-                  <input v-model="coordenadas.direccion" class="form-control" aria-describedby="emailHelp" placeholder="Dirección de la nueva localización">
+                <div class="col-md-10" v-if="loc === 'org'">
+                  <h5>Localizaciones de la organizacion</h5>
+                  <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                      v-for="(loc) in localizaciones"
+                      :key="loc.direccion"
+                      @click="localizacionId=loc.localizacionId; coordenadas.latitud = loc.latitud; coordenadas.longitud = loc.longitud; coordenadas.direccion = loc.direccion"
+                      >{{loc.direccion}}
+                      <span v-if="localizacionId === loc.localizacionId" class="badge badge-success">{{$t('active')}}</span>
+                    </li>
+                  </ul>
                 </div>
-              </div>
-              <div class="col-md-10" v-if="loc === 'org'">
-                <h5>Localizaciones de la organizacion</h5>
-                <ul class="list-group">
-                  <li class="list-group-item d-flex justify-content-between align-items-center"
-                    v-for="(loc) in localizaciones"
-                    :key="loc.direccion"
-                    @click="localizacionId=loc.localizacionId"
-                    >{{loc.direccion}}
-                    <span v-if="localizacionId === loc.localizacionId" class="badge badge-success">{{$t('active')}}</span>
-                  </li>
-                </ul>
               </div>
               <div class="col-md-12">
-                <!-- TODO Mejorar integración mapa -->
-                <small class="form-text text-muted">
-                    <button class="btn btn-link" v-if="!mapa" @click="mapa=!mapa" >Mostrar Localización</button>
-                    <button class="btn btn-link" v-if="mapa" @click="mapa=!mapa" >Ocultar Localización</button>
+                <!-- TODO cambiar componentes a -->
+                <small>
+                    <a href="/#/productos/crear" v-if="!mapa" @click="mostrarMapa" >Mostrar Localización</a>
+                    <a href="/#/productos/crear"  v-if="mapa" @click="mostrarMapa" >Ocultar Localización</a>
                 </small>
-                <google-map v-if="mapa" v-bind:markers='markers' v-bind:lista='false'></google-map>
+                <google-map v-if="mapa" v-bind:markers="[{'lat':coordenadas.latitud, 'lng':coordenadas.longitud, 'info':coordenadas.direccion}]" v-bind:lista='false'></google-map>
               </div>
             </div>
           
@@ -204,7 +207,7 @@
 <script>
 import {composer} from '../../ComposerAPI'
 import googleMap from '../mapas/Mapa'
-import crypto from 'crypto-js'
+//import crypto from 'crypto-js'
 
 export default {
   components : {
@@ -250,7 +253,7 @@ export default {
       tiposProducto:[],
       nuevoTipoProducto : '',
       gps : false,
-      mapa : false,
+      mapa :false,
     }
   },
   computed : {
@@ -278,33 +281,26 @@ export default {
         "longitud": this.coordenadas.longitud,
         "direccion": this.coordenadas.direccion
       };
-
       if (this.caracteristicas.tipoProducto !== ''){
         producto.caracteristicas.tipoProducto = "resource:org.hyperledger.composer.productos.TipoProducto#" + this.caracteristicas.tipoProducto;
       }
-
       if (this.caracteristicas.identificador !== ""){
         producto.identificador = this.caracteristicas.identificador;
       }
-
       if (this.caracteristicas.variedadProducto !== ""){
         producto.caracteristicas.variedadProducto = this.caracteristicas.variedadProducto;
       }
-
       if (this.caracteristicas.descripcion !== ""){
         producto.caracteristicas.descripcion = this.caracteristicas.descripcion;
       }
-
       if (this.imagen.incluir) {
         producto.imagen = imagen;
       }
-
       if (this.loc === 'gps'){
         producto.loc = loc;
       } else {
         producto.localizacionId = this.localizacionId;
       }
-
       if (this.caracteristicas.tipo === 'UNIDAD'){
         producto.caracteristicas.unidades = this.caracteristicas.unidades;
       } 
@@ -378,9 +374,11 @@ export default {
       }
     },
     geolocalizacion : async function(){
+      this.mapa = false;
       this.info.show = false;
       if ("geolocation" in navigator) {
         let self = this;
+        this.coordenadas.latitud = ""; this.coordenadas.longitud = ""; this.coordenadas.direccion = "";
         navigator.geolocation.getCurrentPosition(function(position) {
           self.gps = true;
           const latitud = position.coords.latitude;
@@ -401,6 +399,7 @@ export default {
       }
     },
     getLocalizaciones : async function() {
+      this.mapa = false;
       let response = await composer.getOrganizacion(this.$axios, this.$store.state.organizacion);
       if (response.statusCode === 200){
         this.info.show = false;
@@ -421,6 +420,20 @@ export default {
         this.info.show = true;
         this.info.message = response.message;
         this.info.tipo = "alert alert-danger";
+      }
+    },
+    mostrarMapa : async function() {
+      if (this.mapa) {
+        this.mapa = false;
+        return;        
+      } else {
+        if (this.loc === 'gps' && this.coordenadas.direccion!==""){
+            this.mapa = true;
+        } else if (this.loc === 'org' && this.localizacionId!==""){
+            this.mapa = true;
+        } else {
+          return;
+        }
       }
     }
   }
