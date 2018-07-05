@@ -36,7 +36,7 @@
     },
     methods : {
       inicializar : async function() {
-        let response = await composer.getParticipante(this.$axios, this.$route.params.rol, this.$route.params.id);
+        let response = await composer.participantes.getParticipante(this.$axios, this.$route.params.rol, this.$route.params.id);
         if (response.statusCode === 200){
           this.error.show = false;
           this.participante = response.data;

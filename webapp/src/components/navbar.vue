@@ -189,7 +189,7 @@ export default {
       this.$router.push({"path" : '/'});
     },
     actualizarPerfiles : async function (){
-      var response = await composer.getWallet(this.$axios);
+      var response = await composer.sistema.getWallet(this.$axios);
       this.perfiles = response.data;
       if (response.statusCode !== 200){
         this.errorModal.show = true;
@@ -201,7 +201,7 @@ export default {
         this.errorModal.show = true;
         this.errorModal.message = "Solo se puede subir un archivo";
       } else {
-        let response = await composer.importarPerfil(this.$axios, event.target.files[0]);
+        let response = await composer.sistema.importarPerfil(this.$axios, event.target.files[0]);
         if(response.statusCode === 204){
           this.errorModal.show = false;
         }else{
@@ -212,7 +212,7 @@ export default {
       await this.actualizarPerfiles();
     },
     ping : async function(){
-      let response = await composer.ping(this.$axios);
+      let response = await composer.sistema.ping(this.$axios);
       if (response.statusCode === 200){
         this.errorPing.show = false;
         this.pingData = response.data;
@@ -223,7 +223,7 @@ export default {
     },
     cambiarPerfil : async function(index){
       this.errorModal.show = false;
-      let response = await composer.setDefault(this.$axios, this.perfiles[index].name);
+      let response = await composer.sistema.setDefault(this.$axios, this.perfiles[index].name);
       if (response.statusCode !== 204){
         this.errorModal.show = true;
         this.errorModal.message = response.message;
@@ -232,7 +232,7 @@ export default {
     }
   },
   created: async function () {
-    let response = await composer.getWallet(this.$axios);
+    let response = await composer.sistema.getWallet(this.$axios);
     if (response.statusCode === 401) {
       this.sesionIniciada = false
       this.$router.push('/')
@@ -242,14 +242,14 @@ export default {
     }
 
     // TODO Ajustar Navbar
-    response = await composer.ping(this.$axios);
+    response = await composer.sistema.ping(this.$axios);
     if (response.statusCode === 200){
       if (response.data.participant.includes('org.hyperledger.composer.participantes.')){
         var user = response.data.participant.replace('org.hyperledger.composer.participantes.', '');
         var perfil = user.split('#');
         this.$store.commit('setParticipante', {'rol': perfil[0], 'id': perfil[1]});
         // TODO Controlar Errores
-        let res = await composer.getParticipante(this.$axios, this.$store.state.rolParticipante, this.$store.state.participante);
+        let res = await composer.participantes.getParticipante(this.$axios, this.$store.state.rolParticipante, this.$store.state.participante);
         this.$store.commit('setOrganizacion', res.data.orgId);
       }
     } else {

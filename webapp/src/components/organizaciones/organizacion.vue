@@ -35,7 +35,7 @@
     },
     methods : {
       inicializar : async function() {
-        let response = await composer.getOrganizacion(this.$axios, this.$route.params.id);
+        let response = await composer.organizaciones.getOrganizacion(this.$axios, this.$route.params.id);
         if (response.statusCode === 200){
           this.error.show = false;
           this.organizacion = response.data;

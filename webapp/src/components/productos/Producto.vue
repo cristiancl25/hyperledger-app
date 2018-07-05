@@ -63,7 +63,7 @@
     methods : {
       inicializar : async function() {
         this.showMap = false;
-        let response = await composer.getProducto(this.$axios, this.$route.params.id);
+        let response = await composer.productos.getProducto(this.$axios, this.$route.params.id);
         if (response.statusCode === 200){
           this.info.show = false
           this.datosProducto = response.data

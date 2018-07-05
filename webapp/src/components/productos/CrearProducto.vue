@@ -317,7 +317,7 @@ export default {
       this.infoModal.show=false;
     },
     crearTipoProducto : async function(){
-      let response = await composer.crearTipoProducto(this.$axios, this.nuevoTipoProducto);
+      let response = await composer.productos.crearTipoProducto(this.$axios, this.nuevoTipoProducto);
       if (response.statusCode === 200){
         this.infoModal.show = true;
         this.infoModal.message = 'Tipo de producto creado'
@@ -332,7 +332,7 @@ export default {
 
     },
     actualizarTipoProducto : async function() {
-      let response = await composer.getTipoProducto(this.$axios);
+      let response = await composer.productos.getTipoProducto(this.$axios);
 
       if (response.statusCode === 200){
           this.info.show = false;
@@ -365,7 +365,7 @@ export default {
         }
       }
       this.progress = true;
-      let response = await composer.crearProducto(this.$axios, this.producto);
+      let response = await composer.productos.crearProducto(this.$axios, this.producto);
       this.progress = false;
       if (response.statusCode === 200){
         this.info.show = true; this.info.message = 'Producto Creado'; this.info.tipo = "alert alert-success";
@@ -400,13 +400,13 @@ export default {
     },
     getLocalizaciones : async function() {
       this.mapa = false;
-      let response = await composer.getOrganizacion(this.$axios, this.$store.state.organizacion);
+      let response = await composer.organizaciones.getOrganizacion(this.$axios, this.$store.state.organizacion);
       if (response.statusCode === 200){
         this.info.show = false;
         let self = this;
         this.localizaciones = [];
         response.data.localizaciones.forEach(async (loc) => {
-          let response = await composer.getLocalizacion(self.$axios, loc.split('#')[1]);
+          let response = await composer.organizaciones.getLocalizacion(self.$axios, loc.split('#')[1]);
           if (response.statusCode === 200){
             self.info.show = false;
             self.localizaciones.push(response.data);

@@ -37,7 +37,7 @@ export default {
     }
   },
   created: async function () {
-    let response = await composer.getProducto(this.$axios, '');
+    let response = await composer.productos.getProducto(this.$axios, '');
     if (response.statusCode === 200){
       this.productos=response.data;
     } else {

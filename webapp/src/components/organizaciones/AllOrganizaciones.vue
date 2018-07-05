@@ -35,7 +35,7 @@ export default {
     }
   },
   created: async function () {
-    let response = await composer.getOrganizacion(this.$axios, '');
+    let response = await composer.organizaciones.getOrganizacion(this.$axios, '');
     if (response.statusCode === 200){
       this.error.show = false
       this.organizaciones = response.data;
