@@ -1,11 +1,11 @@
 <template>
-  <div>
-    <div v-if="error.show" class="alert alert-danger">
+  <div class="row justify-content-center">
+    <div v-if="info.show" v-bind:class="info.tipo" role="alert">
       <strong>Error:</strong> {{ error.message }}
     </div>
     <div v-else>
     <h1>Organizacion - {{ $route.params.id }}</h1>
-      <p>{{organizacion}}</p>
+      <!--<p>{{organizacion}}</p>-->
     </div>
   </div>
 
@@ -19,10 +19,11 @@
     data() {
       return{
         organizacion : {},
-        error : {
+        info : {
           show : false,
-          message : ''
-        }
+          message : '',
+          tipo : ''
+        },
       }
     },
     created : async function () {
@@ -37,11 +38,10 @@
       inicializar : async function() {
         let response = await composer.organizaciones.getOrganizacion(this.$axios, this.$route.params.id);
         if (response.statusCode === 200){
-          this.error.show = false;
+          this.info.show = false;
           this.organizacion = response.data;
         } else {
-          this.error.show = true;
-          this.error.message = response.message;
+          this.info.show = true; this.info.message = response.message; this.info.tipo = "alert alert-warning";
         }
       }   
     }

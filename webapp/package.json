@@ -17,6 +17,7 @@
     "vue": "^2.5.11",
     "vue-i18n": "^8.0.0",
     "vue-native-websocket": "^2.0.6",
+    "vue-qr-reader": "^1.5.0",
     "vue-router": "^3.0.1",
     "vue2-google-maps": "^0.8.12",
     "vuex": "^3.0.1"

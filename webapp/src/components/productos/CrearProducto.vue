@@ -13,10 +13,13 @@
           </div>
 
           <form>
-            <div class="form-group col-md-12"> 
+            <div class="form-group col-md-6"> 
               <label for="identificador">Identificador</label>
               <input v-model="caracteristicas.identificador" class="form-control" aria-describedby="emailHelp" placeholder="Identificador del producto">
-               <small id="emailHelp" class="form-text text-muted">Opcional</small>
+                <small id="emailHelp" class="form-text text-muted">Opcional</small>
+                <small id="emailHelp" class="form-text text-muted">
+                  <a href="" data-toggle="modal"  @click="scannerQR=true" data-target="#ModalScannerQR">Escanear código QR</a>
+                </small>
             </div>
 
             <h3>Características</h3>
@@ -67,7 +70,7 @@
               </div>
             </div>
 
-            <div class="form-group col-md-12"> 
+            <div class="form-group col-md-8"> 
               <label for="Descripción">Descripción:</label>
               <textarea v-model="caracteristicas.descripcion" class="form-control" id="message-text"></textarea>
               <small id="emailHelp" class="form-text text-muted">Opcional</small>
@@ -156,13 +159,38 @@
             </div>
 
           </form>
-          <div class="col-sm-12">
+          <div class="col-md-12">
             <button @click="crearProducto" class="btn btn-primary">Submit</button>
           </div>
         </div>
       </div>
 
 
+      <!-- ModalScannerQR-->
+      <div class="modal fade" id="ModalScannerQR" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Escáner QR</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="row justify-content-center">
+                <div>
+                  <vue-qr-reader v-if="scannerQR" :responsive=true v-on:code-scanned="procesarCodigoQR" />
+                </div>
+              </div>
+              <input v-model="caracteristicas.identificador" class="form-control" aria-describedby="emailHelp" placeholder="CódigoQR" disabled="true">
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-info" @click="scannerQR=true">Reintentar</button>
+              <button type="button" class="btn btn-primary" @click="closeModal; scannerQR=false" data-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- ModalTipoProducto-->
       <div class="modal fade" id="ModalTipoProducto" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -205,13 +233,15 @@
 </template>
 
 <script>
+import VueQrReader from 'vue-qr-reader/dist/lib/vue-qr-reader.umd.js';
 import {composer} from '../../ComposerAPI'
 import googleMap from '../mapas/Mapa'
 //import crypto from 'crypto-js'
 
 export default {
   components : {
-    googleMap
+    googleMap,
+    VueQrReader
   },
   data(){
     return {
@@ -254,6 +284,7 @@ export default {
       nuevoTipoProducto : '',
       gps : false,
       mapa :false,
+      scannerQR :false,
     }
   },
   computed : {
@@ -313,6 +344,10 @@ export default {
    
   },
   methods : {
+    procesarCodigoQR (code) {
+      this.caracteristicas.identificador = code;
+      this.scannerQR = false;
+    },
     closeModal : async function(){
       this.infoModal.show=false;
     },
