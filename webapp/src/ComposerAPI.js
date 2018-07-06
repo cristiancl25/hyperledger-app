@@ -40,6 +40,24 @@ export const composer = {
                 return returnError(error);
             }
         },
+        generarIdentidad : async function (axios, participante, id){
+            try{
+                let response = await axios.post('/api/system/identities/issue',{
+                    "participant": participante,
+                    "userID": id,
+                    "options": {}
+                },{
+                    responseType : "arraybuffer",
+                    headers : {
+                        "Accept" : "application/octet-stream"
+                    }
+                });
+                return returnResponse(response);
+            }catch(error){
+                console.log(error)
+                return returnError(error);
+            }
+        }
 
     },
     organizaciones : {
@@ -62,6 +80,26 @@ export const composer = {
 
     },
     participantes : {
+        crearParticipante : async function(axios, participante){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.participantes.CrearParticipante', participante);
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
+        eliminarParticipante : async function(axios, id, tipo){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.participantes.EliminarParticipante', {
+                    "$class": "org.hyperledger.composer.participantes.EliminarParticipante",
+                    "id": id,
+                    "tipoUsuario": tipo,
+                  });
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
         getParticipante : async function(axios, rol, id){
             try{
                 let response = await axios.get('/api/org.hyperledger.composer.participantes.' + rol + '/' + id);

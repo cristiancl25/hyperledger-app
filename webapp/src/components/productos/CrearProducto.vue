@@ -2,16 +2,16 @@
     <div>
       
       <div class="row justify-content-center">
-        
+       
         <div class="col-md-10">
-          <h1>Crear Producto</h1>
+          
           <div class="progress" v-if= "progress">
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
           </div>
           <div class="col-md-12" v-if="info.show" v-bind:class="info.tipo" role="alert">
             <strong></strong> {{ info.message }}
           </div>
-
+           <h1>Crear Producto</h1>
           <form>
             <div class="form-group col-md-6"> 
               <label for="identificador">Identificador</label>

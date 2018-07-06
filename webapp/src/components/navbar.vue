@@ -88,7 +88,7 @@
             </div>
             <ul class="list-group" >
               <li
-                class="list-group-item"
+                class="list-group-item d-flex justify-content-between align-items-center"
                 :key="perfil.name"
                 @click="cambiarPerfil(index)"
                 v-for="(perfil, index) in perfiles">
