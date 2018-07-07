@@ -47,10 +47,37 @@
           </ul>
         </div>
       </div>
+      <div class="row">
+        <div class="col-md-6">
+          <h5 align="center"><strong>Localizaciones</strong></h5>
+          <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center"
+              :key="localizacion.nombre"
+              @click="coordenadas.latitud = localizacion.latitud; coordenadas.longitud = localizacion.longitud; coordenadas.info = coordenadas.direccion; locSelec=localizacion.localizacionId"
+              v-for="(localizacion) in organizacion.localizaciones">
+              {{localizacion.direccion}}
+              <span v-if="locSelec === localizacion.localizacionId" class="badge badge-success">{{$t('active')}}</span>
+              <!--<button
+                v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
+                data-toggle="modal" data-target="#ModalParticipante"
+                @click="delParticipante=true; datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Invitado'"
+                class="btn btn-danger btn-sm">
+                Eliminar
+              </button>
+              -->
+            </li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <google-map v-if="locSelec!==''" v-bind:markers="[{'lat':coordenadas.latitud, 'lng':coordenadas.longitud, 'info':coordenadas.direccion}]" v-bind:lista='false'></google-map>
+        </div>
+
+      </div>
       <br>
       <div class="row" v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id">
-        <div class="col-md-6">
+        <div class="btn-group col-md-6">
           <button class="btn btn-primary" data-toggle="modal" data-target="#ModalParticipante" @click="nuevoParticipante=true">Crear Participante</button>
+          <button class="btn btn-primary" data-toggle="modal" data-target="#ModalParticipante" @click="nuevaLocalizacion=true">Crear localizacion</button>
         </div>
       </div>
 
@@ -63,9 +90,7 @@
             <div class="modal-header">
               <h5 v-if="nuevoParticipante" class="modal-title" id="exampleModalLabel">Crear Participante</h5>
               <h5 v-if="delParticipante" class="modal-title" id="exampleModalLabel">Eliminar Participante</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
+              <h5 v-if="nuevaLocalizacion" class="modal-title" id="exampleModalLabel">Nueva localizacion</h5>
             </div>
             <div class="modal-body">
               <div class="col-md-12" v-if="error.show">
@@ -78,35 +103,62 @@
                   <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
                 </div>
               </div>
-              <form v-if="nuevoParticipante"> 
-                <div class="form-group col-md-12">
-                  <label for="id">Identificador</label>
-                  <input v-model="participante.id" class="form-control"  placeholder="Identificador del participante">
+              <div v-if="nuevaLocalizacion">
+                <form> 
+                  <div class="form-group col-md-12">
+                    <label>Nombre</label>
+                    <input v-model="localizacion.nombre" class="form-control"  placeholder="Nombre de la localizacion">
+                  </div>
+                  <div class="form-group col-md-12">
+                    <label>Latitud</label>
+                    <input v-model="localizacion.latitud" type=number step=0.01 class="form-control"  placeholder="Latitud">
+                  </div>
+                  <div class="form-group col-md-12">
+                    <label>Longitud</label>
+                    <input v-model="localizacion.longitud" type=number step=0.01 class="form-control"  placeholder="Longitud">
+                  </div>
+                  <div class="form-group col-md-12">
+                    <label>Dirección</label>
+                    <input v-model="localizacion.direccion" class="form-control"  placeholder="Dirección">
+                  </div>
+                </form>
+                <div class="col-md-6">
+                  <button class="btn btn-primary" @click="crearLocalizacion">Submit</button>
                 </div>
-                <div class="form-group col-md-12">
-                  <label for="nombre">Nombre</label>
-                  <input v-model="participante.nombre" class="form-control"  placeholder="Nombre del participante">
-                </div>
-                <div class="form-group col-md-12">
-                  <label for="email">Email</label>
-                  <input type="email" v-model="participante.email" class="form-control"  placeholder="Email del participante">
-                </div>
-                <div class="form-group col-md-6">
-                  <label for="exampleFormControlSelect1">Tipo de Participante</label>
-                  <select class="form-control" v-model="participante.tipoUsuario" id="exampleFormControlSelect1">
-                    <option selected>Usuario</option>
-                    <option>Invitado</option>
-                  </select>
-                </div>
-                <div id="card" class="form-group col-md-12"></div>
-                <br>
-                <div class="form-group col-md-6">
+              </div>
+
+              <div v-if="nuevoParticipante">
+                <form> 
+                  <div class="form-group col-md-12">
+                    <label for="id">Identificador</label>
+                    <input v-model="participante.id" class="form-control"  placeholder="Identificador del participante">
+                  </div>
+                  <div class="form-group col-md-12">
+                    <label for="nombre">Nombre</label>
+                    <input v-model="participante.nombre" class="form-control"  placeholder="Nombre del participante">
+                  </div>
+                  <div class="form-group col-md-12">
+                    <label for="email">Email</label>
+                    <input type="email" v-model="participante.email" class="form-control"  placeholder="Email del participante">
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label for="exampleFormControlSelect1">Tipo de Participante</label>
+                    <select class="form-control" v-model="participante.tipoUsuario" id="exampleFormControlSelect1">
+                      <option selected>Usuario</option>
+                      <option>Invitado</option>
+                    </select>
+                  </div>
+                  <div id="card" class="form-group col-md-12"></div>
+                  <br>
+                </form>
+                <div class="col-md-6">
                   <button class="btn btn-primary" @click="crearParticipante">Submit</button>
                 </div>
-              </form>
+              </div>
               
             </div>
             <div class="modal-footer">
+              <button type="button" v-if="nuevaLocalizacion" class="btn btn-primary" @click="inicializar(); nuevaLocalizacion=false; error.show=false" data-dismiss="modal">Cerrar</button>
               <button type="button" v-if="nuevoParticipante" class="btn btn-primary" @click="inicializar(); nuevoParticipante=false; error.show=false" data-dismiss="modal">Cerrar</button>
               <button type="button" v-if="delParticipante" class="btn btn-primary" @click="inicializar(); delParticipante=false; error.show=false" data-dismiss="modal">Cerrar</button>
               <button type="button" v-if="delParticipante" class="btn btn-danger" @click="eliminarParticipante()" >Borrar</button>
@@ -121,9 +173,12 @@
 
 <script>
   import {composer} from '../../ComposerAPI'
+  import googleMap from '../mapas/Mapa'
 
   export default {
-
+    components : {
+      googleMap,
+    },
     data() {
       return{
         organizacion : {
@@ -140,6 +195,7 @@
           message : '',
           tipo : ''
         },
+        nuevaLocalizacion : false,
         nuevoParticipante : false,
         delParticipante : false,
         datosParticipanteBorrar:{},
@@ -157,6 +213,12 @@
           "longitud": 0,
           "direccion": ""
         },
+        coordenadas : {
+          "latitud" : 0,
+          "longitud" : 0, 
+          "info" : ""
+        },
+        locSelec : "",      
         progress : false,
       }
     },
@@ -169,6 +231,24 @@
       }
     },
     methods : {
+      crearLocalizacion : async function(){
+        if (this.localizacion.direccion === '' || this.localizacion.nombre === ''){
+          this.error.show = true; this.error.message = 'Datos inválidos'; this.error.tipo = "alert alert-warning";
+          return;
+        }
+        this.error.show = false;
+        this.progress = true;
+        let response = await composer.organizaciones.crearLocalizacion(this.$axios, this.localizacion);
+        this.progress = false;
+        
+        if (response.statusCode === 200){
+          this.localizacion.direccion = ''; this.localizacion.nombre = ''; this.localizacion.latitud = 0; this.localizacion.longitud = 0;
+          this.error.show = true; this.error.message = 'Localización creada'; this.error.tipo = "alert alert-success";
+        } else {
+          this.error.show = true; this.error.message = response.message; this.error.tipo = "alert alert-danger";
+          this.localizacion.nombre = '';
+        }
+      },
       crearParticipante : async function(){
         this.error.show = false;
         if (this.participante.id !== '' && this.participante.email !== '' && this.participante.nombre !== ''){
@@ -208,7 +288,6 @@
         } else {
           this.error.show = true; this.error.message = 'Datos Icorrectos'; this.error.tipo = "alert alert-danger";
         }
-        //await this.inicializar();
       },
       eliminarParticipante : async function(){
         this.progress = true;

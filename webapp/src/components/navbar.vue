@@ -30,8 +30,12 @@
                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   {{$t('organizations')}}
                 </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">                    
-                  <router-link class="dropdown-item" to="/organizaciones" tag="a" active-class="active"><a>{{$t('organizations')}}</a></router-link>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                  <router-link class="dropdown-item" 
+                    :to="{path:'/organizaciones/:id', name:'org',params:{id:$store.state.organizacion}}"
+                    tag="a"><a>Mi organización</a>
+                  </router-link>                   
+                  <router-link class="dropdown-item" to="/organizaciones" tag="a"><a>{{$t('organizations')}}</a></router-link>
                 </div>
               </li>
             </ul>  

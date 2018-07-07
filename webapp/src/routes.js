@@ -23,7 +23,7 @@ export const routes = [
   },
   { path: '/organizaciones', component: organizaciones, children: [
     { path: '', component: AllOrganizaciones },
-    { path: ':id/', component: organizacion }]
+    { path: ':id/', name: 'org', component: organizacion }]
   },
   { path: '*', redirect: '/'}
 ];
