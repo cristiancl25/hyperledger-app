@@ -203,6 +203,11 @@
               </button>
             </div>
             <div class="modal-body">
+              <div class="col-md-12" v-if="modalProgress">
+                <div class="progress">
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+                </div>
+              </div>
               <div v-if="infoModal.show" v-bind:class="infoModal.tipo">
                {{infoModal.message}}
               </div>
@@ -270,6 +275,7 @@ export default {
       },
       localizaciones : [],
       progress : false,
+      modalProgress : false,
       info : {
         show : false,
         message : '',
@@ -352,6 +358,7 @@ export default {
       this.infoModal.show=false;
     },
     crearTipoProducto : async function(){
+      this.modalProgress = true;
       let response = await composer.productos.crearTipoProducto(this.$axios, this.nuevoTipoProducto);
       if (response.statusCode === 200){
         this.infoModal.show = true;
@@ -364,6 +371,7 @@ export default {
         this.infoModal.tipo = "alert alert-danger"
       }
       this.nuevoTipoProducto = '';
+      this.modalProgress = false;
 
     },
     actualizarTipoProducto : async function() {
@@ -435,22 +443,22 @@ export default {
     },
     getLocalizaciones : async function() {
       this.mapa = false;
-      let response = await composer.organizaciones.getOrganizacion(this.$axios, this.$store.state.organizacion);
+      let response = await composer.organizaciones.getOrganizacionId(this.$axios, this.$store.state.organizacion);
       if (response.statusCode === 200){
         this.info.show = false;
-        let self = this;
-        this.localizaciones = [];
-        response.data.localizaciones.forEach(async (loc) => {
-          let response = await composer.organizaciones.getLocalizacion(self.$axios, loc.split('#')[1]);
-          if (response.statusCode === 200){
-            self.info.show = false;
-            self.localizaciones.push(response.data);
-          } else {
-            self.info.show = true;
-            self.info.message = response.message;
-            self.info.tipo = "alert alert-danger";
-          }
-        });
+        this.localizaciones = response.data.localizaciones;
+        // let self = this;
+        // response.data.localizaciones.forEach(async (loc) => {
+        //   let response = await composer.organizaciones.getLocalizacion(self.$axios, loc.split('#')[1]);
+        //   if (response.statusCode === 200){
+        //     self.info.show = false;
+        //     self.localizaciones.push(response.data);
+        //   } else {
+        //     self.info.show = true;
+        //     self.info.message = response.message;
+        //     self.info.tipo = "alert alert-danger";
+        //   }
+        // });
       } else {
         this.info.show = true;
         this.info.message = response.message;

@@ -80,6 +80,17 @@ export const composer = {
                 return returnError(error);
             }
         },
+        eliminarLocalizacion : async function(axios, loc){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.organizaciones.EliminarLocalizacion/', {
+                    "$class": "org.hyperledger.composer.organizaciones.EliminarLocalizacion",
+                    "localizacionId": loc
+                  });
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
         crearLocalizacion : async function(axios, loc){
             try{
                 let response = await axios.post('/api/org.hyperledger.composer.organizaciones.CrearLocalizacion/', loc);

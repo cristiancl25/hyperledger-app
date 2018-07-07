@@ -57,14 +57,13 @@
               v-for="(localizacion) in organizacion.localizaciones">
               {{localizacion.direccion}}
               <span v-if="locSelec === localizacion.localizacionId" class="badge badge-success">{{$t('active')}}</span>
-              <!--<button
+              <button
                 v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
-                data-toggle="modal" data-target="#ModalParticipante"
-                @click="delParticipante=true; datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Invitado'"
+              
+                @click="eliminarLocalizacion(localizacion.localizacionId)"
                 class="btn btn-danger btn-sm">
                 Eliminar
               </button>
-              -->
             </li>
           </ul>
         </div>
@@ -248,6 +247,13 @@
           this.error.show = true; this.error.message = response.message; this.error.tipo = "alert alert-danger";
           this.localizacion.nombre = '';
         }
+      },
+      eliminarLocalizacion : async function (loc) {
+
+        // TODO Mejorar
+        let response = await composer.organizaciones.eliminarLocalizacion(this.$axios, loc);
+        this.inicializar();
+
       },
       crearParticipante : async function(){
         this.error.show = false;
