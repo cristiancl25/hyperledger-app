@@ -8,7 +8,7 @@
         <div>
           <h1 align="center"><strong>{{ organizacion.nombre}}</strong></h1>
           <h5 align="center"><strong>ID: </strong>{{organizacion.orgId}}</h5>
-          <h5 align="center"><strong>Tipo de organización: </strong>{{tipoOrganizacion}}</h5>
+          <h5 align="center"><strong>Tipo de organización: </strong>{{organizacion.tipoOrganizacion.tipo}}</h5>
         </div>
       </div>
       <div class="row">
@@ -16,12 +16,13 @@
           <h5 align="center"><strong>Usuarios</strong></h5>
           <ul class="list-group">
             <li class="list-group-item d-flex justify-content-between align-items-center"
-              :key="usuario"
-              v-for="(usuario, index) in organizacion.usuarios">
-              {{getUsuario(index)}}
+              :key="usuario.id"
+              v-for="(usuario) in organizacion.usuarios">
+              {{usuario.email}}
               <button
-                v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === administrador"
-                @click="eliminarParticipante(index,'Usuario')"
+                v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
+                data-toggle="modal" data-target="#ModalParticipante"
+                @click="delParticipante=true; datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Usuario'"
                 class="btn btn-danger btn-sm">
                 Eliminar
               </button>
@@ -32,12 +33,13 @@
           <h5 align="center"><strong>Invitados</strong></h5>
           <ul class="list-group">
             <li class="list-group-item d-flex justify-content-between align-items-center"
-              :key="usuario"
-              v-for="(usuario, index) in organizacion.invitados">
-              {{getInvitado(index)}}
+              :key="usuario.id"
+              v-for="(usuario) in organizacion.invitados">
+              {{usuario.email}}
               <button
-                v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === administrador"
-                @click="eliminarParticipante(index,'Invitado')"
+                v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
+                data-toggle="modal" data-target="#ModalParticipante"
+                @click="delParticipante=true; datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Invitado'"
                 class="btn btn-danger btn-sm">
                 Eliminar
               </button>
@@ -45,48 +47,73 @@
           </ul>
         </div>
       </div>
-      <div class="row" v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === administrador">
+      <br>
+      <div class="row" v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id">
         <div class="col-md-6">
-          <button class="btn btn-primary" @click="nuevoParticipante = !nuevoParticipante">nuevoParticipante</button>
-          <form v-if="nuevoParticipante">
-            
-            <div class="col-md-12" v-if="error.show">
-              <div v-bind:class="error.tipo" role="alert">
-                <strong>Error:</strong> {{ error.message }}
-              </div>
-            </div>
-
-            <div class="col-md-12" v-if="progress">
-              <div class="progress" >
-                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
-              </div>
-            </div>
-            
-            <div class="form-group col-md-12">
-              <label for="id">Identificador</label>
-              <input v-model="participante.id" class="form-control"  placeholder="Identificador del participante">
-            </div>
-            <div class="form-group col-md-12">
-              <label for="nombre">Nombre</label>
-              <input v-model="participante.nombre" class="form-control"  placeholder="Nombre del participante">
-            </div>
-            <div class="form-group col-md-12">
-              <label for="email">Email</label>
-              <input type="email" v-model="participante.email" class="form-control"  placeholder="Email del participante">
-            </div>
-            <div class="form-group col-md-6">
-              <label for="exampleFormControlSelect1">Tipo de Participante</label>
-              <select class="form-control" v-model="participante.tipoUsuario" id="exampleFormControlSelect1">
-                <option selected>Usuario</option>
-                <option>Invitado</option>
-              </select>
-            </div>
-            <button class="btn btn-primary" @click="crearParticipante">Submit</button>
-          </form>
+          <button class="btn btn-primary" data-toggle="modal" data-target="#ModalParticipante" @click="nuevoParticipante=true">Crear Participante</button>
         </div>
       </div>
 
     </div>
+
+    <!-- ModalParticipante-->
+      <div class="modal fade" id="ModalParticipante" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 v-if="nuevoParticipante" class="modal-title" id="exampleModalLabel">Crear Participante</h5>
+              <h5 v-if="delParticipante" class="modal-title" id="exampleModalLabel">Eliminar Participante</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="col-md-12" v-if="error.show">
+                <div v-bind:class="error.tipo" role="alert">
+                  <strong></strong> {{ error.message }}
+                </div>
+              </div>
+              <div class="col-md-12" v-if="progress">
+                <div class="progress" >
+                  <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+                </div>
+              </div>
+              <form v-if="nuevoParticipante"> 
+                <div class="form-group col-md-12">
+                  <label for="id">Identificador</label>
+                  <input v-model="participante.id" class="form-control"  placeholder="Identificador del participante">
+                </div>
+                <div class="form-group col-md-12">
+                  <label for="nombre">Nombre</label>
+                  <input v-model="participante.nombre" class="form-control"  placeholder="Nombre del participante">
+                </div>
+                <div class="form-group col-md-12">
+                  <label for="email">Email</label>
+                  <input type="email" v-model="participante.email" class="form-control"  placeholder="Email del participante">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="exampleFormControlSelect1">Tipo de Participante</label>
+                  <select class="form-control" v-model="participante.tipoUsuario" id="exampleFormControlSelect1">
+                    <option selected>Usuario</option>
+                    <option>Invitado</option>
+                  </select>
+                </div>
+                <div id="card" class="form-group col-md-12"></div>
+                <br>
+                <div class="form-group col-md-6">
+                  <button class="btn btn-primary" @click="crearParticipante">Submit</button>
+                </div>
+              </form>
+              
+            </div>
+            <div class="modal-footer">
+              <button type="button" v-if="nuevoParticipante" class="btn btn-primary" @click="inicializar(); nuevoParticipante=false; error.show=false" data-dismiss="modal">Cerrar</button>
+              <button type="button" v-if="delParticipante" class="btn btn-primary" @click="inicializar(); delParticipante=false; error.show=false" data-dismiss="modal">Cerrar</button>
+              <button type="button" v-if="delParticipante" class="btn btn-danger" @click="eliminarParticipante()" >Borrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
   </div>
 
@@ -114,6 +141,8 @@
           tipo : ''
         },
         nuevoParticipante : false,
+        delParticipante : false,
+        datosParticipanteBorrar:{},
         participante : {
           "$class": "org.hyperledger.composer.participantes.CrearParticipante",
           "id": "",
@@ -121,17 +150,15 @@
           "nombre": "",
           "tipoUsuario": "Usuario",
         },
+        localizacion : {
+          "$class": "org.hyperledger.composer.organizaciones.CrearLocalizacion",
+          "nombre": "",
+          "latitud": 0,
+          "longitud": 0,
+          "direccion": ""
+        },
         progress : false,
       }
-    },
-    computed : {
-      tipoOrganizacion() {
-        return this.organizacion.tipoOrganizacion.split('#')[1];
-      },
-      administrador(){
-        return this.organizacion.administrador.split('#')[1];
-      }
-
     },
     created : async function () {
         await this.inicializar();
@@ -142,15 +169,7 @@
       }
     },
     methods : {
-      str2bytes (str) {
-        var bytes = new Uint8Array(str.length);
-        for (var i=0; i<str.length; i++) {
-            bytes[i] = str.charCodeAt(i);
-        }
-        return bytes;
-      },
       crearParticipante : async function(){
-        // TODO Mostrar error
         this.error.show = false;
         if (this.participante.id !== '' && this.participante.email !== '' && this.participante.nombre !== ''){
           this.progress = true;
@@ -159,50 +178,28 @@
           if (response.statusCode === 200){
             const participante = "resource:org.hyperledger.composer.participantes." + this.participante.tipoUsuario + "#" + this.participante.id;
             const id = this.participante.id + "_" + this.organizacion.orgId;
-
-            // var xhr = new XMLHttpRequest();
-            // xhr.open("POST", 'http://localhost:3000/api/system/identities/issue', true);
-            // xhr.withCredentials = true;
-            // xhr.setRequestHeader("Content-type","application/json");
-            // xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
-            // xhr.onreadystatechange = function() {
-            //   if (xhr.readyState == 4 && xhr.status == 200) {
-            //     // alert("Failed to download:" + xhr.status + "---" + xhr.statusText);
-            //     console.log(xhr.response);
-            //     console.log(typeof xhr.response);
-            //     const url = window.URL.createObjectURL(new Blob([xhr.response], {type: "octet/stream"}));
-            //   const link = document.createElement('a');
-            //   link.href = url;
-            //   link.setAttribute('download', id + '.card');
-            //   document.body.appendChild(link);
-            //   link.click();
-            //   }
-            // }
-            // xhr.responseType = "arraybuffer";
-            // xhr.send(JSON.stringify({
-            //         "participant": participante,
-            //         "userID": id,
-            //         "options": {}
-            //     }));
-            
             this.progress = true;
             let response = await composer.sistema.generarIdentidad(this.$axios, participante ,id);
             this.progress = false;
-            console.log(response);
             if (response.statusCode === 200){
               let data = response.data;
-              // console.log(data);
-              // console.log(typeof data);
               const url = window.URL.createObjectURL(new Blob([data],  {type: "octet/stream"}));
               const link = document.createElement('a');
               link.href = url;
               link.setAttribute('download', id + '.card');
-              var t = document.createTextNode("CLICK MEEEEEEEEEEEEEEEEEEEEEEEEE");
-              link.appendChild(t);  
-              document.body.appendChild(link);
-              //link.click();
+              var t = document.createTextNode("Descargar perfil de conexión");
+              link.appendChild(t);
+              document.getElementById("card").appendChild(link);
+              link.click();
+              this.error.show = true; this.error.message = 'Participante creado'; this.error.tipo = "alert alert-success";
+              this.participante.id = ''; this.participante.email = ''; this.participante.nombre = '';
+              
             } else {
-              this.error.show = true; this.error.message = response.message; this.error.tipo = "alert alert-danger";
+              this.progress = true;
+              // TODO mejorar
+              await composer.participantes.eliminarParticipante(this.$axios, this.participante.id, this.participante.tipoUsuario);
+              this.progress = false;
+              this.error.show = true; this.error.message = 'Error al procesar la petición'; this.error.tipo = "alert alert-danger";
             }
           }else{
             this.error.show = true; this.error.message = response.message; this.error.tipo = "alert alert-danger";
@@ -213,27 +210,26 @@
         }
         //await this.inicializar();
       },
-      eliminarParticipante : async function(index, tipo){
-        let id;
-        if (tipo === 'Usuario'){
-          id = this.getUsuario(index);
-        } else {
-          id = this.getInvitado(index);
-        }
+      eliminarParticipante : async function(){
+        this.progress = true;
+        let id = this.datosParticipanteBorrar.id;
+        let tipo = this.datosParticipanteBorrar.tipo;
         let response = await composer.participantes.eliminarParticipante(this.$axios, id, tipo);
-        if (response.statusCode !== 200) {
-          this.info.show = true; this.info.message = response.message; this.info.tipo = "alert alert-danger";
+        this.progress = false;
+        if (response.statusCode === 200) {
+          let identidad = await composer.consulta.getIdentity(this.$axios, tipo, id);
+          let response = await composer.sistema.revocarIdentidad(this.$axios, identidad.data[0].identityId);
+          if (identidad.statusCode !== 200 && response.statusCode !== 204){
+            this.error.show = true; this.error.message = 'La identidad del participante non pudo ser revocada'; this.error.tipo = "alert alert-danger";
+          } else {
+            this.error.show = true; this.error.message = 'Participante eliminado'; this.error.tipo = "alert alert-success";
+          }
+        } else {
+          this.error.show = true; this.error.message = response.message; this.error.tipo = "alert alert-danger";
         }
-        await this.inicializar();
-      },
-      getUsuario(index){
-        return this.organizacion.usuarios[index].split('#')[1];
-      },
-      getInvitado(index){
-        return this.organizacion.invitados[index].split('#')[1];
       },
       inicializar : async function() {
-        let response = await composer.organizaciones.getOrganizacion(this.$axios, this.$route.params.id);
+        let response = await composer.organizaciones.getOrganizacionId(this.$axios, this.$route.params.id);
         if (response.statusCode === 200){
           this.info.show = false;
           this.organizacion = response.data;

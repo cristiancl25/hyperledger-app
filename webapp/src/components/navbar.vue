@@ -86,6 +86,11 @@
             <div v-if="errorModal.show" class="alert alert-danger">
               <strong>Error:</strong> {{errorModal.message}}
             </div>
+            <div class="col-md-12" v-if="progress">
+              <div class="progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+              </div>
+            </div>
             <ul class="list-group" >
               <li
                 class="list-group-item d-flex justify-content-between align-items-center"
@@ -154,6 +159,7 @@ export default {
         show : false,
         message : ''
       },
+      progress : false
     }
   },
   computed : {
@@ -209,6 +215,7 @@ export default {
         }
       }
       await this.actualizarPerfiles();
+      await this.conexion();
     },
     ping : async function(){
       let response = await composer.sistema.ping(this.$axios);
@@ -221,6 +228,7 @@ export default {
       }
     },
     cambiarPerfil : async function(index){
+      this.progress = true;
       this.errorModal.show = false;
       let response = await composer.sistema.setDefault(this.$axios, this.perfiles[index].name);
       if (response.statusCode !== 204){
@@ -229,6 +237,7 @@ export default {
       }
       await this.actualizarPerfiles();
       await this.conexion();
+      this.progress = false;
     },
     conexion : async function(){
       let response = await composer.sistema.ping(this.$axios);

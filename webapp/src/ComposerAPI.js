@@ -52,12 +52,23 @@ export const composer = {
                         "Accept" : "application/octet-stream"
                     }
                 });
+
                 return returnResponse(response);
             }catch(error){
-                console.log(error)
+                return {
+                    "statusCode" : error.response.status
+                };
+            }
+        },
+        revocarIdentidad : async function(axios, id) {
+            try{
+                let response = await axios.post('/api/system/identities/' + id + '/revoke');
+                return returnResponse(response);
+            }catch(error){
                 return returnError(error);
             }
-        }
+        },
+        
 
     },
     organizaciones : {
@@ -69,15 +80,30 @@ export const composer = {
                 return returnError(error);
             }
         },
-        getOrganizacion : async function(axios, id){
+        crearLocalizacion : async function(axios, loc){
             try{
-                let response = await axios.get('/api/org.hyperledger.composer.organizaciones.Organizacion/' + id);
+                let response = await axios.post('/api/org.hyperledger.composer.organizaciones.CrearLocalizacion/', loc);
                 return returnResponse(response);
             }catch(error){
                 return returnError(error);
             }
         },
-
+        getOrganizacion : async function(axios){
+            try{
+                let response = await axios.get('/api/org.hyperledger.composer.organizaciones.Organizacion/');
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
+        getOrganizacionId : async function(axios, id){
+            try{
+                let response = await axios.get('/api/org.hyperledger.composer.organizaciones.Organizacion/' + id + '?filter={%22include%22:%22resolve%22}');
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
     },
     participantes : {
         crearParticipante : async function(axios, participante){
@@ -147,6 +173,17 @@ export const composer = {
             }
         }
 
+    },
+    consulta : {
+        getIdentity : async function(axios, tipo, id){
+            try{
+                let q = '/api/queries/getIdentity?participanteId=resource%3Aorg.hyperledger.composer.participantes.' + tipo + '%23' + id;
+                let response = await axios.get(q);
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        }
     }
 
 }
