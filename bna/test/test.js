@@ -114,6 +114,12 @@ describe('Sample', () => {
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
+    async function eliminarLocalizacion(localizacionId){
+        const transaction = factory.newTransaction(NS_ORG, 'EliminarLocalizacion');
+        transaction.localizacionId = localizacionId;
+        await businessNetworkConnection.submitTransaction(transaction);
+    }
+
     async function crearTipoProducto(tipo){
         const transaction = factory.newTransaction(NS_PROD, 'CrearTipoProducto');
         transaction.tipo = tipo;
@@ -414,6 +420,34 @@ describe('Sample', () => {
         orgs.should.have.lengthOf(1);
         orgs[0].localizaciones.should.have.lengthOf(1);
         orgs[0].localizaciones[0].$identifier.should.equal(localizacionId);
+    });
+
+    it('Creación de una localización', async () => {
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await useIdentity('admin@pes1');
+        
+        await crearLocalizacion({
+            "nombre" : "loc2",
+            "latitud" : 1.2,
+            "longitud" : 1.8,
+            "direccion" : "direccion2"
+        });
+
+        await chai.expect(
+            eliminarLocalizacion('pes1-loc3')
+        ).to.be.rejectedWith(Error);
+
+        await eliminarLocalizacion('pes1-loc2');
+        
+        var regLoc = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Localizacion');
+        var locs = await regLoc.getAll();
+        locs.should.have.lengthOf(2);
+
+        var regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        var orgs = await regOrg.getAll();
+        orgs.should.have.lengthOf(1);
+        orgs[0].localizaciones.should.have.lengthOf(1);
+        orgs[0].localizaciones[0].$identifier.should.equal('pes1-loc1');
     });
     
 

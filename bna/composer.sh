@@ -37,17 +37,17 @@ composer transaction submit -c admin@bna -d '{
     "emailAdmin":"admin@pes1"
 }'
 composer identity issue -c admin@bna -f ~/.composer/profiles/admin_pes1.card -u admin@pes1 -a "resource:org.hyperledger.composer.participantes.OrgAdmin#admin@pes1" -x
-composer card import -f ~/.composer/profiles/admin_pes1.card
+# composer card import -f ~/.composer/profiles/admin_pes1.card
 
-# Creación de un usuario para una organización
-composer transaction submit -c admin@pes1@bna -d '{
-    "$class":"org.hyperledger.composer.participantes.CrearParticipante",
-    "id":"usuario1@pes1",
-    "nombre":"usuario1",
-    "email":"usuario1@pes1",
-    "tipoUsuario":"Usuario"
-}'
-composer identity issue -c admin@pes1@bna -f ~/.composer/profiles/usuario1_pes1.card -u usuario1@pes1 -a "resource:org.hyperledger.composer.participantes.Usuario#usuario1@pes1"
+# # Creación de un usuario para una organización
+# composer transaction submit -c admin@pes1@bna -d '{
+#     "$class":"org.hyperledger.composer.participantes.CrearParticipante",
+#     "id":"usuario1@pes1",
+#     "nombre":"usuario1",
+#     "email":"usuario1@pes1",
+#     "tipoUsuario":"Usuario"
+# }'
+# composer identity issue -c admin@pes1@bna -f ~/.composer/profiles/usuario1_pes1.card -u usuario1@pes1 -a "resource:org.hyperledger.composer.participantes.Usuario#usuario1@pes1"
 # composer card import -f ~/.composer/profiles/usuario1_pes1.card
 
 # Creación de una organización y su administrador

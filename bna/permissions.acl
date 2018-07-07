@@ -125,6 +125,17 @@ rule OrgAdminCrearLocalizacionRecurso2 {
   action: ALLOW  
 }
 
+
+// TODO ajustar ACLs
+rule OrgAdminOrganizaciones {
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE, UPDATE, DELETE 
+  resource: "org.hyperledger.composer.organizaciones.*"
+  transaction: "org.hyperledger.composer.organizaciones.*"
+  action: ALLOW  
+}
+
 // Transacción ActualizarOrganizacion --> OrgAdmin
 rule OrgAdminActualizarOrganizacion {
   description:  ""

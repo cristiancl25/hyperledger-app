@@ -110,6 +110,30 @@ async function CrearLocalizacion(datos) {
 
 /**
  *
+ * @param {org.hyperledger.composer.organizaciones.EliminarLocalizacion} datos
+ * @transaction
+ */
+async function EliminarLocalizacion(datos) {
+
+    if (getCurrentParticipant().$namespace + '.' + getCurrentParticipant().$type !== 'org.hyperledger.composer.participantes.OrgAdmin'){
+        throw new Error('participante inválido');
+    }
+    var participante = getCurrentParticipant();
+    var {organizacion, regOrg} = await getOrganizacion(participante);
+    const index = organizacion.localizaciones.findIndex((loc) => loc.$identifier === datos.localizacionId);
+    if (index === -1) {
+        throw new Error('La localización especificada no existe');
+    }
+
+    organizacion.localizaciones.splice(index, 1);
+
+
+    await regOrg.update(organizacion);
+}
+
+
+/**
+ *
  * @param {org.hyperledger.composer.organizaciones.ActualizarOrganizacion} datos
  * @transaction
  */

@@ -37,6 +37,10 @@ transaction CrearLocalizacion {
   o String direccion
 }
 
+transaction EliminarLocalizacion {
+  o String localizacionId
+}
+
 transaction CrearTipoOrganizacion {
   o String tipo
 }
