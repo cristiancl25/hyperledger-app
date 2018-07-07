@@ -48,7 +48,7 @@ composer transaction submit -c admin@pes1@bna -d '{
     "tipoUsuario":"Usuario"
 }'
 composer identity issue -c admin@pes1@bna -f ~/.composer/profiles/usuario1_pes1.card -u usuario1@pes1 -a "resource:org.hyperledger.composer.participantes.Usuario#usuario1@pes1"
-composer card import -f ~/.composer/profiles/usuario1_pes1.card
+# composer card import -f ~/.composer/profiles/usuario1_pes1.card
 
 # Creación de una organización y su administrador
 composer transaction submit -c admin@bna -d '{
@@ -62,42 +62,42 @@ composer transaction submit -c admin@bna -d '{
     "emailAdmin":"admin@res1"
 }'
 composer identity issue -c admin@bna -f ~/.composer/profiles/admin_res1.card -u admin@res1 -a "resource:org.hyperledger.composer.participantes.OrgAdmin#admin@res1" -x
-composer card import -f ~/.composer/profiles/admin_res1.card
+# composer card import -f ~/.composer/profiles/admin_res1.card
 
-# Creación de un usuario dentro de una organizacion
-composer transaction submit -c admin@res1@bna -d '{
-    "$class":"org.hyperledger.composer.participantes.CrearParticipante",
-    "id":"usuario1@res1",
-    "nombre":"usuario1",
-    "email":"usuario1@res1",
-    "tipoUsuario":"Usuario"
-}'
-composer identity issue -c admin@res1@bna -f ~/.composer/profiles/usuario1_res1.card -u usuario1@res1 -a "resource:org.hyperledger.composer.participantes.Usuario#usuario1@res1"
-#composer card import -f ~/.composer/usuario1_res1.card
+# # Creación de un usuario dentro de una organizacion
+# composer transaction submit -c admin@res1@bna -d '{
+#     "$class":"org.hyperledger.composer.participantes.CrearParticipante",
+#     "id":"usuario1@res1",
+#     "nombre":"usuario1",
+#     "email":"usuario1@res1",
+#     "tipoUsuario":"Usuario"
+# }'
+# composer identity issue -c admin@res1@bna -f ~/.composer/profiles/usuario1_res1.card -u usuario1@res1 -a "resource:org.hyperledger.composer.participantes.Usuario#usuario1@res1"
+# composer card import -f ~/.composer/usuario1_res1.card
 
-composer transaction submit -c usuario1@pes1@bna -d '{
-  "$class": "org.hyperledger.composer.productos.CrearTipoProducto",
-  "tipo": "Pescado"
-}'
+# # composer transaction submit -c usuario1@pes1@bna -d '{
+#   "$class": "org.hyperledger.composer.productos.CrearTipoProducto",
+#   "tipo": "Pescado"
+# }'
 
-composer transaction submit -c usuario1@pes1@bna -d '{
-  "$class": "org.hyperledger.composer.productos.CrearProducto",
-  "identificador": "id1",
-  "caracteristicas": {
-    "$class": "org.hyperledger.composer.productos.Caracteristicas",
-    "tipoProducto": "resource:org.hyperledger.composer.productos.TipoProducto#Pescado",
-    "tipo": "UNIDAD",
-    "variedadProducto": "variedad1",
-    "descripcion" : "descripcion del producto",
-    "unidades" : 1,
-    "peso" : 3.5,
-	"magnitudPeso" : "kg"    
-  },
-  "loc" : {
-    "$class": "org.hyperledger.composer.productos.Loc",
-    "latitud": 3.14,
-    "longitud": 5.3,
-    "direccion": "direccion1"
-  }
-}'
+# # composer transaction submit -c usuario1@pes1@bna -d '{
+#   "$class": "org.hyperledger.composer.productos.CrearProducto",
+#   "identificador": "id1",
+#   "caracteristicas": {
+#     "$class": "org.hyperledger.composer.productos.Caracteristicas",
+#     "tipoProducto": "resource:org.hyperledger.composer.productos.TipoProducto#Pescado",
+#     "tipo": "UNIDAD",
+#     "variedadProducto": "variedad1",
+#     "descripcion" : "descripcion del producto",
+#     "unidades" : 1,
+#     "peso" : 3.5,
+# 	"magnitudPeso" : "kg"    
+#   },
+#   "loc" : {
+#     "$class": "org.hyperledger.composer.productos.Loc",
+#     "latitud": 3.14,
+#     "longitud": 5.3,
+#     "direccion": "direccion1"
+#   }
+# }'
 echo composer-dev iniciado

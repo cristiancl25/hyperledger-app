@@ -12,3 +12,10 @@ query ProductosPorTipo {
     SELECT  org.hyperledger.composer.productos.Producto
   	WHERE   ( caracteristicas.tipoProducto == _$tipoProducto )
 }
+
+query getIdentity {
+  description: "Devuelve todos los productos de unha organización"
+  statement:  
+    SELECT  org.hyperledger.composer.system.Identity
+  	WHERE   ( participant == _$participanteId )
+}

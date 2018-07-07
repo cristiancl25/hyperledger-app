@@ -80,7 +80,23 @@ rule NetworkAdminCrearOrganizacionRecurso2 {
   action: ALLOW  
 }
 
+// Revocar identidad --> OrgAdmin
+rule OrgAdminRevocarIdentidad{
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: CREATE
+  resource: "org.hyperledger.composer.system.RevokeIdentity"
+  action: ALLOW  
+}
 
+rule OrgAdminRevocarIdentidad2{
+  description:  ""
+  participant: "org.hyperledger.composer.participantes.OrgAdmin"
+  operation: UPDATE
+  resource: "org.hyperledger.composer.system.Identity"
+  transaction: "org.hyperledger.composer.system.RevokeIdentity"
+  action: ALLOW  
+}
 
 // Transacción CrearLocalización --> OrgAdmin
 rule OrgAdminCrearLocalizacion{
