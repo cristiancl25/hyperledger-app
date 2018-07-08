@@ -1,3 +1,10 @@
+query Productos {
+  description: "Devuelve todos los productos"
+  statement:  
+    SELECT  org.hyperledger.composer.productos.Producto
+    LIMIT _$limitParam
+    SKIP _$skipParam
+}
 
 query ProductosOrganizacion {
   description: "Devuelve todos los productos de unha organización"
