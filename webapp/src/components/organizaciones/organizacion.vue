@@ -59,8 +59,8 @@
               <span v-if="locSelec === localizacion.localizacionId" class="badge badge-success">{{$t('active')}}</span>
               <button
                 v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
-              
-                @click="eliminarLocalizacion(localizacion.localizacionId)"
+                data-toggle="modal" data-target="#ModalParticipante"
+                @click="delLocalizacion=true; delLocalizacionId=localizacion.localizacionId;"
                 class="btn btn-danger btn-sm">
                 Eliminar
               </button>
@@ -89,6 +89,7 @@
             <div class="modal-header">
               <h5 v-if="nuevoParticipante" class="modal-title" id="exampleModalLabel">Crear Participante</h5>
               <h5 v-if="delParticipante" class="modal-title" id="exampleModalLabel">Eliminar Participante</h5>
+              <h5 v-if="delLocalizacion" class="modal-title" id="exampleModalLabel">Eliminar localizacion</h5>
               <h5 v-if="nuevaLocalizacion" class="modal-title" id="exampleModalLabel">Nueva localizacion</h5>
             </div>
             <div class="modal-body">
@@ -161,6 +162,8 @@
               <button type="button" v-if="nuevoParticipante" class="btn btn-primary" @click="inicializar(); nuevoParticipante=false; error.show=false" data-dismiss="modal">Cerrar</button>
               <button type="button" v-if="delParticipante" class="btn btn-primary" @click="inicializar(); delParticipante=false; error.show=false" data-dismiss="modal">Cerrar</button>
               <button type="button" v-if="delParticipante" class="btn btn-danger" @click="eliminarParticipante()" >Borrar</button>
+              <button type="button" v-if="delLocalizacion" class="btn btn-primary" @click="inicializar(); delLocalizacion=false; error.show=false" data-dismiss="modal">Cerrar</button>
+              <button type="button" v-if="delLocalizacion" class="btn btn-danger" @click="eliminarLocalizacion()" >Borrar</button>
             </div>
           </div>
         </div>
@@ -197,6 +200,8 @@
         nuevaLocalizacion : false,
         nuevoParticipante : false,
         delParticipante : false,
+        delLocalizacion :false,
+        delLocalizacionId : '',
         datosParticipanteBorrar:{},
         participante : {
           "$class": "org.hyperledger.composer.participantes.CrearParticipante",
@@ -248,12 +253,16 @@
           this.localizacion.nombre = '';
         }
       },
-      eliminarLocalizacion : async function (loc) {
-
-        // TODO Mejorar
-        let response = await composer.organizaciones.eliminarLocalizacion(this.$axios, loc);
-        this.inicializar();
-
+      eliminarLocalizacion : async function () {
+        this.error.show = false;
+        this.progress = true;
+        let response = await composer.organizaciones.eliminarLocalizacion(this.$axios, this.delLocalizacionId);
+        this.progress = false;
+        if (response.statusCode === 200){
+          this.error.show = true; this.error.message = 'Localización Eliminada'; this.error.tipo = "alert alert-success";
+        }else{
+          this.error.show = true; this.error.message = response.message; this.error.tipo = "alert alert-danger";
+        }
       },
       crearParticipante : async function(){
         this.error.show = false;
