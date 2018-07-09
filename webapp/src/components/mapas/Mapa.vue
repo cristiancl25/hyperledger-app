@@ -1,12 +1,13 @@
 <template>
   <div>
     <div class="row" v-if="lista">
-      <div class="col-md-6">
+      <div class="col-md-12">
         <ul class="list-group" style="text-align:center" >
           <li class="list-group-item d-flex justify-content-between align-items-center"
               @click="center=mark; seleccionada=index"
               :key="mark.info"
               v-for="(mark,index) in markers">{{mark.info}}
+              <router-link :to="{path:'/organizaciones/:id', name:'org',params:{id:mark.org}}" tag="a">{{mark.org}}</router-link>
               <span v-if="seleccionada===index" class="badge badge-success">Seleccionada</span>
           </li>
         </ul>

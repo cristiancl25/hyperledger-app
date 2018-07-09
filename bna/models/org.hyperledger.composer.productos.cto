@@ -120,7 +120,7 @@ event ProductoEnVenta {
   o String productoId
   o String tipoProducto
   o TipoVenta tipoVenta
-  o String variedadProducto
+  o String variedadProducto optional
 }
 
 transaction PujarProducto {

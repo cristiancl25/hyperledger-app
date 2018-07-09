@@ -169,7 +169,7 @@ export const composer = {
         },
         getProducto : async function(axios, productoId){
             try{
-                let response = await axios.get('/api/org.hyperledger.composer.productos.Producto/' + productoId);
+                let response = await axios.get('/api/org.hyperledger.composer.productos.Producto/' + productoId + '?filter={%22include%22:%22resolve%22}');
                 return returnResponse(response);
             }catch(error){
                 return returnError(error);
@@ -178,6 +178,14 @@ export const composer = {
         crearProducto : async function(axios, producto){
             try{
                 let response = await axios.post('/api/org.hyperledger.composer.productos.CrearProducto/', producto);
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
+        ponerVentaProducto : async function(axios, venta){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.productos.PonerVentaProducto', venta);
                 return returnResponse(response);
             }catch(error){
                 return returnError(error);

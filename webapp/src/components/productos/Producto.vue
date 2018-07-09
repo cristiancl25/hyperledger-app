@@ -10,22 +10,96 @@
     <div class="row justify-content-center">
       <div class="col-md-10">
         <div>
-          <h1>Producto - {{ $route.params.id }}</h1>
-          <p>{{datosProducto}}</p>
+          <!-- TODO imagen -->
+          <h1 align="center"><strong>producto</strong></h1>
+          <h5 align="center"><strong>ID: </strong>{{datosProducto.productoId}}</h5>
+          <h5 align="center"><strong>Identificador: </strong>{{datosProducto.identificador}}</h5>
+          <h5 align="center"><strong>Estado: </strong><span class="badge badge-primary">{{datosProducto.estado}}</span></h5>
+          <h5 align="center"><strong>Propietaria: </strong>{{datosProducto.operacionActual.orgId}}</h5>
+          <h5 align="center"><strong>Caracteristicas: </strong>{{datosProducto.caracteristicas}}</h5>
+          <h5 align="center"><strong>OperacionActual: </strong>{{datosProducto.operacionActual}}</h5>
+          <h5 align="center"><strong>operaciones: </strong>{{datosProducto.operaciones}}</h5>
         </div>
       </div>
     </div>
 
 
+    
+
+    <div class="row justify-content-center">
+      <div class="btn-group col-md-6">
+        <button class="btn btn-primary" @click="showMapMethod">Mostrar Mapa</button>
+        <button class="btn btn-primary"
+          data-toggle="modal" data-target="#ModalProducto"
+          v-if="$store.state.rolParticipante === 'Usuario' && $store.state.organizacion === datosProducto.operacionActual.orgId && datosProducto.estado==='PARADO'"
+          @click="ponerVenta=true; datosVenta.productoId=datosProducto.productoId">
+          Poner en venta
+        </button>
+
+      </div>
+    </div>
+
     <div class="row justify-content-center">
       <div class="col-md-10">
-        <div>
-          <button class="btn btn-primary" @click="showMapMethod">Mostrar Mapa</button>
-          <div v-if="showMap">
-            <h2>Mapa de Google</h2>
-            <google-map v-bind:markers='markers' v-bind:lista='true'></google-map>
+        <div v-if="showMap">
+          <google-map v-bind:markers='markers' v-bind:lista='true'></google-map>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="modal fade" id="ModalProducto" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content" v-if="ponerVenta">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Poner Venta</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="col-md-12" v-if="modalInfo.show">
+                <div v-bind:class="modalInfo.tipo" role="alert">
+                  <strong></strong> {{ modalInfo.message }}
+                </div>
+            </div>
+            <div class="col-md-12" v-if="progress">
+              <div class="progress" >
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+              </div>
+            </div>
+            <div>
+              <form> 
+                <div class="form-group col-md-6">
+                  <label for="exampleFormControlSelect1">Unidad monetaria</label>
+                  <select class="form-control" v-model="datosVenta.unidadMonetaria" id="exampleFormControlSelect1">
+                    <option selected>euros</option>
+                    <option>dolares</option>
+                  </select>
+                </div>
+                <div class="form-group col-md-12">
+                  <label for="nombre">Precio</label>
+                  <input v-model="datosVenta.precio" type=number step=0.01 class="form-control"  placeholder="Precio">
+                </div>
+                <div class="form-group col-md-6">
+                  <label for="exampleFormControlSelect1">Tipo de venta</label>
+                  <select class="form-control" v-model="datosVenta.tipoVenta" id="exampleFormControlSelect1">
+                    <option selected>NORMAL</option>
+                    <option>PUJA</option>
+                  </select>
+                </div>
+                <div id="card" class="form-group col-md-12"></div>
+                <br>
+              </form>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="inicializar" data-dismiss="modal">{{$t('close')}}</button>
+            <button type="button" class="btn btn-primary" @click="crearVenta">Crear</button>
           </div>
         </div>
+
+
       </div>
     </div>
   </div>
@@ -42,6 +116,12 @@
     },
     data() {
       return{
+        progress : false,
+        modalInfo : {
+          show : false,
+          message : '',
+          tipo : ''
+        },
         info : {
           show : false,
           message : '',
@@ -49,7 +129,17 @@
         },
         markers: [],
         showMap: false,
-        datosProducto : {}
+        ponerVenta : false,
+        datosProducto : {
+          operacionActual : {}
+        },
+        datosVenta : {
+          "$class": "org.hyperledger.composer.productos.PonerVentaProducto",
+          "productoId": "",
+          "tipoVenta": "NORMAL",
+          "unidadMonetaria": "euros",
+          "precio": 0
+        }
       }
     },
     created : async function () {
@@ -75,36 +165,36 @@
       showMapMethod () {
         if (this.showMap){
           this.showMap = false;
-        } else {          
+        } else {
           this.markers = [{
-            'lat': 43,
-            'lng': -8,
-            'info': "Localización1"
-          },{
-            'lat': 43,
-            'lng': -10,
-            'info': "Localización2"
+            'lat': this.datosProducto.operacionActual.localizacion.latitud,
+            'lng': this.datosProducto.operacionActual.localizacion.longitud,
+            'info': this.datosProducto.operacionActual.localizacion.direccion,
+            'org': this.datosProducto.operacionActual.orgId
           }];
-          /* Geolocalización */
-          if ("geolocation" in navigator) {
-            this.info.show = false
-            let self = this;
-            navigator.geolocation.getCurrentPosition(function(position) {
-              const latitud = position.coords.latitude;
-              const longitud = position.coords.longitude;
-              self.markers.push({
-                'lat': latitud,
-                'lng': longitud,
-                'info': "Localización Actual"
-              });
-            },function(error){
-              self.info.show = true
-              self.info.message = error.message
-              
+          let self = this;
+          this.datosProducto.operaciones.forEach(async (operacion) => {
+            self.markers.push({
+              'lat': operacion.localizacion.latitud,
+              'lng': operacion.localizacion.longitud,
+              'info': operacion.localizacion.direccion,
+              'org': operacion.orgId
             });
-          }
+          });         
           this.showMap = true;
         }
+      },
+      crearVenta : async function (){
+        this.modalInfo.show = false;
+        this.progress = true;
+        let response = await composer.productos.ponerVentaProducto(this.$axios, this.datosVenta);
+        if (response.statusCode === 200){
+          this.modalInfo.show = true; this.modalInfo.message = 'Producto en venta'; this.modalInfo.tipo = "alert alert-success";
+          this.datosVenta.precio = '';
+        } else {
+          this.modalInfo.show = true; this.modalInfo.message = response.message; this.modalInfo.tipo = "alert alert-danger";
+        }
+        this.progress = false;
       }
     }
   }
