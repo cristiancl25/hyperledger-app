@@ -32,13 +32,26 @@
         <button class="btn btn-primary" @click="showMapMethod">Mostrar Mapa</button>
         <button class="btn btn-primary"
           data-toggle="modal" data-target="#ModalProducto"
-          v-if="$store.state.rolParticipante === 'Usuario' && $store.state.organizacion === datosProducto.operacionActual.orgId && datosProducto.estado==='PARADO'"
+          v-if="$store.state.rolParticipante === 'Usuario' && 
+                $store.state.organizacion === datosProducto.operacionActual.orgId && 
+                datosProducto.estado==='PARADO'"
           @click="ponerVenta=true; datosVenta.productoId=datosProducto.productoId">
           Poner en venta
         </button>
         <button class="btn btn-primary"
           data-toggle="modal" data-target="#ModalProducto"
-          v-if="$store.state.rolParticipante === 'Usuario' && $store.state.organizacion !== datosProducto.operacionActual.orgId && datosProducto.estado==='VENTA' && datosProducto.operacionActual.datosVenta.tipoVenta==='NORMAL'"
+          v-if="$store.state.rolParticipante === 'Usuario' && 
+                $store.state.organizacion === datosProducto.operacionActual.orgId && 
+                datosProducto.estado==='VENTA'"
+          @click="cancelacionVenta=true">
+          Cancelar Venta
+        </button>
+        <button class="btn btn-primary"
+          data-toggle="modal" data-target="#ModalProducto"
+          v-if="$store.state.rolParticipante === 'Usuario' && 
+                $store.state.organizacion !== datosProducto.operacionActual.orgId && 
+                datosProducto.estado==='VENTA' && 
+                datosProducto.operacionActual.datosVenta.tipoVenta==='NORMAL'"
           @click="compraProducto=true">
           Comprar Producto
         </button>
@@ -103,7 +116,7 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="inicializar(); ponerVenta=false" data-dismiss="modal">{{$t('close')}}</button>
+            <button type="button" class="btn btn-secondary" @click="inicializar(); ponerVenta=false; modalInfo.show=false" data-dismiss="modal">{{$t('close')}}</button>
             <button type="button" class="btn btn-primary" @click="crearVenta">Crear</button>
           </div>
         </div>
@@ -130,8 +143,35 @@
             
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" @click="inicializar(); compraProducto=false" data-dismiss="modal">{{$t('close')}}</button>
+            <button type="button" class="btn btn-secondary" @click="inicializar(); compraProducto=false; modalInfo.show=false" data-dismiss="modal">{{$t('close')}}</button>
             <button type="button" class="btn btn-primary" @click="comprarProducto">Comprar</button>
+          </div>
+        </div>
+
+        <div class="modal-content" v-if="cancelacionVenta">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Cancelar venta</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!-- Componente Info -->
+            <div class="col-md-12" v-if="modalInfo.show">
+                <div v-bind:class="modalInfo.tipo" role="alert">
+                  <strong></strong> {{ modalInfo.message }}
+                </div>
+            </div>
+            <div class="col-md-12" v-if="progress">
+              <div class="progress" >
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+              </div>
+            </div>
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="inicializar(); cancelacionVenta=false; modalInfo.show=false" data-dismiss="modal">{{$t('close')}}</button>
+            <button type="button" class="btn btn-primary" @click="cancelarVenta">Cancelar</button>
           </div>
         </div>
 
@@ -167,6 +207,7 @@
         showMap: false,
         ponerVenta : false,
         compraProducto : false,
+        cancelacionVenta : false,
         datosProducto : {
           operacionActual : {}
         },
@@ -227,6 +268,18 @@
         let response = await composer.productos.ponerVentaProducto(this.$axios, this.datosVenta);
         if (response.statusCode === 200){
           this.modalInfo.show = true; this.modalInfo.message = 'Producto en venta'; this.modalInfo.tipo = "alert alert-success";
+          this.datosVenta.precio = '';
+        } else {
+          this.modalInfo.show = true; this.modalInfo.message = response.message; this.modalInfo.tipo = "alert alert-danger";
+        }
+        this.progress = false;
+      },
+      cancelarVenta : async function (){
+        this.modalInfo.show = false;
+        this.progress = true;
+        let response = await composer.productos.cancelarVenta(this.$axios, this.datosProducto.productoId);
+        if (response.statusCode === 200){
+          this.modalInfo.show = true; this.modalInfo.message = 'Venta cancelada'; this.modalInfo.tipo = "alert alert-success";
           this.datosVenta.precio = '';
         } else {
           this.modalInfo.show = true; this.modalInfo.message = response.message; this.modalInfo.tipo = "alert alert-danger";

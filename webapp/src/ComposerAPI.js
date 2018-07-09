@@ -191,6 +191,17 @@ export const composer = {
                 return returnError(error);
             }
         },
+        cancelarVenta : async function(axios, productoId){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.productos.CancelarVenta',{
+                    "$class": "org.hyperledger.composer.productos.CancelarVenta",
+                    "productoId": productoId
+                });
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
         comprarProducto : async function(axios, productoId){
             try{
                 let response = await axios.post('/api/org.hyperledger.composer.productos.ComprarProducto', {
