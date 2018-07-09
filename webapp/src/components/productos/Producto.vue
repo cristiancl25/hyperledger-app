@@ -16,6 +16,7 @@
           <h5 align="center"><strong>Identificador: </strong>{{datosProducto.identificador}}</h5>
           <h5 align="center"><strong>Estado: </strong><span class="badge badge-primary">{{datosProducto.estado}}</span></h5>
           <h5 align="center" v-if="datosProducto.operacionActual.datosVenta"><strong>Datos Venta: </strong>{{datosProducto.operacionActual.datosVenta}}</h5>
+          <h5 align="center" v-if="datosProducto.estado==='PUJA'"><strong>Datos Puja: </strong>{{datosProducto.operacionActual.datosVenta.pujaId}}</h5>
           <h5 align="center"><strong>Propietaria: </strong>{{datosProducto.operacionActual.orgId}}</h5>
           <h5 align="center"><strong>Caracteristicas: </strong>{{datosProducto.caracteristicas}}</h5>
           <h5 align="center"><strong>OperacionActual: </strong>{{datosProducto.operacionActual}}</h5>
@@ -55,6 +56,22 @@
           @click="compraProducto=true">
           Comprar Producto
         </button>
+        <button class="btn btn-primary"
+          data-toggle="modal" data-target="#ModalProducto"
+          v-if="$store.state.rolParticipante === 'Usuario' && 
+                $store.state.organizacion !== datosProducto.operacionActual.orgId && 
+                datosProducto.estado==='PUJA'"
+          @click="pujaProducto=true">
+          Pujar Producto
+        </button>
+        <button class="btn btn-primary"
+          data-toggle="modal" data-target="#ModalProducto"
+          v-if="$store.state.rolParticipante === 'Usuario' && 
+                $store.state.organizacion === datosProducto.operacionActual.orgId && 
+                datosProducto.estado==='PUJA'"
+          @click="finPuja=true">
+          Finalizar puja
+        </button>
 
       </div>
     </div>
@@ -79,7 +96,7 @@
             </button>
           </div>
           <div class="modal-body">
-            <!-- Componente Info -->
+            <!-- TODO Componente Info -->
             <div class="col-md-12" v-if="modalInfo.show">
                 <div v-bind:class="modalInfo.tipo" role="alert">
                   <strong></strong> {{ modalInfo.message }}
@@ -129,7 +146,7 @@
             </button>
           </div>
           <div class="modal-body">
-            <!-- Componente Info -->
+            <!-- TODO Componente Info -->
             <div class="col-md-12" v-if="modalInfo.show">
                 <div v-bind:class="modalInfo.tipo" role="alert">
                   <strong></strong> {{ modalInfo.message }}
@@ -156,7 +173,7 @@
             </button>
           </div>
           <div class="modal-body">
-            <!-- Componente Info -->
+            <!-- TODO Componente Info -->
             <div class="col-md-12" v-if="modalInfo.show">
                 <div v-bind:class="modalInfo.tipo" role="alert">
                   <strong></strong> {{ modalInfo.message }}
@@ -172,6 +189,64 @@
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click="inicializar(); cancelacionVenta=false; modalInfo.show=false" data-dismiss="modal">{{$t('close')}}</button>
             <button type="button" class="btn btn-primary" @click="cancelarVenta">Cancelar</button>
+          </div>
+        </div>
+
+        <div class="modal-content" v-if="pujaProducto">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Puja producto</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!--  TODO Componente Info -->
+            <div class="col-md-12" v-if="modalInfo.show">
+                <div v-bind:class="modalInfo.tipo" role="alert">
+                  <strong></strong> {{ modalInfo.message }}
+                </div>
+            </div>
+            <div class="col-md-12" v-if="progress">
+              <div class="progress" >
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+              </div>
+            </div>
+            <div class="form-group col-md-12">
+              <label for="nombre">Precio</label>
+              <input v-model="precioPuja" type=number step=0.01 class="form-control"  placeholder="Precio">
+            </div>
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="inicializar(); pujaProducto=false; modalInfo.show=false" data-dismiss="modal">{{$t('close')}}</button>
+            <button type="button" class="btn btn-primary" @click="pujarProducto">Pujar</button>
+          </div>
+        </div>
+
+        <div class="modal-content" v-if="finPuja">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Finalizar puja</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <!-- TODO Componente Info -->
+            <div class="col-md-12" v-if="modalInfo.show">
+                <div v-bind:class="modalInfo.tipo" role="alert">
+                  <strong></strong> {{ modalInfo.message }}
+                </div>
+            </div>
+            <div class="col-md-12" v-if="progress">
+              <div class="progress" >
+                <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+              </div>
+            </div>
+            
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" @click="inicializar(); finPuja=false; modalInfo.show=false" data-dismiss="modal">{{$t('close')}}</button>
+            <button type="button" class="btn btn-primary" @click="finalizarPuja">Finalizar</button>
           </div>
         </div>
 
@@ -208,6 +283,8 @@
         ponerVenta : false,
         compraProducto : false,
         cancelacionVenta : false,
+        pujaProducto : false,
+        finPuja : false,
         datosProducto : {
           operacionActual : {}
         },
@@ -217,7 +294,8 @@
           "tipoVenta": "NORMAL",
           "unidadMonetaria": "euros",
           "precio": 0
-        }
+        },
+        precioPuja : 0
       }
     },
     created : async function () {
@@ -292,6 +370,30 @@
         let response = await composer.productos.comprarProducto(this.$axios, this.datosProducto.productoId);
         if (response.statusCode === 200){
           this.modalInfo.show = true; this.modalInfo.message = 'Producto Comprado'; this.modalInfo.tipo = "alert alert-success";
+          this.datosVenta.precio = '';
+        } else {
+          this.modalInfo.show = true; this.modalInfo.message = response.message; this.modalInfo.tipo = "alert alert-danger";
+        }
+        this.progress = false;
+      },
+      pujarProducto : async function (){
+        this.modalInfo.show = false;
+        this.progress = true;
+        let response = await composer.productos.pujarProducto(this.$axios, this.datosProducto.productoId, this.precioPuja);
+        if (response.statusCode === 200){
+          this.modalInfo.show = true; this.modalInfo.message = 'Producto pujado'; this.modalInfo.tipo = "alert alert-success";
+          this.datosVenta.precio = '';
+        } else {
+          this.modalInfo.show = true; this.modalInfo.message = response.message; this.modalInfo.tipo = "alert alert-danger";
+        }
+        this.progress = false;
+      },
+      finalizarPuja : async function (){
+        this.modalInfo.show = false;
+        this.progress = true;
+        let response = await composer.productos.finalizarPuja(this.$axios, this.datosProducto.productoId);
+        if (response.statusCode === 200){
+          this.modalInfo.show = true; this.modalInfo.message = 'Puja finalizada'; this.modalInfo.tipo = "alert alert-success";
           this.datosVenta.precio = '';
         } else {
           this.modalInfo.show = true; this.modalInfo.message = response.message; this.modalInfo.tipo = "alert alert-danger";
