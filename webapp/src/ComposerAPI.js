@@ -190,7 +190,42 @@ export const composer = {
             }catch(error){
                 return returnError(error);
             }
-        }
+        },
+        comprarProducto : async function(axios, productoId){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.productos.ComprarProducto', {
+                    "$class": "org.hyperledger.composer.productos.ComprarProducto",
+                    "productoId": productoId
+                });
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            } 
+        },
+        pujarProducto : async function(axios, productoId, precio){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.productos.PujarProducto', {
+                    "$class": "org.hyperledger.composer.productos.PujarProducto",
+                    "productoId": productoId,
+                    "precio": precio
+                });
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            } 
+        },
+        finalizarPuja : async function(axios, productoId){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.productos.FinalizarPuja', {
+                    "$class": "org.hyperledger.composer.productos.FinalizarPuja",
+                    "productoId": productoId
+                });
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            } 
+        },
+
 
     },
     consulta : {
