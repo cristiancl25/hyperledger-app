@@ -2,8 +2,7 @@ import Productos from './components/productos/Productos';
 import ListaProductos from './components/productos/ListaProductos';
 import CrearProducto from './components/productos/CrearProducto';
 import Producto from './components/productos/Producto';
-import participantes from './components/participantes/participantes';
-import participante from './components/participantes/participante';
+import transacciones from './components/transacciones/transacciones';
 import organizaciones from './components/organizaciones/organizaciones';
 import AllOrganizaciones from './components/organizaciones/AllOrganizaciones';
 import organizacion from './components/organizaciones/organizacion';
@@ -17,10 +16,7 @@ export const routes = [
       { path: 'all', component: ListaProductos },
       { path: ':id/', component: Producto }]
   },
-  { path: '/participantes', component: participantes, children: [
-    { path: '', component: participantes },
-    { path: ':rol/:id/', component: participante }]
-  },
+  { path: '/transacciones', component: transacciones },
   { path: '/organizaciones', component: organizaciones, children: [
     { path: '', component: AllOrganizaciones },
     { path: ':id/', name: 'org', component: organizacion }]

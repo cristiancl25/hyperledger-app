@@ -270,7 +270,6 @@
       respuesta(response, mensaje){
         if (response.statusCode === 200){
           this.modalInfo.show = true; this.modalInfo.message = mensaje; this.modalInfo.tipo = "alert alert-success";
-          this.datosVenta.precio = '';
         } else {
           this.modalInfo.show = true; this.modalInfo.message = response.message; this.modalInfo.tipo = "alert alert-danger";
         }
@@ -281,6 +280,7 @@
         this.progress = true;
         let response = await composer.productos.ponerVentaProducto(this.$axios, this.datosVenta);
         this.respuesta(response, 'Producto en venta');
+        this.datosVenta.precio = '';
         this.progress = false;
       },
       cancelarVenta : async function (){

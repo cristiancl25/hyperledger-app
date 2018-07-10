@@ -41,7 +41,7 @@
             </ul>  
           </div>
           <div class="navbar-nav" v-if="sesionIniciada">
-            <router-link class="nav-item nav-link" to="/" tag="a">Transacciones</router-link>
+            <router-link class="nav-item nav-link" to="/transacciones" tag="a">Transacciones</router-link>
             <router-link class="nav-item nav-link" to="/" tag="a"><a>Eventos <span class="badge badge-success badge-pill"> 0</span></a></router-link>
           </div>
           <div class="nav navbar-nav navbar-right" v-if="sesionIniciada">

@@ -40,14 +40,10 @@
       }
     },
     created: async function () {
-      // this.$options.sockets.onmessage = (data) => {
-      //   let peixe = JSON.parse(data.data);
-      //   this.event.data = peixe.peixeId;
-      //   this.event.show = true;
-      //   setTimeout(() => {
-      //     this.event.show = false
-      //   }, 10000);
-      // }
+      this.$options.sockets.onmessage = (data) => {
+        let data2 = JSON.parse(data.data);
+        console.log(data2);
+      }
     }
   }
 </script>

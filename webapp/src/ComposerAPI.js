@@ -244,6 +244,38 @@ export const composer = {
                 return returnError(error);
             } 
         },
+        getTransacciones : async function(axios){
+            try{
+                let response = await axios.get('/api/org.hyperledger.composer.productos.Transaccion');
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
+        getTransaccionesVenta : async function(axios, org){
+            try{
+                let response = await axios.get('/api/org.hyperledger.composer.productos.Transaccion?filter={"where": {"orgVenta.orgId": "' + org +'"}}');
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
+        getTransaccionesCompra : async function(axios, org){
+            try{
+                let response = await axios.get('/api/org.hyperledger.composer.productos.Transaccion?filter={"where": {"orgCompra.orgId": "' + org +'"}}');
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
+        confirmarTransaccion : async function(axios, datos){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.productos.ConfirmarTransaccion', datos);
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            } 
+        },
         consumirProducto : async function(axios, productoId){
             try{
                 let response = await axios.post('/api/org.hyperledger.composer.productos.ConsumirProducto', {
