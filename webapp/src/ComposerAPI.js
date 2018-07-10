@@ -175,6 +175,14 @@ export const composer = {
                 return returnError(error);
             }
         },
+        getPuja : async function(axios, pujaId){
+            try{
+                let response = await axios.get('/api/org.hyperledger.composer.productos.Puja/' + pujaId);
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
         crearProducto : async function(axios, producto){
             try{
                 let response = await axios.post('/api/org.hyperledger.composer.productos.CrearProducto/', producto);
@@ -236,6 +244,28 @@ export const composer = {
                 return returnError(error);
             } 
         },
+        consumirProducto : async function(axios, productoId){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.productos.ConsumirProducto', {
+                    "$class": "org.hyperledger.composer.productos.ConsumirProducto",
+                    "productoId": productoId
+                  });
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            } 
+        },
+        productoPerdido : async function(axios, productoId){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.productos.ProductoPerdido', {
+                    "$class": "org.hyperledger.composer.productos.ProductoPerdido",
+                    "productoId": productoId
+                  });
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            } 
+        }
 
 
     },
