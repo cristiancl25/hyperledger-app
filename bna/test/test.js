@@ -1595,7 +1595,7 @@ describe('Sample', () => {
         producto.operacionActual.orgId.should.equal('pes1');
         chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
 
-        var sucesor1 = await regProducto.get(producto.sucesores[0].$identifier);
+        var sucesor1 = await regProducto.get(producto.sucesores[0]);
         sucesor1.identificador.should.equal('id1');
         sucesor1.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
         sucesor1.caracteristicas.variedadProducto.should.equal('sardina');
@@ -1604,7 +1604,10 @@ describe('Sample', () => {
         sucesor1.caracteristicas.unidades.should.equal(3);
         sucesor1.caracteristicas.peso.should.equal(5.5);
         sucesor1.caracteristicas.magnitudPeso.should.equal('kg');
-        sucesor1.predecesor.$identifier.should.equal(producto.productoId);
+        sucesor1.imagen.url.should.equal('https://ejemplo1.com');
+        sucesor1.imagen.hashImagen.should.equal('hash1');
+        sucesor1.imagen.algoritmo.should.equal('sha1');
+        sucesor1.predecesor.should.equal(producto.productoId);
         chai.expect(sucesor1.sucesores).to.be.undefined;
         chai.expect(sucesor1.transaccionId).to.be.undefined;
         sucesor1.estado.should.equal('PARADO');
@@ -1612,7 +1615,7 @@ describe('Sample', () => {
         sucesor1.operacionActual.orgId.should.equal('pes1');
         chai.expect(sucesor1.operacionActual.datosVenta).to.be.undefined;
 
-        var sucesor2 = await regProducto.get(producto.sucesores[1].$identifier);
+        var sucesor2 = await regProducto.get(producto.sucesores[1]);
         sucesor2.identificador.should.equal('id2');
         sucesor2.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
         sucesor2.caracteristicas.variedadProducto.should.equal('sardina');
@@ -1621,7 +1624,10 @@ describe('Sample', () => {
         sucesor2.caracteristicas.unidades.should.equal(1);
         sucesor2.caracteristicas.peso.should.equal(5.5);
         sucesor2.caracteristicas.magnitudPeso.should.equal('kg');
-        sucesor2.predecesor.$identifier.should.equal(producto.productoId);
+        sucesor2.imagen.url.should.equal('https://ejemplo2.com');
+        sucesor2.imagen.hashImagen.should.equal('hash2');
+        sucesor2.imagen.algoritmo.should.equal('sha1');
+        sucesor2.predecesor.should.equal(producto.productoId);
         chai.expect(sucesor2.sucesores).to.be.undefined;
         chai.expect(sucesor2.transaccionId).to.be.undefined;
         sucesor2.estado.should.equal('PARADO');
@@ -1693,7 +1699,7 @@ describe('Sample', () => {
         producto.operacionActual.orgId.should.equal('pes1');
         chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
 
-        var sucesor1 = await regProducto.get(producto.sucesores[0].$identifier);
+        var sucesor1 = await regProducto.get(producto.sucesores[0]);
         sucesor1.identificador.should.equal('id1');
         chai.expect(sucesor1.caracteristicas.unidades).to.be.undefined;
         sucesor1.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
@@ -1702,7 +1708,7 @@ describe('Sample', () => {
         sucesor1.caracteristicas.tipo.should.equal('PESO');
         sucesor1.caracteristicas.peso.should.equal(3);
         sucesor1.caracteristicas.magnitudPeso.should.equal('kg');
-        sucesor1.predecesor.$identifier.should.equal(producto.productoId);
+        sucesor1.predecesor.should.equal(producto.productoId);
         chai.expect(sucesor1.sucesores).to.be.undefined;
         chai.expect(sucesor1.transaccionId).to.be.undefined;
         sucesor1.estado.should.equal('PARADO');
@@ -1710,7 +1716,7 @@ describe('Sample', () => {
         sucesor1.operacionActual.orgId.should.equal('pes1');
         chai.expect(sucesor1.operacionActual.datosVenta).to.be.undefined;
 
-        var sucesor2 = await regProducto.get(producto.sucesores[1].$identifier);
+        var sucesor2 = await regProducto.get(producto.sucesores[1]);
         chai.expect(sucesor2.caracteristicas.unidades).to.be.undefined;
         sucesor2.identificador.should.equal('id2');
         sucesor2.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
@@ -1719,7 +1725,7 @@ describe('Sample', () => {
         sucesor2.caracteristicas.tipo.should.equal('PESO');
         sucesor2.caracteristicas.peso.should.equal(1.5);
         sucesor2.caracteristicas.magnitudPeso.should.equal('kg');
-        sucesor2.predecesor.$identifier.should.equal(producto.productoId);
+        sucesor2.predecesor.should.equal(producto.productoId);
         chai.expect(sucesor2.sucesores).to.be.undefined;
         chai.expect(sucesor2.transaccionId).to.be.undefined;
         sucesor2.estado.should.equal('PARADO');

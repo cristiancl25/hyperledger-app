@@ -34,8 +34,8 @@ concept PujaOrganizacion {
 asset Producto identified by productoId {
   o String productoId
   o String identificador optional
-  --> Producto predecesor optional
-  --> Producto[] sucesores optional
+  o String predecesor optional
+  o String[] sucesores optional
   o Estado estado
   o String transaccionId optional
   o Imagen imagen optional

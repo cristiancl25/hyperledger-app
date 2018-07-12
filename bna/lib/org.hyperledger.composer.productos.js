@@ -471,7 +471,7 @@ async function DividirProducto(datos){
     var sucesores = [];
     for (i = 0; i < datos.trozos.length; i++) {
         let productoId = generarIdProducto(participante.orgId);
-        sucesores.push(factory.newRelationship(NS_PROD, 'Producto', productoId));
+        sucesores.push(productoId);
 
         let caracteristicas = factory.newConcept(NS_PROD,'Caracteristicas');
         caracteristicas.tipoProducto = producto.caracteristicas.tipoProducto;
@@ -492,10 +492,10 @@ async function DividirProducto(datos){
             "orgId" : participante.orgId,
             "caracteristicas" : caracteristicas,
             "localizacionId" : producto.operacionActual.localizacion.$identifier,
-            "imagen" : producto.imagen
+            "imagen" : datos.trozos[i].imagen
         });
 
-        p.predecesor = factory.newRelationship(NS_PROD, 'Producto', producto.productoId);
+        p.predecesor = producto.productoId;
         await regProd.add(p);
     }
     producto.sucesores = sucesores; 
