@@ -297,6 +297,18 @@ export const composer = {
             }catch(error){
                 return returnError(error);
             } 
+        },
+        dividirProducto : async function(axios, productoId, trozos){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.productos.DividirProducto', {
+                    "$class": "org.hyperledger.composer.productos.DividirProducto",
+                    "productoId": productoId,
+                    "trozos": trozos
+                  });
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            } 
         }
 
 
