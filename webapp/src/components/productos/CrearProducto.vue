@@ -29,7 +29,12 @@
                 <label for="variedad">Variedad</label>
                 <input v-model="caracteristicas.tipoProducto" class="form-control" aria-describedby="emailHelp" placeholder="" disabled="true">
                 <small id="emailHelp" class="form-text text-muted">
-                  <a href="" data-toggle="modal"  data-target="#ModalTipoProducto">Seleccionar tipo de producto</a>
+                  <a href="" 
+                    data-toggle="modal"
+                    @click="modal.titulo='Crear tipo Producto'; modal.tipo='crearTipoProducto'"
+                    data-target="#ModalCrearProducto">
+                    Seleccionar tipo de producto
+                  </a>
                 </small>
               </div>
               <div class="form-group col-md-4">
@@ -123,11 +128,11 @@
                   </ul>
                 </div>
               </div>
-              <div class="col-md-12">
+              <div class="col-md-12" v-if="this.loc === 'gps' && this.coordenadas.direccion!=='' || this.loc === 'org' && this.localizacionId!==''">
                 <!-- TODO cambiar componentes a -->
                 <small>
-                    <a href="/#/productos/crear" v-if="!mapa" @click="mostrarMapa" >Mostrar Localización</a>
-                    <a href="/#/productos/crear"  v-if="mapa" @click="mostrarMapa" >Ocultar Localización</a>
+                    <a href="/#/productos/crear" v-if="!mapa" @click="mapa=!mapa" >Mostrar Localización</a>
+                    <a href="/#/productos/crear"  v-if="mapa" @click="mapa=!mapa" >Ocultar Localización</a>
                 </small>
                 <google-map v-if="mapa" v-bind:markers="[{'lat':coordenadas.latitud, 'lng':coordenadas.longitud, 'info':coordenadas.direccion}]" v-bind:lista='false'></google-map>
               </div>
@@ -160,7 +165,12 @@
 
           </form>
           <div class="col-md-12">
-            <button @click="crearProducto" class="btn btn-primary">Submit</button>
+            <button class="btn btn-primary"
+              data-toggle="modal"
+              @click="modal.titulo='Crear Producto'; modal.tipo='crearProducto'"
+              data-target="#ModalCrearProducto">
+              Crear Producto
+            </button>
           </div>
         </div>
       </div>
@@ -192,12 +202,12 @@
         </div>
       </div>
 
-      <!-- ModalTipoProducto-->
-      <div class="modal fade" id="ModalTipoProducto" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <!-- ModalCrearProducto-->
+      <div class="modal fade" id="ModalCrearProducto" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Tipos de productos</h5>
+              <h5 class="modal-title" id="exampleModalLabel">{{modal.titulo}}</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -211,24 +221,30 @@
               <div v-if="infoModal.show" v-bind:class="infoModal.tipo">
                {{infoModal.message}}
               </div>
-              <ul class="list-group" >
-                <li class="list-group-item d-flex justify-content-between align-items-center"
-                  @click="caracteristicas.tipoProducto=tipo"
-                  v-for="(tipo) in tiposProducto"
-                  :key="tipo"
-                  >{{tipo}}
-                  <span v-if="tipo === caracteristicas.tipoProducto" class="badge badge-success">{{$t('active')}}</span>
-                </li>
-              </ul>
-              <hr>
-              <h6>Crear nuevo tipo de producto</h6>
-              <div class="form-group">
-                <input v-model="nuevoTipoProducto" class="form-control" aria-describedby="emailHelp" required="true" placeholder="Identificador del producto">
+
+              <div v-if="modal.tipo==='crearTipoProducto'">
+                <ul class="list-group" >
+                  <li class="list-group-item d-flex justify-content-between align-items-center"
+                    @click="caracteristicas.tipoProducto=tipo"
+                    v-for="(tipo) in tiposProducto"
+                    :key="tipo"
+                    >{{tipo}}
+                    <span v-if="tipo === caracteristicas.tipoProducto" class="badge badge-success">{{$t('active')}}</span>
+                  </li>
+                </ul>
+                <hr>
+                <h6>Crear nuevo tipo de producto</h6>
+                <div class="form-group">
+                  <input v-model="nuevoTipoProducto" class="form-control" aria-describedby="emailHelp" required="true" placeholder="Identificador del producto">
+                </div>
+                <button type="submit" @click="crearTipoProducto" class="btn btn-primary">Crear</button>
               </div>
-              <button type="submit" @click="crearTipoProducto" class="btn btn-primary">Crear</button>
+              
+
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-primary" @click="closeModal" data-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn btn-secondary" @click="closeModal" data-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn btn-primary" @click="crearProducto" v-if="modal.tipo==='crearProducto'">Crear Producto</button>
             </div>
           </div>
         </div>
@@ -274,16 +290,20 @@ export default {
         algoritmo : 'sha1'
       },
       localizaciones : [],
-      progress : false,
       modalProgress : false,
-      info : {
-        show : false,
-        message : '',
-        tipo : ''
-      },
       infoModal :{
         show : false,
         message : 'Mensage de ERROR',
+        tipo : ''
+      },
+      info :{
+        show : false,
+        message : 'Mensage de ERROR',
+        tipo : ''
+      },
+      progress : false,
+      modal : {
+        titulo : '',
         tipo : ''
       },
       tiposProducto:[],
@@ -389,31 +409,31 @@ export default {
       }
     },
     crearProducto : async function() {
-      this.info.show = false;
+      this.infoModal.show = false;
       if (!this.gps){
         if (this.loc === 'gps'){
-          this.info.show = true; this.info.message = 'GPS no disponible'; this.info.tipo = "alert alert-warning";
+          this.infoModal.show = true; this.infoModal.message = 'GPS no disponible'; this.infoModal.tipo = "alert alert-warning";
           return;
         }
       } else {
         if (this.coordenadas.direccion === '' && this.loc === 'gps'){
-          this.info.show = true; this.info.message = 'Dirección no válida'; this.info.tipo = "alert alert-warning";
+          this.infoModal.show = true; this.infoModal.message = 'Dirección no válida'; this.infoModal.tipo = "alert alert-warning";
           return;
         }
       }
       if (this.imagen.incluir){
         if(this.imagen.hashImagen === '' || this.imagen.url === ''){
-          this.info.show = true; this.info.message = 'Datos de la imagen inválidos'; this.info.tipo = "alert alert-warning";
+          this.infoModal.show = true; this.infoModal.message = 'Datos de la imagen inválidos'; this.infoModal.tipo = "alert alert-warning";
           return;
         }
       }
-      this.progress = true;
+      this.modalProgress = true;
       let response = await composer.productos.crearProducto(this.$axios, this.producto);
-      this.progress = false;
+      this.modalProgress = false;
       if (response.statusCode === 200){
-        this.info.show = true; this.info.message = 'Producto Creado'; this.info.tipo = "alert alert-success";
+        this.infoModal.show = true; this.infoModal.message = 'Producto Creado'; this.infoModal.tipo = "alert alert-success";
       } else {
-        this.info.show = true; this.info.message = response.message; this.info.tipo = "alert alert-danger";
+        this.infoModal.show = true; this.infoModal.message = response.message; this.infoModal.tipo = "alert alert-danger";
       }
     },
     geolocalizacion : async function(){
@@ -463,20 +483,6 @@ export default {
         this.info.show = true;
         this.info.message = response.message;
         this.info.tipo = "alert alert-danger";
-      }
-    },
-    mostrarMapa : async function() {
-      if (this.mapa) {
-        this.mapa = false;
-        return;        
-      } else {
-        if (this.loc === 'gps' && this.coordenadas.direccion!==""){
-            this.mapa = true;
-        } else if (this.loc === 'org' && this.localizacionId!==""){
-            this.mapa = true;
-        } else {
-          return;
-        }
       }
     }
   }
