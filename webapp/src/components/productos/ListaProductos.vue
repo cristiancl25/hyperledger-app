@@ -1,23 +1,29 @@
 <template>
     <div>
-      <div>
+      <div class="col-md-12">
         <div class="col-md-12" v-if="info.show" v-bind:class="info.tipo" role="alert">
             <strong></strong> {{ info.message }}
         </div>
-        <div class="row justify-content-center ">
-          <ul class="list-group col-md-10">
-            <li class="list-group-item d-flex justify-content-between align-items-center"
-              :key="producto.productoId"
-              v-for="(producto) in productos">
-              {{producto}}
+        <div class="row justify-content-center">
+          <div class="mt-2 mr-2 border col-md-5"
+            :key="producto.productoId"
+            v-for="(producto) in productos">
+            <h5><strong>ID: </strong>
               <router-link
-                class="badge badge-success"
                 :to="'/productos/' + producto.productoId"
-                tag="span">
-                Más
+                tag="a">
+                {{producto.productoId}}
               </router-link>
-            </li>
-          </ul>
+            </h5>
+            <h5 align="center"><span :class="colorEstado(producto.estado)">{{producto.estado}}</span></h5>
+            <h5><strong>Organización ID: </strong>
+              <router-link
+                :to="'/organizaciones/' + producto.operacionActual.orgId"
+                tag="a">
+                {{producto.operacionActual.orgId}}
+              </router-link>
+            </h5>
+          </div>
         </div>
       </div>
     </div>
@@ -25,6 +31,8 @@
 
 <script>
 import {composer} from '../../ComposerAPI'
+import {util} from '../../util.js'
+
 export default {
   data : function() {
     return {
@@ -43,7 +51,12 @@ export default {
     } else {
       this.info.show = true; this.info.message = response.message; this.info.tipo = "alert alert-warning";
     }
-  }
+  },
+  methods : {
+    colorEstado(estado){
+      return util.colorEstadoProducto(estado);
+    }
+  },
 }
 </script>
 

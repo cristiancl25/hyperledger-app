@@ -306,6 +306,7 @@
 <script>
   import googleMap from '../mapas/Mapa';
   import {composer} from '../../ComposerAPI'
+  import {util} from '../../util.js'
 
   export default {
     components : {
@@ -363,22 +364,7 @@
     },
     computed : {
       colorEstado(){
-        switch (this.datosProducto.estado) {
-          case 'PARADO':
-            return 'badge badge-secondary';
-          case 'VENTA':
-            return 'badge badge-info';
-          case 'TRANSACCION':
-            return 'badge badge-primary';
-          case 'PUJA':
-            return 'badge badge-light';
-          case 'CONSUMIDO':
-            return 'badge badge-success';
-          case 'PERDIDO':
-            return 'badge badge-danger';
-          case 'DIVIDIDO':
-            return 'badge badge-warning';
-        }
+        return util.colorEstadoProducto(this.datosProducto.estado);
       }
     },
     created : async function () {
