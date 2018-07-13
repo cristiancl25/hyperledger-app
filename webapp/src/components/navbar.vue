@@ -42,7 +42,7 @@
           </div>
           <div class="navbar-nav" v-if="sesionIniciada">
             <router-link class="nav-item nav-link" to="/transacciones" tag="a">Transacciones</router-link>
-            <router-link class="nav-item nav-link" to="/" tag="a"><a>Eventos <span class="badge badge-success badge-pill"> 0</span></a></router-link>
+            <router-link class="nav-item nav-link" to="/eventos" tag="a"><a>Eventos <span class="badge badge-success badge-pill"> {{eventos.length}}</span></a></router-link>
           </div>
           <div class="nav navbar-nav navbar-right" v-if="sesionIniciada">
             <ul class="navbar-nav">
@@ -180,6 +180,9 @@ export default {
       set(value) {
         this.$store.commit('setSesionIniciada', value);
       }
+    },
+    eventos() {
+      return this.$store.state.eventos
     }
   },
   methods: {

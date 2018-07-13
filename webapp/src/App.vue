@@ -41,8 +41,8 @@
     },
     created: async function () {
       this.$options.sockets.onmessage = (data) => {
-        let data2 = JSON.parse(data.data);
-        console.log(data2);
+        let evento = JSON.parse(data.data);
+        this.$store.commit('anadirEvento', evento);
       }
     }
   }

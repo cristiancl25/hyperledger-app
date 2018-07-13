@@ -63,7 +63,7 @@
         </router-link>
 
       </div>
-      <div class="col-md-6" v-if="datosProducto.sucesores">
+      <div class="col-md-6" v-if="datosProducto.sucesores.length!==0">
         <h5 align="center"><strong>Sucesores: </strong></h5>
         <ul>
           <li align="center"
@@ -331,6 +331,7 @@
         markers: [],
         showMap: false,
         datosProducto : {
+          sucesores : [],
           operacionActual : {},
           caracteristicas : {
             tipoProducto : {}

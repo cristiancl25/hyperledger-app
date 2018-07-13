@@ -6,6 +6,7 @@ import transacciones from './components/transacciones/transacciones';
 import organizaciones from './components/organizaciones/organizaciones';
 import AllOrganizaciones from './components/organizaciones/AllOrganizaciones';
 import organizacion from './components/organizaciones/organizacion';
+import evento from './components/eventos/Evento';
 import HomePage from './components/HomePage';
 
 export const routes = [
@@ -17,6 +18,7 @@ export const routes = [
       { path: ':id/', component: Producto }]
   },
   { path: '/transacciones', component: transacciones },
+  { path: '/eventos', component: evento },
   { path: '/organizaciones', component: organizaciones, children: [
     { path: '', component: AllOrganizaciones },
     { path: ':id/', name: 'org', component: organizacion }]

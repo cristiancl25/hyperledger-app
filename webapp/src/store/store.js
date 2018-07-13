@@ -10,7 +10,8 @@ export const store = new Vuex.Store({
         sesionIniciada : false,
         rolParticipante : '', 
         participante : '',
-        organizacion : ''
+        organizacion : '',
+        eventos : []
     },
     getters : {
 
@@ -31,6 +32,12 @@ export const store = new Vuex.Store({
         },
         setOrganizacion(state, organizacion){
             state.organizacion = organizacion;
+        },
+        anadirEvento(state, evento){
+            state.eventos.unshift(evento);
+        },
+        setEventos(state, eventos){
+            state.store.eventos = eventos;
         }
     },
     actions : {
