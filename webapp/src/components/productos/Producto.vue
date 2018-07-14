@@ -18,7 +18,7 @@
       <div class="col-md-6">
         <h5 align="center"><strong>Características: </strong></h5>
         <h6><strong>Tipo producto: </strong>{{datosProducto.caracteristicas.tipoProducto.tipo}}</h6>
-        <h6><strong>Variedad: </strong>{{datosProducto.caracteristicas.variedad}}</h6>
+        <h6><strong>Variedad: </strong>{{datosProducto.caracteristicas.variedadProducto}}</h6>
         <h6><strong>Tipo: </strong>{{datosProducto.caracteristicas.tipo}}</h6>
         <h6 v-if="datosProducto.caracteristicas.tipo==='PESO'"><strong>Peso: </strong>{{datosProducto.caracteristicas.peso}}</h6>
         <h6 v-if="datosProducto.caracteristicas.tipo==='UNIDAD'"><strong>Peso medio: </strong>{{datosProducto.caracteristicas.peso}}</h6>
