@@ -103,8 +103,13 @@
                 v-for="(perfil, index) in perfiles">
                 {{ perfil.name }}
                 <span v-if="perfil.default" class="badge badge-success">{{$t('active')}}</span>
+                <div class="col-md-12" v-if="perfil.default">
+                  <button class="btn btn-secondary btn-sm" @click="exportarPerfil(perfil.name)">Exportar</button>
+                  <button class="btn btn-danger btn-sm" @click="eliminarPerfil(perfil.name)">Eliminar</button>
+                </div>
               </li>
             </ul>
+            <div id="card"></div>
             <br>
             <label>{{$t('import.profile')}}</label>
             <br>
@@ -268,7 +273,34 @@ export default {
         this.errorModal.show = true; this.errorModal.message = response.message;
         $('#ModalPerfiles').modal('show');
       }
-    }
+    },
+    exportarPerfil : async function(perfil){
+      this.progress = true
+      let response = await composer.sistema.exportarPerfil(this.$axios, perfil);
+      this.progress = false;
+      if (response.statusCode === 200){
+        let data = response.data;
+        const url = window.URL.createObjectURL(new Blob([data],  {type: "octet/stream"}));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', perfil);
+        document.getElementById("card").appendChild(link);
+        link.click();
+        
+      } else {
+        this.errorModal.show = true; this.errorModal.message = 'Error al procesar la petición'; this.errorModal.tipo = "alert alert-danger";
+      }
+    },
+    eliminarPerfil : async function(perfil){
+      this.progress = true
+      let response = await composer.sistema.eliminarPerfil(this.$axios, perfil);
+      this.progress = false;
+      if (response.statusCode === 204){
+        this.errorModal.show = true; this.errorModal.message = 'Perfil eliminado'; this.errorModal.tipo = "alert alert-success";
+      } else {
+        this.errorModal.show = true; this.errorModal.message = response.message; this.errorModal.tipo = "alert alert-danger";
+      }
+    },
   },
   created: async function () {
     let response = await composer.sistema.getWallet(this.$axios);

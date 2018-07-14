@@ -16,6 +16,15 @@ export const composer = {
                 return returnError(error);
             }
         },
+        eliminarPerfil : async function(axios, perfil) {
+            try{
+                let response = await axios.delete('/api/wallet/' + perfil);
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+                
+            }
+        },
         importarPerfil : async function(axios, file) {
             const formData = new FormData()
             formData.append('card', file, file.name)
@@ -26,10 +35,24 @@ export const composer = {
                   }
                 });
                 return returnResponse(response);
-                
             }catch(error){
                 return returnError(error);
                 
+            }
+        },
+        exportarPerfil : async function (axios, id){
+            try{
+                let response = await axios.get('/api/wallet/' + id + '/export', {
+                    responseType : "arraybuffer",
+                    headers : {
+                        "Accept" : "application/octet-stream"
+                    }
+                });
+                return returnResponse(response);
+            }catch(error){
+                return {
+                    "statusCode" : error.response.status
+                };
             }
         },
         setDefault : async function(axios, name) {
