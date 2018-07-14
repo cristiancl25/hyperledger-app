@@ -130,6 +130,14 @@ export const composer = {
                 return returnError(error);
             }
         },
+        getTipoOrganizacion : async function(axios){
+            try{
+                let response = await axios.get('/api/org.hyperledger.composer.organizaciones.TipoOrganizacion/');
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
         getOrganizacionId : async function(axios, id){
             try{
                 let response = await axios.get('/api/org.hyperledger.composer.organizaciones.Organizacion/' + id + '?filter={%22include%22:%22resolve%22}');

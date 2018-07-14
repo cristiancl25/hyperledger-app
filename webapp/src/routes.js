@@ -4,7 +4,7 @@ import CrearProducto from './components/productos/CrearProducto';
 import Producto from './components/productos/Producto';
 import transacciones from './components/transacciones/transacciones';
 import organizaciones from './components/organizaciones/organizaciones';
-import AllOrganizaciones from './components/organizaciones/AllOrganizaciones';
+import AllOrganizaciones from './components/organizaciones/listaOrganizaciones';
 import organizacion from './components/organizaciones/organizacion';
 import evento from './components/eventos/Evento';
 import HomePage from './components/HomePage';

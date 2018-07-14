@@ -20,6 +20,7 @@
     "vue-qr-reader": "^1.5.0",
     "vue-router": "^3.0.1",
     "vue2-google-maps": "^0.8.12",
+    "vuejs-paginate": "^1.9.3",
     "vuex": "^3.0.1"
   },
   "devDependencies": {

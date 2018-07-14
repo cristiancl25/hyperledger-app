@@ -104,7 +104,7 @@
                 {{ perfil.name }}
                 <span v-if="perfil.default" class="badge badge-success">{{$t('active')}}</span>
                 <div class="col-md-12" v-if="perfil.default">
-                  <button class="btn btn-secondary btn-sm" @click="exportarPerfil(perfil.name)">Exportar</button>
+                  <button class="btn btn-info btn-sm" @click="exportarPerfil(perfil.name)">Exportar</button>
                   <button class="btn btn-danger btn-sm" @click="eliminarPerfil(perfil.name)">Eliminar</button>
                 </div>
               </li>
@@ -279,6 +279,7 @@ export default {
       let response = await composer.sistema.exportarPerfil(this.$axios, perfil);
       this.progress = false;
       if (response.statusCode === 200){
+
         let data = response.data;
         const url = window.URL.createObjectURL(new Blob([data],  {type: "octet/stream"}));
         const link = document.createElement('a');
