@@ -89,24 +89,24 @@
         <div class="mt-2 mr-2 border col-md-5 div-default"
           :key="producto.productoId"
           v-for="(producto) in paginacion.contenido">
-          <h5><strong>ID: </strong>
+          <h6><strong>ID: </strong>
             <router-link
               :to="'/productos/' + producto.productoId"
               tag="a">
               {{producto.productoId}}
             </router-link>
-          </h5>
-          <h5 align="center"><span :class="colorEstado(producto.estado)">{{producto.estado}}</span></h5>
-          <h5><strong>Organización ID: </strong>
+          </h6>
+          <h6 align="center"><span :class="colorEstado(producto.estado)">{{producto.estado}}</span></h6>
+          <h6><strong>Organización ID: </strong>
             <router-link
               :to="'/organizaciones/' + producto.operacionActual.orgId"
               tag="a">
               {{producto.operacionActual.orgId}}
             </router-link>
-          </h5>
-          <h5><strong>Tipo Producto: </strong>{{getTipoProducto(producto.caracteristicas.tipoProducto)}}</h5>
-          <h5><strong>Variedad: </strong>{{producto.caracteristicas.variedadProducto}}</h5>
-          <h5><strong>Tipo: </strong>{{producto.caracteristicas.tipo}}</h5>
+          </h6>
+          <h6><strong>Tipo Producto: </strong>{{getTipoProducto(producto.caracteristicas.tipoProducto)}}</h6>
+          <h6><strong>Variedad: </strong>{{producto.caracteristicas.variedadProducto}}</h6>
+          <h6><strong>Tipo: </strong>{{producto.caracteristicas.tipo}}</h6>
         </div>
       </div>
     </div>

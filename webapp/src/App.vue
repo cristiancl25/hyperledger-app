@@ -33,17 +33,21 @@
     },
     data() {
       return {
-        event : {
-          show : false,
-          data : ''
-        }
       }
     },
     created: async function () {
       this.$options.sockets.onmessage = (data) => {
         let evento = JSON.parse(data.data);
-        this.$store.commit('anadirEvento', evento);
+        evento.$class = this.getTipoEvento(evento.$class)
+        if(evento.$class === 'ProductoEnVenta' || evento.orgDestino === this.$store.state.organizacion){
+          this.$store.commit('anadirEvento', evento);
+        }
       }
+    },
+    methods : {
+      getTipoEvento(evento){
+        return evento.replace('org.hyperledger.composer.productos.','');
+      },
     }
   }
 </script>

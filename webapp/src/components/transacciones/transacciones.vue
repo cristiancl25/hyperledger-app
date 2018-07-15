@@ -10,19 +10,22 @@
         </select>
       </div>
     </div>
+    <h1 align="center">Transacciones</h1>
     <div class="row justify-content-center">
+      <div align="center" v-if="paginacion.contenido.length === 0" class="alert alert-warning col-md-6">
+        <strong>No existen transacciones</strong>
+      </div>
       <div class="col-md-10">
-        <h1 align="center">Transacciones</h1>
         <ul class="list-group">
           <li
-            class="list-group-item"
+            class="list-group-item mb-2"
             :key="tran.trasaccionId"
             v-for="(tran) in paginacion.contenido">
             <div>
-              <h5><strong>ID: </strong>{{tran.transaccionId}}</h5>
+              <h6><strong>ID: </strong>{{tran.transaccionId}}</h6>
               <router-link :to="'/productos/' + getProductoId(tran.producto)" tag="a"> <a>producto</a> </router-link>
-              <h5>
-                <strong>Comprador</strong>
+              <h6>
+                <span v-if="tran.orgCompra.orgId===$store.state.organizacion">&#10132; </span><strong>Comprador</strong>
                 <router-link
                   :to="'/organizaciones/' + tran.orgCompra.orgId"
                   tag="a">
@@ -30,9 +33,9 @@
                 </router-link>
                 <span v-if="tran.orgCompra.confirmacion">&#x2705;</span>
                 <span v-else>&#10008;</span>
-              </h5>
-              <h5>
-                <strong>Vendedor</strong>
+              </h6>
+              <h6>
+                <span v-if="tran.orgVenta.orgId===$store.state.organizacion">&#10132; </span><strong>Vendedor</strong>
                 <router-link
                   :to="'/organizaciones/' + tran.orgVenta.orgId"
                   tag="a">
@@ -40,7 +43,7 @@
                 </router-link> 
                 <span v-if="tran.orgVenta.confirmacion">&#x2705;</span>
                 <span v-else>&#10008;</span>
-              </h5>
+              </h6>
               <button class="btn btn-primary"
                 data-toggle="modal" data-target="#ModalTransaccion"
                 @click="modal.titulo='Confirmar transaccion';

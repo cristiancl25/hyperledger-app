@@ -26,15 +26,15 @@
         <div class="mt-2 mr-2 border col-md-5 div-default"
           :key="organizacion.orgId"
           v-for="(organizacion) in paginacion.contenido">
-          <h5><strong>ID :</strong>
+          <h6><strong>ID :</strong>
             <router-link
               :to="'/organizaciones/' + organizacion.orgId"
               tag="a">
               {{organizacion.orgId}}
               </router-link>
-          </h5>
-          <h5><strong>Nombre: </strong>{{organizacion.nombre}}</h5>
-          <h5><strong>Tipo: </strong>{{getTipoProducto(organizacion.tipoOrganizacion)}}</h5>
+          </h6>
+          <h6><strong>Nombre: </strong>{{organizacion.nombre}}</h6>
+          <h6><strong>Tipo: </strong>{{getTipoProducto(organizacion.tipoOrganizacion)}}</h6>
       </div>
     </div>
     <br>
