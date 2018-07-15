@@ -137,12 +137,24 @@ transaction FinalizarPuja {
   o String productoId
 }
 
+event GanadorPuja{
+  o String orgDestino
+  o String orgOrigen
+  o String productoId
+}
+
 transaction CrearTipoProducto {
   o String tipo
 }
 
 
 transaction ComprarProducto {
+  o String productoId
+}
+
+event ProductoComprado{
+  o String orgDestino
+  o String orgOrigen
   o String productoId
 }
 

@@ -64,6 +64,71 @@ composer transaction submit -c admin@bna -d '{
 composer identity issue -c admin@bna -f ~/.composer/profiles/admin_res1.card -u admin@res1 -a "resource:org.hyperledger.composer.participantes.OrgAdmin#admin@res1" -x
 # composer card import -f ~/.composer/profiles/admin_res1.card
 
+# Creación de una organización y su administrador
+composer transaction submit -c admin@bna -d '{
+    "$class":"org.hyperledger.composer.organizaciones.CrearOrganizacion",
+    "orgId":"org1",
+    "nombre":"org1",
+    "idAdmin":"admin@org1",
+    "tipoOrganizacion":"RESTAURANTE",
+    "descripcion":"Descripción del restaurante",
+    "nombreAdmin":"admin",
+    "emailAdmin":"admin@org1"
+}'
+composer identity issue -c admin@bna -f ~/.composer/profiles/admin_org1.card -u admin@org1 -a "resource:org.hyperledger.composer.participantes.OrgAdmin#admin@org1" -x
+
+# Creación de una organización y su administrador
+composer transaction submit -c admin@bna -d '{
+    "$class":"org.hyperledger.composer.organizaciones.CrearOrganizacion",
+    "orgId":"org2",
+    "nombre":"org2",
+    "idAdmin":"admin@org2",
+    "tipoOrganizacion":"RESTAURANTE",
+    "descripcion":"Descripción del restaurante",
+    "nombreAdmin":"admin",
+    "emailAdmin":"admin@org2"
+}'
+composer identity issue -c admin@bna -f ~/.composer/profiles/admin_org2.card -u admin@org2 -a "resource:org.hyperledger.composer.participantes.OrgAdmin#admin@org2" -x
+
+# Creación de una organización y su administrador
+composer transaction submit -c admin@bna -d '{
+    "$class":"org.hyperledger.composer.organizaciones.CrearOrganizacion",
+    "orgId":"org3",
+    "nombre":"org3",
+    "idAdmin":"admin@org3",
+    "tipoOrganizacion":"PESQUEIRA",
+    "descripcion":"Descripción del restaurante",
+    "nombreAdmin":"admin",
+    "emailAdmin":"admin@org3"
+}'
+composer identity issue -c admin@bna -f ~/.composer/profiles/admin_org3.card -u admin@org3 -a "resource:org.hyperledger.composer.participantes.OrgAdmin#admin@org3" -x
+
+# Creación de una organización y su administrador
+composer transaction submit -c admin@bna -d '{
+    "$class":"org.hyperledger.composer.organizaciones.CrearOrganizacion",
+    "orgId":"org4",
+    "nombre":"org4",
+    "idAdmin":"admin@org4",
+    "tipoOrganizacion":"PESQUEIRA",
+    "descripcion":"Descripción del restaurante",
+    "nombreAdmin":"admin",
+    "emailAdmin":"admin@org4"
+}'
+composer identity issue -c admin@bna -f ~/.composer/profiles/admin_org4.card -u admin@org4 -a "resource:org.hyperledger.composer.participantes.OrgAdmin#admin@org4" -x
+
+# Creación de una organización y su administrador
+composer transaction submit -c admin@bna -d '{
+    "$class":"org.hyperledger.composer.organizaciones.CrearOrganizacion",
+    "orgId":"org5",
+    "nombre":"org5",
+    "idAdmin":"admin@org5",
+    "tipoOrganizacion":"PESQUEIRA",
+    "descripcion":"Descripción del restaurante",
+    "nombreAdmin":"admin",
+    "emailAdmin":"admin@org5"
+}'
+composer identity issue -c admin@bna -f ~/.composer/profiles/admin_org5.card -u admin@org5 -a "resource:org.hyperledger.composer.participantes.OrgAdmin#admin@org5" -x
+
 # # Creación de un usuario dentro de una organizacion
 # composer transaction submit -c admin@res1@bna -d '{
 #     "$class":"org.hyperledger.composer.participantes.CrearParticipante",

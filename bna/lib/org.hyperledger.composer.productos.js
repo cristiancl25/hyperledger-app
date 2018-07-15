@@ -268,6 +268,7 @@ async function PujarProducto(datos){
 }
 
 async function pujaATransaccion(producto){
+    const factory = getFactory();
     var regPuja = await getAssetRegistry(NS_PROD + '.Puja');
     var puja = await regPuja.get(producto.operacionActual.datosVenta.pujaId);
 
@@ -282,6 +283,12 @@ async function pujaATransaccion(producto){
         await regPuja.update(puja);
 
         await crearTransaccion(producto, ganador);
+
+        let evento = factory.newEvent(NS_PROD, 'GanadorPuja');
+        evento.orgDestino = ganador;
+        evento.orgOrigen = producto.operacionActual.orgId;
+        evento.productoId = producto.productoId;
+        emit(evento);
     }
 }
 /**
@@ -309,6 +316,7 @@ async function FinalizarPuja(datos){
  * @transaction
 */
 async function ComprarProducto(datos){
+    const factory = getFactory();
     var participante = getCurrentParticipant();
     await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
@@ -322,6 +330,12 @@ async function ComprarProducto(datos){
     }
 
     await crearTransaccion(producto, participante.orgId);
+    
+    let evento = factory.newEvent(NS_PROD, 'ProductoComprado');
+    evento.orgDestino = producto.operacionActual.orgId;
+    evento.orgOrigen = participante.orgId;
+    evento.productoId = producto.productoId;
+    emit(evento);
 }
 
 
