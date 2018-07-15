@@ -214,6 +214,7 @@ export default {
       return tipo.replace('resource:org.hyperledger.composer.productos.TipoProducto#','');
     },
     filtrado : async function(){
+      this.info.show = false;
       this.paginacion.show = false;
       let filtro = '?filter=';
       if (this.filtros.id !== ''){

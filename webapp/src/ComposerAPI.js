@@ -283,25 +283,9 @@ export const composer = {
                 return returnError(error);
             } 
         },
-        getTransacciones : async function(axios){
+        getTransacciones : async function(axios, filtro){
             try{
-                let response = await axios.get('/api/org.hyperledger.composer.productos.Transaccion');
-                return returnResponse(response);
-            }catch(error){
-                return returnError(error);
-            }
-        },
-        getTransaccionesVenta : async function(axios, org){
-            try{
-                let response = await axios.get('/api/org.hyperledger.composer.productos.Transaccion?filter={"where": {"orgVenta.orgId": "' + org +'"}}');
-                return returnResponse(response);
-            }catch(error){
-                return returnError(error);
-            }
-        },
-        getTransaccionesCompra : async function(axios, org){
-            try{
-                let response = await axios.get('/api/org.hyperledger.composer.productos.Transaccion?filter={"where": {"orgCompra.orgId": "' + org +'"}}');
+                let response = await axios.get('/api/org.hyperledger.composer.productos.Transaccion' + filtro);
                 return returnResponse(response);
             }catch(error){
                 return returnError(error);

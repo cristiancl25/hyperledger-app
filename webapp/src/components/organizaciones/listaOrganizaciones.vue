@@ -23,7 +23,7 @@
       </div>
     </div>
     <div class="row justify-content-center">
-        <div class="mt-2 mr-2 border col-md-5"
+        <div class="mt-2 mr-2 border col-md-5 div-default"
           :key="organizacion.orgId"
           v-for="(organizacion) in paginacion.contenido">
           <h5><strong>ID :</strong>
@@ -123,6 +123,9 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
+  .div-default{
+    background-color: #f7fdfd 
+  }
 
 </style>

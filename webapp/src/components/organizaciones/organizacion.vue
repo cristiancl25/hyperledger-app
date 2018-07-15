@@ -9,6 +9,7 @@
           <h1 align="center"><strong>{{ organizacion.nombre}}</strong></h1>
           <h5 align="center"><strong>ID: </strong>{{organizacion.orgId}}</h5>
           <h5 align="center"><strong>Tipo de organización: </strong>{{organizacion.tipoOrganizacion.tipo}}</h5>
+          <h5 align="center"><strong>Descripción: </strong>{{organizacion.descripcion}}</h5>
         </div>
       </div>
       <div class="row">

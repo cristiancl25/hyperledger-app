@@ -1,17 +1,46 @@
 <template>
   <div>
     <div class="row justify-content-center">
+      <div class="col-md-2">
+        <label for="inputState">Filtro</label>
+        <select v-model="filtros.compraVenta" class="form-control">
+          <option @click="filtrado()" value="">Todas</option>
+          <option @click="filtrado()" >Compra</option>
+          <option @click="filtrado()" >Venta</option>
+        </select>
+      </div>
+    </div>
+    <div class="row justify-content-center">
       <div class="col-md-10">
+        <h1 align="center">Transacciones</h1>
         <ul class="list-group">
           <li
             class="list-group-item"
             :key="tran.trasaccionId"
-            v-for="(tran) in transaccionesVenta">
+            v-for="(tran) in paginacion.contenido">
             <div>
               <h5><strong>ID: </strong>{{tran.transaccionId}}</h5>
               <router-link :to="'/productos/' + getProductoId(tran.producto)" tag="a"> <a>producto</a> </router-link>
-              <h5><strong>Comprador</strong> {{tran.orgCompra.orgId}} - {{tran.orgCompra.confirmacion}}</h5>
-              <h5><strong>Vendedor</strong> {{tran.orgVenta.orgId}} - {{tran.orgVenta.confirmacion}}</h5>
+              <h5>
+                <strong>Comprador</strong>
+                <router-link
+                  :to="'/organizaciones/' + tran.orgCompra.orgId"
+                  tag="a">
+                  {{tran.orgCompra.orgId}}
+                </router-link>
+                <span v-if="tran.orgCompra.confirmacion">&#x2705;</span>
+                <span v-else>&#10008;</span>
+              </h5>
+              <h5>
+                <strong>Vendedor</strong>
+                <router-link
+                  :to="'/organizaciones/' + tran.orgVenta.orgId"
+                  tag="a">
+                  {{tran.orgVenta.orgId}}
+                </router-link> 
+                <span v-if="tran.orgVenta.confirmacion">&#x2705;</span>
+                <span v-else>&#10008;</span>
+              </h5>
               <button class="btn btn-primary"
                 data-toggle="modal" data-target="#ModalTransaccion"
                 @click="modal.titulo='Confirmar transaccion';
@@ -25,13 +54,25 @@
         </ul>
       </div>
     </div>
-
-
-
+    <br>
+    <div class="row justify-content-center">
+      <div>
+        <paginate v-if="paginacion.show"
+          :page-count="paginacion.paginas"
+          :click-handler="cambiarPagina"
+          :prev-text="'Anterior'"
+          :next-text="'Siguiente'"
+          :page-class="'page-item'"
+          :page-link-class="'page-link'"
+          :prev-link-class="'page-link'"
+          :next-link-class="'page-link'"
+          :container-class="'pagination justify-content-center'">
+        </paginate>
+      </div>
+    </div>
 
     <div class="modal fade" id="ModalTransaccion" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
-
         <div class="modal-content">
           <div class="modal-header">
             <h5 class="modal-title" id="exampleModalLabel">{{modal.titulo}}</h5>
@@ -50,7 +91,6 @@
                 <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
               </div>
             </div>
-
             <div id="ContenidoModal">
               <form> 
                 <div class="form-group col-md-6">
@@ -81,15 +121,12 @@
                 <google-map v-if="coordenadas.mapa" v-bind:markers="[{'lat':coordenadas.latitud, 'lng':coordenadas.longitud, 'info':coordenadas.direccion}]" v-bind:lista='false'></google-map>
               </div>
             </div>
-
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click="inicializar(); modalInfo.show=false" data-dismiss="modal">{{$t('close')}}</button>
             <button type="button" class="btn btn-primary" @click="confirmarTransaccion">Enviar</button>
           </div>
         </div>
-
-
       </div>
     </div>
   </div>
@@ -98,9 +135,11 @@
 <script>
 import {composer} from '../../ComposerAPI'
 import googleMap from '../mapas/Mapa'
+import Paginate from 'vuejs-paginate'
 
 export default {
   components : {
+    Paginate,
     googleMap,
   },
   data() {
@@ -128,7 +167,15 @@ export default {
         "nuevaLocalizacion": ""
       },
       progress : false,
-      transaccionesVenta : []
+      transacciones : [],
+      paginacion : {
+        show : false,
+        paginas : 1,
+        contenido : []
+      },
+      filtros : {
+        compraVenta : ''
+      }
     
     }
   },
@@ -146,21 +193,12 @@ export default {
       return rec
     }
   },
-  watch: {
-    // TODO Mejorar
-    '$store.store.organizacion' : async function(to, from) {
-      await this.inicializar();
-    }
-  },
   created : async function () {
-      await this.inicializar();
+      await this.filtrado();
   },
   methods : {
-    inicializar : async function() {
-      let response = await composer.productos.getTransacciones(this.$axios);
-      // let response = await composer.productos.getTransaccionesVenta(this.$axios, this.$store.state.organizacion);
-      // let resp = await composer.productos.getTransaccionesCompra(this.$axios, this.$store.state.organizacion);
-      this.transaccionesVenta = response.data;
+    inicializar : async function(){
+      await this.filtrado();
     },
     getProductoId(recurso){ return recurso.split("#")[1] },
     getLocalizaciones : async function() {
@@ -189,6 +227,23 @@ export default {
       this.respuesta(response, 'Confirmado');
       this.progress = false;
     },
+    cambiarPagina(pagina){
+      this.paginacion.contenido = this.transacciones.slice((pagina-1)*10, (pagina-1)*10 + 10);
+    },
+    filtrado : async function () {
+      let filtro = '';
+      if (this.filtros.compraVenta === 'Compra'){
+        filtro = '?filter={"where": {"orgCompra.orgId": "' + this.$store.state.organizacion +'"}}'
+      } else if (this.filtros.compraVenta === 'Venta'){
+        filtro = '?filter={"where": {"orgVenta.orgId": "' + this.$store.state.organizacion +'"}}'
+      }
+      
+      let response = await composer.productos.getTransacciones(this.$axios, filtro);
+      this.transacciones=response.data;
+      this.cambiarPagina(1);
+      this.paginacion.paginas = Math.ceil(this.transacciones.length/10);
+      this.paginacion.show = true;
+    }
   }
 }
 </script>
