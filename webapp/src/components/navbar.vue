@@ -109,7 +109,7 @@
                 </div>
               </li>
             </ul>
-            <div id="card"></div>
+            <div id="perfilConexion"></div>
             <br>
             <label>{{$t('import.profile')}}</label>
             <br>
@@ -285,7 +285,7 @@ export default {
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', perfil);
-        document.getElementById("card").appendChild(link);
+        document.getElementById("perfilConexion").appendChild(link);
         link.click();
         
       } else {

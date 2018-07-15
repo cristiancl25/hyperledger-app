@@ -100,6 +100,7 @@ export default {
     this.tipoOrganizaciones = response.data;
   },
   methods : {
+    // TODO getTipoProducto -> getTipoOrganizacion
     getTipoProducto(tipo){
       return tipo.replace('resource:org.hyperledger.composer.organizaciones.TipoOrganizacion#','');
     },

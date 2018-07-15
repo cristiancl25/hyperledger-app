@@ -206,6 +206,14 @@ export const composer = {
                 return returnError(error);
             }
         },
+        getProductos : async function(axios, filtro){
+            try{
+                let response = await axios.get('/api/org.hyperledger.composer.productos.Producto/' + filtro);
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
         getPuja : async function(axios, pujaId){
             try{
                 let response = await axios.get('/api/org.hyperledger.composer.productos.Puja/' + pujaId);

@@ -84,7 +84,7 @@
     
 
     <div class="row">
-      <div class="btn-group col-md-12">
+      <div class="btn-group flex-wrap col-md-12">
         <button class="btn btn-primary" @click="showMapMethod">Mostrar Mapa</button>
         <button class="btn btn-primary"
           data-toggle="modal" data-target="#ModalProducto"
