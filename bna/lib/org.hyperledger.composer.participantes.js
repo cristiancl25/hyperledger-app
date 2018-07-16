@@ -36,7 +36,7 @@ async function CrearParticipante(datos){
     await regPar.add(usuario);
 
     // Inserción del nuevo participante en la lista de participantes válido de la organización
-    lista.push(factory.newRelationship(NS_PAR, tipo, usuario.email));
+    lista.push(factory.newRelationship(NS_PAR, tipo, datos.id));
     await regOrg.update(org);
 }
 
