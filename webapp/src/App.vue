@@ -36,11 +36,26 @@
       }
     },
     created: async function () {
+      if ('Notification' in window){
+        Notification.requestPermission(function(){});
+      }
       this.$options.sockets.onmessage = (data) => {
         let evento = JSON.parse(data.data);
         evento.$class = this.getTipoEvento(evento.$class)
         if(evento.$class === 'ProductoEnVenta' || evento.orgDestino === this.$store.state.organizacion){
           this.$store.commit('anadirEvento', evento);
+          if ('Notification' in window && Notification.permission === 'granted'){
+            let notification = new Notification('Evento Hyperledger', {
+              body: evento.$class,
+              tag: evento.$class
+            });
+            notification.onclick = function() {
+              parent.focus();
+              window.focus();
+              this.close();
+            };
+            //setTimeout(notification.close.bind(notification), 5000);
+          }
         }
       }
     },
