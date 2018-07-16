@@ -1,12 +1,10 @@
 <template>
   <div>
-    <h1>{{$t('homePage')}}</h1>
-    <hr>
-    <h4> Cookies </h4>
-    <h6>{{cookie}}</h6>
-    <hr>
-    <h4> localStorage </h4>
-    <h6>{{storage}}</h6>
+    <div class="row justify-content-center">
+      <div class="col-md-10">
+        <h1 align="center">{{$t('homePage')}}</h1>
+      </div>
+    </div>
   </div>
 </template>
 

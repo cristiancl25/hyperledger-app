@@ -23,7 +23,8 @@
               <button
                 v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
                 data-toggle="modal" data-target="#ModalParticipante"
-                @click="delParticipante=true; datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Usuario'"
+                @click="modal.tipo='eliminarParticipante'; modal.titulo='Eliminar Participante Usuario';
+                  datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Usuario'"
                 class="btn btn-danger btn-sm">
                 Eliminar
               </button>
@@ -40,7 +41,8 @@
               <button
                 v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
                 data-toggle="modal" data-target="#ModalParticipante"
-                @click="delParticipante=true; datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Invitado'"
+                @click="modal.tipo='eliminarParticipante'; modal.titulo='Eliminar Participante Invitado';
+                  datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Invitado'"
                 class="btn btn-danger btn-sm">
                 Eliminar
               </button>
@@ -61,7 +63,8 @@
               <button
                 v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
                 data-toggle="modal" data-target="#ModalParticipante"
-                @click="delLocalizacion=true; delLocalizacionId=localizacion.localizacionId;"
+                @click="modal.tipo='eliminarLocalizacion'; modal.titulo='Eliminar Localizacion';
+                  delLocalizacionId=localizacion.localizacionId;"
                 class="btn btn-danger btn-sm">
                 Eliminar
               </button>
@@ -76,8 +79,17 @@
       <br>
       <div class="row" v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id">
         <div class="btn-group col-md-6">
-          <button class="btn btn-primary" data-toggle="modal" data-target="#ModalParticipante" @click="nuevoParticipante=true">Crear Participante</button>
-          <button class="btn btn-primary" data-toggle="modal" data-target="#ModalParticipante" @click="nuevaLocalizacion=true">Crear localizacion</button>
+          <button 
+            class="btn btn-primary"
+            data-toggle="modal" data-target="#ModalParticipante"
+            @click="modal.titulo='Crear Participante'; modal.tipo='crearParticipante'">
+            Crear Participante
+          </button>
+          <button class="btn btn-primary"
+            data-toggle="modal" data-target="#ModalParticipante"
+            @click="modal.titulo='Crear Localizacion'; modal.tipo='crearLocalizacion'">
+            Crear localizacion
+          </button>
         </div>
       </div>
 
@@ -88,10 +100,7 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 v-if="nuevoParticipante" class="modal-title" id="exampleModalLabel">Crear Participante</h5>
-              <h5 v-if="delParticipante" class="modal-title" id="exampleModalLabel">Eliminar Participante</h5>
-              <h5 v-if="delLocalizacion" class="modal-title" id="exampleModalLabel">Eliminar localizacion</h5>
-              <h5 v-if="nuevaLocalizacion" class="modal-title" id="exampleModalLabel">Nueva localizacion</h5>
+              <h5 class="modal-title">{{modal.titulo}}</h5>
             </div>
             <div class="modal-body">
               <div class="col-md-12" v-if="error.show">
@@ -104,67 +113,65 @@
                   <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
                 </div>
               </div>
-              <div v-if="nuevaLocalizacion">
-                <form> 
+              <div v-if="modal.tipo==='crearLocalizacion'">
+                <div align="center" class="col-md-12">
+                  <button  @click="geolocalizacion()" class="btn btn -info">Usar GPS</button>
+                </div>
+                <div> 
                   <div class="form-group col-md-12">
                     <label>Nombre</label>
                     <input v-model="localizacion.nombre" class="form-control"  placeholder="Nombre de la localizacion">
                   </div>
                   <div class="form-group col-md-12">
                     <label>Latitud</label>
-                    <input v-model="localizacion.latitud" type=number step=0.01 class="form-control"  placeholder="Latitud">
+                    <input v-model.number="localizacion.latitud" type=number step=0.01 class="form-control"  placeholder="Latitud">
                   </div>
                   <div class="form-group col-md-12">
                     <label>Longitud</label>
-                    <input v-model="localizacion.longitud" type=number step=0.01 class="form-control"  placeholder="Longitud">
+                    <input v-model.number="localizacion.longitud" type=number step=0.0000000000000001 class="form-control"  placeholder="Longitud">
                   </div>
                   <div class="form-group col-md-12">
                     <label>Dirección</label>
                     <input v-model="localizacion.direccion" class="form-control"  placeholder="Dirección">
                   </div>
-                </form>
-                <div class="col-md-6">
-                  <button class="btn btn-primary" @click="crearLocalizacion">Submit</button>
                 </div>
+                <div class="col-md-12">
+                  <button v-if="!mapa" @click="mapa=!mapa; locSelec=''" class="btn btn -info">Mostrar mapa</button>
+                  <button v-if="mapa" @click="mapa=!mapa" class="btn btn -info">Ocultar mapa</button>
+                </div>
+                <google-map v-if="mapa" v-bind:markers="[{'lat':localizacion.latitud, 'lng':localizacion.longitud, 'info':localizacion.direccion}]" v-bind:lista='false'></google-map>
               </div>
 
-              <div v-if="nuevoParticipante">
-                <form> 
-                  <div class="form-group col-md-12">
-                    <label for="id">Identificador</label>
-                    <input v-model="participante.id" class="form-control"  placeholder="Identificador del participante">
-                  </div>
-                  <div class="form-group col-md-12">
-                    <label for="nombre">Nombre</label>
-                    <input v-model="participante.nombre" class="form-control"  placeholder="Nombre del participante">
-                  </div>
-                  <div class="form-group col-md-12">
-                    <label for="email">Email</label>
-                    <input type="email" v-model="participante.email" class="form-control"  placeholder="Email del participante">
-                  </div>
-                  <div class="form-group col-md-6">
-                    <label for="exampleFormControlSelect1">Tipo de Participante</label>
-                    <select class="form-control" v-model="participante.tipoUsuario" id="exampleFormControlSelect1">
-                      <option selected>Usuario</option>
-                      <option>Invitado</option>
-                    </select>
-                  </div>
-                  <div id="card" class="form-group col-md-12"></div>
-                  <br>
-                </form>
-                <div class="col-md-6">
-                  <button class="btn btn-primary" @click="crearParticipante">Submit</button>
+              <div v-if="modal.tipo==='crearParticipante'">
+                <div class="form-group col-md-12">
+                  <label>Identificador</label>
+                  <input v-model="participante.id" class="form-control"  placeholder="Identificador del participante">
                 </div>
+                <div class="form-group col-md-12">
+                  <label>Nombre</label>
+                  <input v-model="participante.nombre" class="form-control"  placeholder="Nombre del participante">
+                </div>
+                <div class="form-group col-md-12">
+                  <label>Email</label>
+                  <input type="email" v-model="participante.email" class="form-control"  placeholder="Email del participante">
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Tipo de Participante</label>
+                  <select class="form-control" v-model="participante.tipoUsuario">
+                    <option selected>Usuario</option>
+                    <option>Invitado</option>
+                  </select>
+                </div>
+                <div id="card" class="col-md-12"></div>
               </div>
               
             </div>
             <div class="modal-footer">
-              <button type="button" v-if="nuevaLocalizacion" class="btn btn-primary" @click="inicializar(); nuevaLocalizacion=false; error.show=false" data-dismiss="modal">Cerrar</button>
-              <button type="button" v-if="nuevoParticipante" class="btn btn-primary" @click="inicializar(); nuevoParticipante=false; error.show=false" data-dismiss="modal">Cerrar</button>
-              <button type="button" v-if="delParticipante" class="btn btn-primary" @click="inicializar(); delParticipante=false; error.show=false" data-dismiss="modal">Cerrar</button>
-              <button type="button" v-if="delParticipante" class="btn btn-danger" @click="eliminarParticipante()" >Borrar</button>
-              <button type="button" v-if="delLocalizacion" class="btn btn-primary" @click="inicializar(); delLocalizacion=false; error.show=false" data-dismiss="modal">Cerrar</button>
-              <button type="button" v-if="delLocalizacion" class="btn btn-danger" @click="eliminarLocalizacion()" >Borrar</button>
+              <button type="button" class="btn btn-secondary" @click="inicializar(); error.show=false" data-dismiss="modal">{{$t('close')}}</button>
+              <button type="button" v-if="modal.tipo==='eliminarParticipante'" class="btn btn-danger" @click="eliminarParticipante()" >Eliminar Participante</button>
+              <button type="button" v-if="modal.tipo==='eliminarLocalizacion'" class="btn btn-danger" @click="eliminarLocalizacion()" >Eliminar Localizacion</button>
+              <button type="button" v-if="modal.tipo==='crearParticipante'" class="btn btn-primary" @click="crearParticipante()" >Crear Participante</button>
+              <button type="button" v-if="modal.tipo==='crearLocalizacion'" class="btn btn-primary" @click="crearLocalizacion()" >Crear Localizacion</button>
             </div>
           </div>
         </div>
@@ -198,10 +205,10 @@
           message : '',
           tipo : ''
         },
-        nuevaLocalizacion : false,
-        nuevoParticipante : false,
-        delParticipante : false,
-        delLocalizacion :false,
+        modal : {
+          titulo : '',
+          tipo : ''
+        },
         delLocalizacionId : '',
         datosParticipanteBorrar:{},
         participante : {
@@ -223,6 +230,7 @@
           "longitud" : 0, 
           "info" : ""
         },
+        mapa : false,
         locSelec : "",      
         progress : false,
       }
@@ -237,6 +245,7 @@
     },
     methods : {
       crearLocalizacion : async function(){
+        this.mapa = false;
         if (this.localizacion.direccion === '' || this.localizacion.nombre === ''){
           this.error.show = true; this.error.message = 'Datos inválidos'; this.error.tipo = "alert alert-warning";
           return;
@@ -331,7 +340,30 @@
         } else {
           this.info.show = true; this.info.message = response.message; this.info.tipo = "alert alert-danger";
         }
-      },  
+      },
+      geolocalizacion : async function(){
+      this.progress = true;
+      this.error.show = false;
+      if ("geolocation" in navigator) {
+        let self = this;
+        this.coordenadas.latitud = ""; this.coordenadas.longitud = ""; this.coordenadas.direccion = "";
+        navigator.geolocation.getCurrentPosition(function(position) {
+          const latitud = position.coords.latitude;
+          const longitud = position.coords.longitude;
+          self.localizacion.latitud = latitud;
+          self.localizacion.longitud = longitud;
+        },function(error){
+          self.error.show = true;
+          self.error.message = error.message;
+          self.error.tipo = "alert alert-warning";
+        });
+      } else {
+        this.error.show = true;
+        this.error.message = 'Geolocalización no disponible en este dispositivo';
+        this.error.tipo = "alert alert-warning";
+      }
+      this.progress = false;
+    },
     }
   }
 </script>
