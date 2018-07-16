@@ -18,7 +18,11 @@
                   {{$t('products')}}
                 </a>
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">                    
-                  <router-link class="dropdown-item" to="/productos/crear" tag="a" active-class="active" exact><a>Crear Producto</a></router-link>
+                  <router-link 
+                    v-if="$store.state.rolParticipante === 'Usuario'"
+                    class="dropdown-item" to="/productos/crear" tag="a" active-class="active" exact>
+                    <a>Crear Producto</a>
+                  </router-link>
                   <router-link class="dropdown-item" to="/productos/all" tag="a" active-class="active" exact><a>Productos</a></router-link>
                 </div>
               </li>
@@ -41,7 +45,7 @@
             </ul>  
           </div>
           <div class="navbar-nav" v-if="sesionIniciada">
-            <router-link class="nav-item nav-link" to="/transacciones" tag="a">Transacciones</router-link>
+            <router-link v-if="$store.state.rolParticipante === 'Usuario'" class="nav-item nav-link" to="/transacciones" tag="a">Transacciones</router-link>
             <router-link class="nav-item nav-link" to="/eventos" tag="a"><a>Eventos <span class="badge badge-success badge-pill"> {{eventos.length}}</span></a></router-link>
           </div>
           <div class="nav navbar-nav navbar-right" v-if="sesionIniciada">
