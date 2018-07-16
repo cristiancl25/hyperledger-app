@@ -35,7 +35,7 @@ async function validarParticipante(participante){
 
     var find = false;
     organizacion.usuarios.forEach(function(usuario){
-        if (participante.email === usuario['$identifier']){
+        if (participante.id === usuario['$identifier']){
             find = true;
             return;
         }
