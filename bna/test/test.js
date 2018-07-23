@@ -456,6 +456,7 @@ describe('Sample', () => {
         await useIdentity('admin');
         await crearTipoOrganizacion(orgTipo);
         await crearOrganizacion(orgId, orgTipo, 'descripción', admin, admin + '@' + orgId);
+        await crearOrganizacion('test2', orgTipo, 'descripción', admin, admin + '@' + 'test2');
         await useIdentity(admin + '@' + orgId);
         
         await crearParticipante(usuario + '@' + orgId, usuario, 'Usuario');
@@ -479,6 +480,11 @@ describe('Sample', () => {
         org.localizaciones.should.have.lengthOf(0);
         org.invitados.should.have.lengthOf(0);
 
+        await useIdentity(usuario + '@' + orgId);
+        await chai.expect(
+            crearParticipante('usuario2' + '@' + orgId, 'usuario2', 'Usuario')
+        ).to.be.rejectedWith(Error);
+        await useIdentity(admin + '@' + orgId);
         await crearParticipante('usuario2' + '@' + orgId, 'usuario2', 'Usuario');
 
         users = await reg.getAll();

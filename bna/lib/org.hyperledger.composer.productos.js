@@ -153,7 +153,6 @@ async function generarProducto(datos){
  */
  async function CrearProducto(datos){
     var participante = getCurrentParticipant();
-    await validarParticipante(participante);
     datos.productoId = generarIdProducto(participante.orgId);
     datos.orgId = participante.orgId;
     var producto = await generarProducto(datos);
@@ -171,7 +170,6 @@ async function generarProducto(datos){
 async function PonerVentaProducto(datos){
     const factory = getFactory();
     var participante = getCurrentParticipant();
-    await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
     
     if (producto.operacionActual.orgId !== participante.orgId){
@@ -224,7 +222,6 @@ async function PonerVentaProducto(datos){
 async function PujarProducto(datos){
     const factory = getFactory();
     var participante = getCurrentParticipant();
-    await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
 
     if (producto.operacionActual.orgId === participante.orgId){
@@ -298,7 +295,6 @@ async function pujaATransaccion(producto){
 */
 async function FinalizarPuja(datos){
     var participante = getCurrentParticipant();
-    await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
     if (producto.estado != 'PUJA'){
         throw new Error ('El producto non está en PUJA');
@@ -318,7 +314,6 @@ async function FinalizarPuja(datos){
 async function ComprarProducto(datos){
     const factory = getFactory();
     var participante = getCurrentParticipant();
-    await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
     
     if (participante.orgId === producto.operacionActual.orgId) {
@@ -349,7 +344,6 @@ async function ConfirmarTransaccion(datos){
     var regProd = await getAssetRegistry(NS_PROD + '.Producto');
     var regTran = await getAssetRegistry(NS_PROD + '.Transaccion');
     var participante = getCurrentParticipant();
-    await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
     var transaccion = await getTransaccion(producto.transaccionId);
 
@@ -441,7 +435,6 @@ async function DividirProducto(datos){
     const factory = getFactory();
     var regProd = await getAssetRegistry(NS_PROD + '.Producto');
     var participante = getCurrentParticipant();
-    await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
 
     if (producto.operacionActual.orgId !== participante.orgId){
@@ -524,7 +517,6 @@ async function DividirProducto(datos){
 */
 async function CancelarVenta(datos){
     var participante = getCurrentParticipant();
-    await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
     
     if (participante.orgId !== producto.operacionActual.orgId) {
@@ -556,7 +548,6 @@ async function CancelarVenta(datos){
 */
 async function ConsumirProducto(datos){
     var participante = getCurrentParticipant();
-    await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
     
     if (participante.orgId !== producto.operacionActual.orgId) {
@@ -580,9 +571,7 @@ async function ConsumirProducto(datos){
  * @transaction
 */
 async function ProductoPerdido(datos){
-// TODO lanzar eventos correspondientes
     var participante = getCurrentParticipant();
-    await validarParticipante(participante);
     var producto = await getProducto(datos.productoId);
     
     if (participante.orgId !== producto.operacionActual.orgId) {

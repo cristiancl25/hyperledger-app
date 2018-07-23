@@ -17,7 +17,6 @@ async function CrearParticipante(datos){
     var regOrg = await getAssetRegistry(NS_ORG + '.Organizacion');
     var org = await regOrg.get(participanteActual.orgId);
 
-    // TODO validar usuario OrgAdmin
     if (datos.tipoUsuario === 'Usuario'){
        tipo = 'Usuario'; 
        lista = org.usuarios;
