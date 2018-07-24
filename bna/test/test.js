@@ -335,8 +335,19 @@ describe('Sample', () => {
         chai.assert.isTrue(await regTipoOrg.exists('PESQUEIRA'));
     });
 
+    it('Creación de un tipo de organización con un participante inválido', async () => {
+        await useIdentity('admin');
+        await crearTipoOrganizacion('LONXA');
+        await crearOrganizacion('OrganizacionProba', 'LONXA', 'descripción', 'admin', 'admin@OrganizacionProba');
+        await useIdentity('admin@OrganizacionProba');
+        await chai.expect(
+            crearTipoOrganizacion('PESQUEIRA')
+        ).to.be.rejectedWith(Error);
+        var regTipoOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.TipoOrganizacion');
+        chai.assert.isFalse(await regTipoOrg.exists('PESQUEIRA'));
+    });
 
-    // TODO crear más test de las organizaciones
+
     it('Creación de una organización y de su administrador', async () => {
         await useIdentity('admin');
         await crearTipoOrganizacion('LONXA');
@@ -362,6 +373,19 @@ describe('Sample', () => {
         par.email.should.equal('admin@OrganizacionProba');
         par.nombre.should.equal('admin');
 
+    });
+
+    it('Creación de una organización inválida', async () => {
+        await useIdentity('admin');
+        await crearTipoOrganizacion('LONXA');
+
+        await chai.expect(
+            crearOrganizacion('OrganizacionProba', 'LONXAAA', 'descripción', 'admin', 'admin@OrganizacionProba')
+        ).to.be.rejectedWith(Error);
+
+        const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        var orgs = await regOrg.getAll();
+        orgs.should.have.lengthOf(0);
     });
 
     it('Creación de una organización y posterior actualización', async () => {
