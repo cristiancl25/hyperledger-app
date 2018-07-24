@@ -392,7 +392,6 @@ describe('Sample', () => {
     });
     
 
-    // TODO Crear más tests con las localizaciones
     it('Creación de una localización', async () => {
         const localizacionId = 'pes1-Dirección-1';
         await useIdentity('admin');
@@ -505,6 +504,57 @@ describe('Sample', () => {
         org.invitados.should.have.lengthOf(0);
     });
 
+    it('Creación de un participante Invitado para una organización', async () => {
+        const orgTipo = 'LONXA'; const admin = 'admin'; const orgId = 'test'; const invitado = 'invitado1';
+        await useIdentity('admin');
+        await crearTipoOrganizacion(orgTipo);
+        await crearOrganizacion(orgId, orgTipo, 'descripción', admin, admin + '@' + orgId);
+        await crearOrganizacion('test2', orgTipo, 'descripción', admin, admin + '@' + 'test2');
+        await useIdentity(admin + '@' + orgId);
+        
+        await crearParticipante(invitado + '@' + orgId, invitado, 'Invitado');
+
+        const reg = await businessNetworkConnection.getParticipantRegistry(NS_PAR + '.Invitado');
+        var invitados = await reg.getAll();
+        invitados.should.have.lengthOf(1);
+        invitados[0].id.should.equal('invitado1@test');
+        invitados[0].email.should.equal('invitado1@test');
+        invitados[0].nombre.should.equal('invitado1');
+        invitados[0].orgId.should.equal('test');
+
+        const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
+        var org = await regOrg.get('test');
+        org.orgId.should.equal('test');
+        org.tipoOrganizacion.$identifier.should.equal('LONXA');
+        org.administrador.$identifier.should.equal('admin@test');
+        org.invitados.should.have.lengthOf(1);
+        org.invitados[0].$identifier.should.equal('invitado1@test');
+        org.usuarios.should.have.lengthOf(0);
+
+        await useIdentity(invitado + '@' + orgId);
+        await chai.expect(
+            crearParticipante('invitado2' + '@' + orgId, 'invitado1', 'Invitado')
+        ).to.be.rejectedWith(Error);
+        await useIdentity(admin + '@' + orgId);
+        await crearParticipante('invitado2' + '@' + orgId, 'invitado2', 'Invitado');
+
+        invitados = await reg.getAll();
+        invitados.should.have.lengthOf(2);
+        invitados[1].id.should.equal('invitado2@test');
+        invitados[1].email.should.equal('invitado2@test');
+        invitados[1].nombre.should.equal('invitado2');
+        invitados[1].orgId.should.equal('test');
+
+        org = await regOrg.get('test');
+        org.orgId.should.equal('test');
+        org.tipoOrganizacion.$identifier.should.equal('LONXA');
+        org.administrador.$identifier.should.equal('admin@test');
+        org.descripcion.should.equal('descripción');
+        org.invitados.should.have.lengthOf(2);
+        org.invitados[1].$identifier.should.equal('invitado2@test');
+        org.localizaciones.should.have.lengthOf(0);
+        org.usuarios.should.have.lengthOf(0);
+    });
 
     it('Actualización de un participante para una organización', async () => {
         await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
