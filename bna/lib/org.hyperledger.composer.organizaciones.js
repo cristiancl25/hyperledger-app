@@ -1,10 +1,6 @@
 
 // Devuelve el registro y la organización a la que pertenece un participante del tipo OrgAdmin
 async function getOrganizacion(participante){
-    if (participante.getFullyQualifiedType() !== (NS_PAR + '.OrgAdmin')){
-        throw new Error('Participante ' + participante.getFullyQualifiedIdentifier() + ' non válido');
-    }
-
     try{
         var regOrg = await getAssetRegistry(NS_ORG + '.Organizacion');
         var organizacion = await regOrg.get(participante.orgId);
@@ -28,10 +24,6 @@ async function getOrganizacion(participante){
  */
 async function CrearOrganizacion(datos){
     var factory = getFactory();
-
-    if (getCurrentParticipant().$namespace + '.' + getCurrentParticipant().$type !== 'org.hyperledger.composer.system.NetworkAdmin'){
-        throw new Error('participante inválido');
-    }
 
     var regTipoOrg = await getAssetRegistry(NS_ORG + '.TipoOrganizacion');
     if (! await regTipoOrg.exists(datos.tipoOrganizacion)){
@@ -71,10 +63,6 @@ async function CrearOrganizacion(datos){
 async function CrearTipoOrganizacion(datos){
     var factory = getFactory();
 
-    if (getCurrentParticipant().$namespace + '.' + getCurrentParticipant().$type !== 'org.hyperledger.composer.system.NetworkAdmin'){
-        throw new Error('participante inválido');
-    }
-
     var tipoOrg = factory.newResource(NS_ORG, 'TipoOrganizacion', datos.tipo);
     var regOrg = await getAssetRegistry(NS_ORG + '.TipoOrganizacion');
     await regOrg.add(tipoOrg);
@@ -87,10 +75,6 @@ async function CrearTipoOrganizacion(datos){
  * @transaction
  */
 async function CrearLocalizacion(datos) {
-
-    if (getCurrentParticipant().$namespace + '.' + getCurrentParticipant().$type !== 'org.hyperledger.composer.participantes.OrgAdmin'){
-        throw new Error('participante inválido');
-    }
     var factory = getFactory();
     var participante = getCurrentParticipant();
     var {organizacion, regOrg} = await getOrganizacion(participante);
@@ -114,10 +98,6 @@ async function CrearLocalizacion(datos) {
  * @transaction
  */
 async function EliminarLocalizacion(datos) {
-
-    if (getCurrentParticipant().$namespace + '.' + getCurrentParticipant().$type !== 'org.hyperledger.composer.participantes.OrgAdmin'){
-        throw new Error('participante inválido');
-    }
     var participante = getCurrentParticipant();
     var {organizacion, regOrg} = await getOrganizacion(participante);
     const index = organizacion.localizaciones.findIndex((loc) => loc.$identifier === datos.localizacionId);
@@ -138,9 +118,6 @@ async function EliminarLocalizacion(datos) {
  * @transaction
  */
 async function ActualizarOrganizacion(datos){
-    if (getCurrentParticipant().$namespace + '.' + getCurrentParticipant().$type !== 'org.hyperledger.composer.participantes.OrgAdmin'){
-        throw new Error('participante inválido');
-    }
     var participante = getCurrentParticipant();
     var {organizacion, regOrg} = await getOrganizacion(participante);
 

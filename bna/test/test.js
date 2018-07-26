@@ -445,7 +445,7 @@ describe('Sample', () => {
         orgs[0].localizaciones[0].$identifier.should.equal(localizacionId);
     });
 
-    it('Creación de una localización', async () => {
+    it('Eliminación de una localización', async () => {
         await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
         await useIdentity('admin@pes1');
         

@@ -19,32 +19,6 @@ async function getTransaccion(transaccionId){
     return  await rexistro.get(transaccionId);
 }
 
-
-async function validarParticipante(participante){
-    if (participante.getFullyQualifiedType() !== (NS_PAR + '.Usuario')){
-        throw new Error('Participante ' + participante.getFullyQualifiedIdentifier() + ' non válido');
-    }
-
-    try{
-        var rexistro = await getAssetRegistry(NS_ORG + '.Organizacion');
-        var organizacion = await rexistro.get(participante.orgId);
-    }catch(error){
-        throw new Error('El usuario' + participante.getFullyQualifiedIdentifier() + 
-                ' pertenece a unha organizacion no válida ( ' +  participante.orgId + ' )');
-    }
-
-    var find = false;
-    organizacion.usuarios.forEach(function(usuario){
-        if (participante.id === usuario['$identifier']){
-            find = true;
-            return;
-        }
-    });
-    if (!find){
-        throw new Error('El participante ' + participante.email + ' no pertenece a la organizacion ' + participante.orgId);
-    }
-}
-
 async function crearTransaccion(producto, orgId){
     const factory = getFactory();
     //Creación de los conceptos para la confirmación de la transacción

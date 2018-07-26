@@ -10,10 +10,6 @@ async function CrearParticipante(datos){
     var tipo = ''; 
     var lista = [];
 
-    if (participanteActual.$type !== 'OrgAdmin'){
-        throw new Error('participante inválido');
-    }
-
     var regOrg = await getAssetRegistry(NS_ORG + '.Organizacion');
     var org = await regOrg.get(participanteActual.orgId);
 
