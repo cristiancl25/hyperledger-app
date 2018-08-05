@@ -572,3 +572,32 @@ async function ProductoPerdido(datos){
 
     await regProd.update(producto);
 }
+
+/**
+ * @param {org.hyperledger.composer.productos.ProductosPujados} datos
+ * @returns {org.hyperledger.composer.productos.Producto[]}
+ * @transaction
+*/
+async function ProductosPujados(datos) {
+    var regProd = await getAssetRegistry(NS_PROD + '.Producto');
+    var regPuja = await getAssetRegistry(NS_PROD + '.Puja');
+    var participante = getCurrentParticipant();
+    let pujas = await regPuja.getAll();
+    
+    
+    let p = pujas.filter((puja) => {
+        var resultado = puja.organizaciones.filter((organizacion) => {
+            return organizacion.orgId === participante.orgId
+        })
+        return resultado.length === 1
+    })
+
+    var productos = [];
+    for(let i=0; i < p.length; i++){
+        let producto = await regProd.get(p[i].producto.$identifier);
+        if (producto.estado === 'PUJA'){
+            productos.push(producto);
+        }
+    }
+    return productos;
+}

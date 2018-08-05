@@ -1994,4 +1994,40 @@ describe('Tests de las transacciones del Smartcontract', () => {
         (await getProducto(productoId)).estado.should.equal('TRANSACCION');
 
     });
+
+    it('Test de la transacción ProductosPujados', async () => {
+        await crearOrganizacionyUsuario('res2', 'R2', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res3', 'R3', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'R1', 'admin', 'usuario1');
+        
+        await useIdentity('usuario1@pes1');
+        await crearTipoProducto('PESCADO');
+        const productoId1 = await crearProductoEjemplo();
+        await ponerVentaProducto(productoId1, 'PUJA', '€', 13);
+        let productos = await businessNetworkConnection.submitTransaction(factory.newTransaction(NS_PROD, 'ProductosPujados'));
+        productos.should.have.lengthOf(0);
+
+        await useIdentity('usuario1@res1');
+        const productoId2 = await crearProductoEjemplo();
+        await ponerVentaProducto(productoId2, 'PUJA', '€', 20);
+        productos = await businessNetworkConnection.submitTransaction(factory.newTransaction(NS_PROD, 'ProductosPujados'));
+        productos.should.have.lengthOf(0);
+
+        await useIdentity('usuario1@res2');
+        await pujarProducto(productoId1, 21);
+        productos = await businessNetworkConnection.submitTransaction(factory.newTransaction(NS_PROD, 'ProductosPujados'));
+        productos.should.have.lengthOf(1);
+        await pujarProducto(productoId2, 21);
+        productos = await businessNetworkConnection.submitTransaction(factory.newTransaction(NS_PROD, 'ProductosPujados'));
+        productos.should.have.lengthOf(2);
+        productos[0].productoId.should.equal(productoId1);
+        productos[1].productoId.should.equal(productoId2);
+  
+        await useIdentity('usuario1@res3');
+        await pujarProducto(productoId1, 22);
+        productos = await businessNetworkConnection.submitTransaction(factory.newTransaction(NS_PROD, 'ProductosPujados'));
+        productos.should.have.lengthOf(1);
+        productos[0].productoId.should.equal(productoId1);
+    });
 });

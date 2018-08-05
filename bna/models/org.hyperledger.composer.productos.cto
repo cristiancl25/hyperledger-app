@@ -193,3 +193,7 @@ transaction ProductoPerdido {
 transaction CancelarVenta {
   o String productoId
 }
+
+@commit(false)
+@returns(Producto[])
+transaction ProductosPujados {}
