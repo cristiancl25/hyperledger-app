@@ -50,6 +50,7 @@ async function CrearOrganizacion(datos){
     org.localizaciones = [];
     org.email = datos.email;
     org.telefono = datos.telefono;
+    org.webUrl = datos.webUrl;
     org.administrador = factory.newRelationship(NS_PAR, 'OrgAdmin', admin.email);
     var regOrg = await getAssetRegistry(NS_ORG + '.Organizacion');
     await regOrg.add(org);
@@ -127,6 +128,18 @@ async function ActualizarOrganizacion(datos){
 
     if (datos.descripcion) {
         organizacion.descripcion = datos.descripcion;
+    }
+
+    if (datos.email) {
+        organizacion.email = datos.email;
+    }
+
+    if (datos.telefono) {
+        organizacion.telefono = datos.telefono;
+    }
+
+    if (datos.webUrl) {
+        organizacion.webUrl = datos.webUrl;
     }
 
     await regOrg.update(organizacion);

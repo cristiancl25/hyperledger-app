@@ -11,6 +11,8 @@ query ProductosOrganizacion {
   statement:  
     SELECT  org.hyperledger.composer.productos.Producto
   	WHERE   ( operacionActual.orgId == _$orgId )
+    LIMIT _$limitParam
+    SKIP _$skipParam
 }
 
 query ProductosPorTipo {

@@ -168,16 +168,20 @@ describe('Tests de las transacciones del Smartcontract', () => {
         transaction.idAdmin=emailAdmin;
         transaction.email = 'prueba@email.com';
         transaction.telefono = '123456789';
+        transaction.webUrl = 'https://example.com';
         transaction.emailAdmin = emailAdmin;
         await businessNetworkConnection.submitTransaction(transaction);
         await importCardForIdentity(emailAdmin, await businessNetworkConnection.issueIdentity(NS_PAR + '.OrgAdmin#' + emailAdmin, emailAdmin, {issuer:true}));
     }
 
-    async function actualizarOrganizacion(nombre, descripcion){
+    async function actualizarOrganizacion(nombre, descripcion, email, telefono, webUrl){
         const transaction = factory.newTransaction(NS_ORG, 'ActualizarOrganizacion');
 
         transaction.nombre = nombre;
         transaction.descripcion = descripcion;
+        transaction.email = email;
+        transaction.telefono = telefono;
+        transaction.webUrl = webUrl;
         await businessNetworkConnection.submitTransaction(transaction);
     }
 
@@ -363,6 +367,7 @@ describe('Tests de las transacciones del Smartcontract', () => {
         org.descripcion.should.equal('descripción');
         org.email.should.equal('prueba@email.com');
         org.telefono.should.equal('123456789');
+        org.webUrl.should.equal('https://example.com');
         chai.expect(org.usuarios).to.eql([]);
         chai.expect(org.localizaciones).to.eql([]);
 
@@ -393,16 +398,20 @@ describe('Tests de las transacciones del Smartcontract', () => {
         await crearOrganizacion('OrganizacionProba', 'LONXA', 'descripción', 'admin', 'admin@OrganizacionProba');
 
         await useIdentity('admin@OrganizacionProba');
-        await actualizarOrganizacion('nuevoNombre', 'nuevaDescripcion');
+        await actualizarOrganizacion('nuevoNombre', 'nuevaDescripcion', 'nuevoEmail', 'nuevoTelefono', 'nuevaWebUrl');
         const regOrg = await businessNetworkConnection.getAssetRegistry(NS_ORG + '.Organizacion');
         var orgs = await regOrg.getAll();
         orgs.should.have.lengthOf(1);
         var org = await regOrg.get('OrganizacionProba');
+        org.administrador.$identifier.should.equal('admin@OrganizacionProba');
         org.orgId.should.equal('OrganizacionProba');
         org.nombre.should.equal('nuevoNombre');
         org.tipoOrganizacion.$identifier.should.equal('LONXA');
-        org.administrador.$identifier.should.equal('admin@OrganizacionProba');
         org.descripcion.should.equal('nuevaDescripcion');
+        org.webUrl.should.equal('nuevaWebUrl');
+        org.email.should.equal('nuevoEmail');
+        org.telefono.should.equal('nuevoTelefono');
+        
         chai.expect(org.usuarios).to.eql([]);
         chai.expect(org.localizaciones).to.eql([]);
 

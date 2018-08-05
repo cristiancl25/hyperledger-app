@@ -16,6 +16,7 @@ asset Organizacion identified by orgId {
   o String descripcion
   o String email optional
   o String telefono optional
+  o String webUrl optional
   o DateTime fechaCreacion
   --> OrgAdmin administrador
   --> Usuario[] usuarios
@@ -51,6 +52,7 @@ transaction CrearOrganizacion {
   o String tipoOrganizacion
   o String email optional
   o String telefono optional
+  o String webUrl optional
   o String nombre
   o String descripcion
   o String idAdmin
@@ -61,4 +63,7 @@ transaction CrearOrganizacion {
 transaction ActualizarOrganizacion {
   o String nombre optional
   o String descripcion optional
+  o String email optional
+  o String telefono optional
+  o String webUrl optional
 }

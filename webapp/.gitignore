@@ -15,4 +15,5 @@ key.js
 *.sln
 package-lock.json
 nginx/certs
+.scannerwork
 
