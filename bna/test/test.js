@@ -12,7 +12,7 @@ const NS_PAR = 'org.hyperledger.composer.participantes';
 const NS_PROD = 'org.hyperledger.composer.productos';
 const NS_ORG = 'org.hyperledger.composer.organizaciones';
 
-describe('Sample', () => {
+describe('Tests de las transacciones del Smartcontract', () => {
     const cardStore = require('composer-common').NetworkCardStoreManager.getCardStore( { type: 'composer-wallet-inmemory' } );
     const connectionProfile = {
         name: 'embedded',
@@ -285,7 +285,6 @@ describe('Sample', () => {
 
     async function dividirProducto(productoId, t){
         var trozos = [];
-        var unidad = false; 
 
         for (var i = 0; i < t.length; i++) {
             let imagen = factory.newConcept(NS_PROD, 'Imagen');
@@ -693,10 +692,6 @@ describe('Sample', () => {
         users[1].orgId.should.equal('test');
 
         org = await regOrg.get('test');
-        org.orgId.should.equal('test');
-        org.tipoOrganizacion.$identifier.should.equal('LONXA');
-        org.administrador.$identifier.should.equal('admin@test');
-        org.descripcion.should.equal('descripción');
         org.invitados.should.have.lengthOf(2);
         org.invitados[1].$identifier.should.equal('invitado2@test');
         org.localizaciones.should.have.lengthOf(0);
@@ -813,24 +808,12 @@ describe('Sample', () => {
         productos.should.have.lengthOf(1);
 
         var producto = productos[0];
-        producto.identificador.should.equal('producto1');
-        producto.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
-        producto.caracteristicas.variedadProducto.should.equal('sardina');
-        producto.caracteristicas.descripcion.should.equal('Descripción del producto');
         producto.caracteristicas.tipo.should.equal('PESO');
         chai.expect(producto.caracteristicas.unidades).to.be.undefined;
         producto.caracteristicas.peso.should.equal(0.3);
         producto.caracteristicas.magnitudPeso.should.equal('kg');
         chai.expect(producto.imagen).to.be.undefined;
         producto.operacionActual.localizacion.$identifier.should.equal('pes1-loc1');
-        chai.expect(producto.imagen).to.be.undefined;
-        chai.expect(producto.predecesor).to.be.undefined;
-        chai.expect(producto.sucesores).to.be.undefined;
-        chai.expect(producto.transaccionId).to.be.undefined;
-        producto.estado.should.equal('PARADO');
-        producto.operaciones.should.have.lengthOf(0);
-        producto.operacionActual.orgId.should.equal('pes1');
-        chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
     });
 
 
@@ -888,7 +871,7 @@ describe('Sample', () => {
         await crearTipoProducto('PESCADO');
 
         await chai.expect(
-            ponerVentaProducto('PRODUCTO_INEXISTENTE', 'NORMAL', '€', '13.4', undefined)
+            ponerVentaProducto('PRODUCTO_INEXISTENTE', 'NORMAL', '€', '13.4')
         ).to.be.rejectedWith(Error);
     });
 
@@ -908,9 +891,6 @@ describe('Sample', () => {
         producto.operacionActual.datosVenta.tipoVenta.should.equal('NORMAL');
         chai.expect(producto.operacionActual.datosVenta.pujaId).to.be.undefined;
         producto.estado.should.equal('VENTA');
-        events[0].orgOrigen.should.equal('pes1');
-        events[0].productoId.should.equal(productoId);
-        events[0].tipoVenta.should.equal('NORMAL');
     });
 
 
@@ -937,9 +917,6 @@ describe('Sample', () => {
         producto.operacionActual.datosVenta.pujaId.should.equal(pujas[0].pujaId);
         producto.operacionActual.datosVenta.tipoVenta.should.equal('PUJA');
         producto.estado.should.equal('PUJA');
-        events[0].orgOrigen.should.equal('pes1');
-        events[0].productoId.should.equal(productoId);
-        events[0].tipoVenta.should.equal('PUJA');
     });
 
 
@@ -1013,7 +990,7 @@ describe('Sample', () => {
 
         await useIdentity('usuario1@res2');
         await pujarProducto(productoId, 14);
-        var puja = await getPuja(pujaId);
+        puja = await getPuja(pujaId);
         puja.organizaciones.should.have.lengthOf(2);
         puja.organizaciones[1].orgId.should.equal('res2');
         puja.organizaciones[1].precio.should.equal(14);
@@ -1032,7 +1009,7 @@ describe('Sample', () => {
 
         await useIdentity('usuario1@res3');
         await pujarProducto(productoId, 15.5);
-        var puja = await getPuja(pujaId);
+        puja = await getPuja(pujaId);
         puja.organizaciones.should.have.lengthOf(3);
         puja.organizaciones[1].orgId.should.equal('res3');
         puja.organizaciones[1].precio.should.equal(15.5);
@@ -1133,14 +1110,11 @@ describe('Sample', () => {
 
 
     it('Compra de un producto válido', async () => {
-        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
-        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('pes1', 'TRANSPORTE', 'admin', 'usuario1'); await crearOrganizacionyUsuario('res1', 'lonxa', 'admin', 'usuario1');
 
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
-        const productoId = await crearProductoEjemplo();
-        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
-
+        const productoId = await crearProductoEjemplo(); await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
         await useIdentity('usuario1@res1');
         await comprarProducto(productoId);
         
@@ -1158,7 +1132,7 @@ describe('Sample', () => {
         producto.estado.should.equal('TRANSACCION');
         producto.transaccionId.should.equal(transacciones[0].transaccionId);
 
-        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
+        regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
         (await regProducto.getAll()).should.have.length(1);
     });
 
@@ -1212,11 +1186,10 @@ describe('Sample', () => {
 
 
     it('Rechazo de compra de un producto por la compañía vendedora', async () => {
-        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
-        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1'); await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        
 
-        await useIdentity('usuario1@pes1');
-        await crearTipoProducto('PESCADO');
+        await useIdentity('usuario1@pes1'); await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
         await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
 
@@ -1240,18 +1213,17 @@ describe('Sample', () => {
 
 
     it('Confirmación de compra de un producto por un participante de una compañía errónea', async () => {
-        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
-        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
-        await crearOrganizacionyUsuario('res2', 'COMERCIO', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('pes1', 'L', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'R', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res2', 'C', 'admin', 'usuario1');
 
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
-        (await getProducto(productoId)).estado.should.equal('PARADO');
         await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
-        (await getProducto(productoId)).estado.should.equal('VENTA');
-
+        
         await useIdentity('usuario1@res1');
+        (await getProducto(productoId)).estado.should.equal('VENTA');
         await comprarProducto(productoId);
         (await getProducto(productoId)).estado.should.equal('TRANSACCION');
 
@@ -1288,7 +1260,7 @@ describe('Sample', () => {
         await useIdentity('usuario1@pes1');
         await confirmarTransaccion(productoId, true, undefined);
         (await getProducto(productoId)).estado.should.equal('TRANSACCION');
-        var transacciones = await regT.getAll();
+        transacciones = await regT.getAll();
         transacciones.should.have.lengthOf(1);
         transacciones[0].orgVenta.confirmacion.should.equal(true);
         transacciones[0].orgCompra.confirmacion.should.equal(false);
@@ -1304,121 +1276,115 @@ describe('Sample', () => {
         chai.expect(producto.transaccionId).to.be.undefined;
         producto.operaciones.should.have.lengthOf(1);
         producto.operaciones[0].orgId.should.equal('pes1');
-        var transacciones = await regT.getAll();
+        transacciones = await regT.getAll();
         transacciones.should.have.lengthOf(0);
     });
 
 
     it('Confirmación de compra de un producto por la compañía compradora primero', async () => {
-        var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion');
+        
         await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
         await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
+        var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion');
 
         await useIdentity('usuario1@pes1');
-        await crearTipoProducto('PESCADO');
-        const productoId = await crearProductoEjemplo();
-        (await getProducto(productoId)).estado.should.equal('PARADO');
+        await crearTipoProducto('PESCADO'); const productoId = await crearProductoEjemplo();
         await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
-        (await getProducto(productoId)).estado.should.equal('VENTA');
 
         await useIdentity('usuario1@res1');
         await comprarProducto(productoId);
         (await getProducto(productoId)).estado.should.equal('TRANSACCION');
         var transacciones = await regT.getAll();
-        transacciones.should.have.lengthOf(1);
-        transacciones[0].orgVenta.confirmacion.should.equal(false);
+        
         transacciones[0].orgCompra.confirmacion.should.equal(false);
+        transacciones[0].orgVenta.confirmacion.should.equal(false);
+        transacciones.should.have.lengthOf(1);
         chai.expect(transacciones[0].nuevaLocalizacion).to.be.undefined;
+
         (await getProducto(productoId)).transaccionId.should.equal(transacciones[0].transaccionId);
 
         await useIdentity('usuario1@res1');
         await confirmarTransaccion(productoId, true, 'res1-loc1');
         (await getProducto(productoId)).estado.should.equal('TRANSACCION');
-        var transacciones = await regT.getAll();
-        transacciones.should.have.lengthOf(1);
+        transacciones = await regT.getAll();
         transacciones[0].orgVenta.confirmacion.should.equal(false);
         transacciones[0].orgCompra.confirmacion.should.equal(true);
+        transacciones.should.have.lengthOf(1);
         transacciones[0].nuevaLocalizacion.should.equal('res1-loc1');
 
         await useIdentity('usuario1@pes1');
         await confirmarTransaccion(productoId, true, undefined);
         var producto = await getProducto(productoId);
         producto.estado.should.equal('PARADO');
-        producto.operacionActual.localizacion.$identifier.should.equal('res1-loc1');
         producto.operacionActual.orgId.should.equal('res1');
-        chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
+        producto.operacionActual.localizacion.$identifier.should.equal('res1-loc1');
         chai.expect(producto.transaccionId).to.be.undefined;
+        chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
         producto.operaciones.should.have.lengthOf(1);
         producto.operaciones[0].orgId.should.equal('pes1');
-        var transacciones = await regT.getAll();
+        transacciones = await regT.getAll();
         transacciones.should.have.lengthOf(0);
     });
 
 
     it('Confirmación de compra de un producto por la compañía vendedora primero y cancelación', async () => {
-        var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion');
         await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion');
         await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
 
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
-        const productoId = await crearProductoEjemplo();
-        (await getProducto(productoId)).estado.should.equal('PARADO');
-        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
-        (await getProducto(productoId)).estado.should.equal('VENTA');
+        const productoId = await crearProductoEjemplo(); await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
 
         await useIdentity('usuario1@res1');
-        await comprarProducto(productoId);
-        (await getProducto(productoId)).estado.should.equal('TRANSACCION');
+        await comprarProducto(productoId); (await getProducto(productoId)).estado.should.equal('TRANSACCION');
         var transacciones = await regT.getAll();
-        transacciones.should.have.lengthOf(1);
-        transacciones[0].orgVenta.confirmacion.should.equal(false);
+        
         transacciones[0].orgCompra.confirmacion.should.equal(false);
+        transacciones[0].orgVenta.confirmacion.should.equal(false);
         chai.expect(transacciones[0].nuevaLocalizacion).to.be.undefined;
+        transacciones.should.have.lengthOf(1);
         (await getProducto(productoId)).transaccionId.should.equal(transacciones[0].transaccionId);
 
         await useIdentity('usuario1@pes1');
         await confirmarTransaccion(productoId, true, undefined);
         (await getProducto(productoId)).estado.should.equal('TRANSACCION');
-        var transacciones = await regT.getAll();
-        transacciones.should.have.lengthOf(1);
+        transacciones = await regT.getAll();
+        chai.expect(transacciones[0].nuevaLocalizacion).to.be.undefined;
         transacciones[0].orgVenta.confirmacion.should.equal(true);
         transacciones[0].orgCompra.confirmacion.should.equal(false);
-        chai.expect(transacciones[0].nuevaLocalizacion).to.be.undefined;
-
+        transacciones.should.have.lengthOf(1);
+        
         await useIdentity('usuario1@res1');
         await confirmarTransaccion(productoId, false, 'res1-loc1');
         transacciones = await regT.getAll();
         transacciones.should.have.lengthOf(0);
 
         var producto = await getProducto(productoId);
-        producto.operacionActual.orgId.should.equal('pes1');
-        producto.estado.should.equal('VENTA');
         chai.expect(producto.transaccionId).to.be.undefined;
+        producto.estado.should.equal('VENTA');
+        producto.operacionActual.orgId.should.equal('pes1');
+        
     });
 
 
     it('Confirmación de compra de un producto por la compañía compradora primero y cancelación', async () => {
         var regT = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Transaccion');
-        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
-        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1');
-
-        await useIdentity('usuario1@pes1');
-        await crearTipoProducto('PESCADO');
+        await crearOrganizacionyUsuario('res1', 'RESTAURANTE', 'admin', 'usuario1'); await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
+        
+        await useIdentity('usuario1@pes1'); await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
-        (await getProducto(productoId)).estado.should.equal('PARADO');
         await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
-        (await getProducto(productoId)).estado.should.equal('VENTA');
-
         await useIdentity('usuario1@res1');
         await comprarProducto(productoId);
         (await getProducto(productoId)).estado.should.equal('TRANSACCION');
         var transacciones = await regT.getAll();
-        transacciones.should.have.lengthOf(1);
         transacciones[0].orgVenta.confirmacion.should.equal(false);
+        (await getProducto(productoId)).transaccionId.should.equal(transacciones[0].transaccionId);
         transacciones[0].orgCompra.confirmacion.should.equal(false);
         chai.expect(transacciones[0].nuevaLocalizacion).to.be.undefined;
-        (await getProducto(productoId)).transaccionId.should.equal(transacciones[0].transaccionId);
+        transacciones.should.have.lengthOf(1);
+        
 
         await useIdentity('usuario1@res1');
         await chai.expect(
@@ -1426,7 +1392,7 @@ describe('Sample', () => {
         ).to.be.rejectedWith(Error);
         await confirmarTransaccion(productoId, true, 'res1-loc1');
         (await getProducto(productoId)).estado.should.equal('TRANSACCION');
-        var transacciones = await regT.getAll();
+        transacciones = await regT.getAll();
         transacciones.should.have.lengthOf(1);
         transacciones[0].orgVenta.confirmacion.should.equal(false);
         transacciones[0].orgCompra.confirmacion.should.equal(true);
@@ -1434,21 +1400,16 @@ describe('Sample', () => {
 
         await useIdentity('usuario1@pes1');
         await confirmarTransaccion(productoId, false, undefined);
-        transacciones = await regT.getAll();
-        transacciones.should.have.lengthOf(0);
-
+        transacciones = await regT.getAll(); transacciones.should.have.lengthOf(0);
         var producto = await getProducto(productoId);
         producto.operacionActual.orgId.should.equal('pes1');
-        producto.estado.should.equal('VENTA');
-        chai.expect(producto.transaccionId).to.be.undefined;
+        producto.estado.should.equal('VENTA'); chai.expect(producto.transaccionId).to.be.undefined;
     });
 
     it('Rechazo de todas las transaciones en estado de puja de un producto', async () => {
-        var regProducto = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Producto');
-        var regPuja = await businessNetworkConnection.getAssetRegistry(NS_PROD + '.Puja');
-        await crearOrganizacionyUsuario('pes1', 'LONXA', 'admin', 'usuario1');
-        await crearOrganizacionyUsuario('res1', 'R1', 'admin', 'usuario1');
         await crearOrganizacionyUsuario('res2', 'R2', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('res1', 'R1', 'admin', 'usuario1');
+        await crearOrganizacionyUsuario('pes1', 'T', 'admin', 'usuario1');
 
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
@@ -1475,9 +1436,9 @@ describe('Sample', () => {
         await useIdentity('usuario1@res2');
         await confirmarTransaccion(productoId, false, undefined);
 
-        var producto = await getProducto(productoId);
+        producto = await getProducto(productoId);
         producto.estado.should.equal('TRANSACCION');
-        var tran = await getTransaccion(producto.transaccionId);
+        tran = await getTransaccion(producto.transaccionId);
         tran.orgCompra.orgId.should.equal('res1');
 
         await useIdentity('usuario1@res2');
@@ -1487,7 +1448,7 @@ describe('Sample', () => {
 
         await useIdentity('usuario1@res1');
         await confirmarTransaccion(productoId, false, undefined);
-        var producto = await getProducto(productoId);
+        producto = await getProducto(productoId);
         producto.estado.should.equal('PARADO');
         producto.operacionActual.orgId.should.equal('pes1');
         producto.operaciones.should.have.lengthOf(0);
@@ -1510,12 +1471,13 @@ describe('Sample', () => {
                 "unidades" : 4,
                 "peso" : 5.5,
                 "magnitudPeso" : 'kg'
-            }, undefined, {
+            }, 
+            undefined,
+            {
                 "latitud" : 1.3,
                 "longitud" : 2.5,
                 "direccion" : "dirección de prueba"
-            }, 
-            undefined);
+            }, undefined);
         var productos = await regProducto.getAll();
         productos.should.have.lengthOf(1);
         var producto = productos[productos.length - 1];
@@ -1540,9 +1502,9 @@ describe('Sample', () => {
             ])
         ).to.be.rejectedWith(Error);
 
-        var productos = await regProducto.getAll();
+        productos = await regProducto.getAll();
         productos.should.have.lengthOf(1);
-        var producto = productos[productos.length - 1];
+        producto = productos[productos.length - 1];
         await chai.expect(
             dividirProducto(producto.productoId, [
                 {
@@ -1564,9 +1526,9 @@ describe('Sample', () => {
             ])
         ).to.be.rejectedWith(Error);
 
-        var productos = await regProducto.getAll();
+        productos = await regProducto.getAll();
         productos.should.have.lengthOf(1);
-        var producto = productos[productos.length - 1];
+        producto = productos[productos.length - 1];
         await chai.expect(
             dividirProducto(producto.productoId, [
                 {
@@ -1588,9 +1550,9 @@ describe('Sample', () => {
             ])
         ).to.be.rejectedWith(Error);
 
-        var productos = await regProducto.getAll();
+        productos = await regProducto.getAll();
         productos.should.have.lengthOf(1);
-        var producto = productos[productos.length - 1];
+        producto = productos[productos.length - 1];
         await chai.expect(
             dividirProducto(producto.productoId, [
                 {
@@ -1621,18 +1583,18 @@ describe('Sample', () => {
         await crearTipoProducto('PESCADO');
         await crearProducto('producto1',{
                 "tipoProducto" : "PESCADO",
-                "variedadProducto" : "sardina",
-                "descripcion" : "Descripción del producto", 
+                "variedadProducto" : "xurelo",
+                "descripcion" : "Descripción del xurelo", 
                 "tipo" : "UNIDAD",
                 "unidades" : 4,
-                "peso" : 5.5,
+                "peso" : 5,
                 "magnitudPeso" : 'kg'
-            }, undefined, {
+            }
+            , undefined, {
                 "latitud" : 1.3,
                 "longitud" : 2.5,
                 "direccion" : "dirección de prueba"
-            }, 
-            undefined);
+            }, undefined);
         var productos = await regProducto.getAll();
         productos.should.have.lengthOf(1);
         var producto = productos[productos.length - 1];
@@ -1650,21 +1612,21 @@ describe('Sample', () => {
                 "imagen" : {
                     "hashImagen": "hash2",
                     "url" : "https://ejemplo2.com",
-                    "algoritmo" : "sha1"
+                    "algoritmo" : "md5"
                 }
             }
         ]);
 
-        var productos = await regProducto.getAll();
+        productos = await regProducto.getAll();
         productos.should.have.lengthOf(3);
-        var producto = productos[0];
+        producto = productos[0];
         producto.identificador.should.equal('producto1');
         producto.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
-        producto.caracteristicas.variedadProducto.should.equal('sardina');
-        producto.caracteristicas.descripcion.should.equal('Descripción del producto');
+        producto.caracteristicas.variedadProducto.should.equal('xurelo');
+        producto.caracteristicas.descripcion.should.equal('Descripción del xurelo');
         producto.caracteristicas.tipo.should.equal('UNIDAD');
         producto.caracteristicas.unidades.should.equal(4);
-        producto.caracteristicas.peso.should.equal(5.5);
+        producto.caracteristicas.peso.should.equal(5);
         producto.caracteristicas.magnitudPeso.should.equal('kg');
         chai.expect(producto.imagen).to.be.undefined;
         chai.expect(producto.predecesor).to.be.undefined;
@@ -1678,11 +1640,11 @@ describe('Sample', () => {
         var sucesor1 = await regProducto.get(producto.sucesores[0]);
         sucesor1.identificador.should.equal('id1');
         sucesor1.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
-        sucesor1.caracteristicas.variedadProducto.should.equal('sardina');
-        sucesor1.caracteristicas.descripcion.should.equal('Descripción del producto');
+        sucesor1.caracteristicas.variedadProducto.should.equal('xurelo');
+        sucesor1.caracteristicas.descripcion.should.equal('Descripción del xurelo');
         sucesor1.caracteristicas.tipo.should.equal('UNIDAD');
         sucesor1.caracteristicas.unidades.should.equal(3);
-        sucesor1.caracteristicas.peso.should.equal(5.5);
+        sucesor1.caracteristicas.peso.should.equal(5);
         sucesor1.caracteristicas.magnitudPeso.should.equal('kg');
         sucesor1.imagen.url.should.equal('https://ejemplo1.com');
         sucesor1.imagen.hashImagen.should.equal('hash1');
@@ -1698,15 +1660,15 @@ describe('Sample', () => {
         var sucesor2 = await regProducto.get(producto.sucesores[1]);
         sucesor2.identificador.should.equal('id2');
         sucesor2.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
-        sucesor2.caracteristicas.variedadProducto.should.equal('sardina');
-        sucesor2.caracteristicas.descripcion.should.equal('Descripción del producto');
+        sucesor2.caracteristicas.variedadProducto.should.equal('xurelo');
+        sucesor2.caracteristicas.descripcion.should.equal('Descripción del xurelo');
         sucesor2.caracteristicas.tipo.should.equal('UNIDAD');
         sucesor2.caracteristicas.unidades.should.equal(1);
-        sucesor2.caracteristicas.peso.should.equal(5.5);
+        sucesor2.caracteristicas.peso.should.equal(5);
         sucesor2.caracteristicas.magnitudPeso.should.equal('kg');
         sucesor2.imagen.url.should.equal('https://ejemplo2.com');
         sucesor2.imagen.hashImagen.should.equal('hash2');
-        sucesor2.imagen.algoritmo.should.equal('sha1');
+        sucesor2.imagen.algoritmo.should.equal('md5');
         sucesor2.predecesor.should.equal(producto.productoId);
         chai.expect(sucesor2.sucesores).to.be.undefined;
         chai.expect(sucesor2.transaccionId).to.be.undefined;
@@ -1759,9 +1721,9 @@ describe('Sample', () => {
             }
         ]);
 
-        var productos = await regProducto.getAll();
+        productos = await regProducto.getAll();
         productos.should.have.lengthOf(3);
-        var producto = productos[0];
+        producto = productos[0];
         producto.identificador.should.equal('producto1');
         chai.expect(producto.caracteristicas.unidades).to.be.undefined;
         producto.caracteristicas.tipoProducto.$identifier.should.equal('PESCADO');
@@ -1769,15 +1731,7 @@ describe('Sample', () => {
         producto.caracteristicas.descripcion.should.equal('Descripción del producto');
         producto.caracteristicas.tipo.should.equal('PESO');
         producto.caracteristicas.peso.should.equal(5.5);
-        producto.caracteristicas.magnitudPeso.should.equal('kg');
-        chai.expect(producto.imagen).to.be.undefined;
-        chai.expect(producto.predecesor).to.be.undefined;
-        producto.sucesores.should.have.lengthOf(2);
-        chai.expect(producto.transaccionId).to.be.undefined;
         producto.estado.should.equal('DIVIDIDO');
-        producto.operaciones.should.have.lengthOf(0);
-        producto.operacionActual.orgId.should.equal('pes1');
-        chai.expect(producto.operacionActual.datosVenta).to.be.undefined;
 
         var sucesor1 = await regProducto.get(producto.sucesores[0]);
         sucesor1.identificador.should.equal('id1');
@@ -1907,7 +1861,6 @@ describe('Sample', () => {
         await chai.expect(
             productoPerdido(productoId)
         ).to.be.rejectedWith(Error);
-        var producto = await getProducto(productoId);
         (await getProducto(productoId)).estado.should.equal('CONSUMIDO');
     });
 
@@ -1922,7 +1875,6 @@ describe('Sample', () => {
         await chai.expect(
             productoPerdido(productoId)
         ).to.be.rejectedWith(Error);
-        var producto = await getProducto(productoId);
         (await getProducto(productoId)).estado.should.equal('PERDIDO');
 
     });
@@ -1936,17 +1888,18 @@ describe('Sample', () => {
         await crearProducto('producto1',{
                 "tipoProducto" : "PESCADO",
                 "variedadProducto" : "sardina",
-                "descripcion" : "Descripción del producto", 
+                "descripcion" : "Descripción", 
                 "tipo" : "PESO",
                 "unidades" : 4,
                 "peso" : 5.5,
                 "magnitudPeso" : 'kg'
-            }, undefined, {
-                "latitud" : 1.3,
-                "longitud" : 2.5,
-                "direccion" : "dirección de prueba"
             }, 
-            undefined);
+            undefined,
+            {
+                "latitud" : 2,
+                "longitud" : 4,
+                "direccion" : "dirección prueba"
+            }, undefined);
         var productos = await regProducto.getAll();
         productos.should.have.lengthOf(1);
         var producto = productos[productos.length - 1];
@@ -1954,16 +1907,16 @@ describe('Sample', () => {
                 "peso" : 3,
                 "identificador" : "id1",
                 "imagen" : {
-                    "hashImagen": "hash1",
-                    "url" : "https://ejemplo1.com",
-                    "algoritmo" : "sha1"
+                    "hashImagen": "ap982w34hytawghw34h",
+                    "url" : "https://example.com",
+                    "algoritmo" : "md5"
                 }
             },{
                 "peso" : 1.5,
                 "identificador" : "id2",
                 "imagen" : {
-                    "hashImagen": "hash2",
-                    "url" : "https://ejemplo2.com",
+                    "hashImagen": " ag2w3908hyawbg2w9038gb",
+                    "url" : "https://example.com",
                     "algoritmo" : "sha1"
                 }
             }
@@ -1985,7 +1938,6 @@ describe('Sample', () => {
         const productoId = await crearProductoEjemplo();
         (await getProducto(productoId)).estado.should.equal('PARADO');
         await productoPerdido(productoId);
-        var producto = await getProducto(productoId);
         (await getProducto(productoId)).estado.should.equal('PERDIDO');
 
     });
@@ -2000,7 +1952,6 @@ describe('Sample', () => {
 
         (await getProducto(productoId)).estado.should.equal('VENTA');
         await productoPerdido(productoId);
-        var producto = await getProducto(productoId);
         (await getProducto(productoId)).estado.should.equal('PERDIDO');
 
     });
@@ -2010,13 +1961,11 @@ describe('Sample', () => {
 
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
-        const productoId = await crearProductoEjemplo();
-        await ponerVentaProducto(productoId, 'PUJA', '€', 13.4);
+        const identificadorP = await crearProductoEjemplo();
+        await ponerVentaProducto(identificadorP, 'PUJA', '€', 20);
 
-        (await getProducto(productoId)).estado.should.equal('PUJA');
-        await productoPerdido(productoId);
-        var producto = await getProducto(productoId);
-        (await getProducto(productoId)).estado.should.equal('PERDIDO');
+        (await getProducto(identificadorP)).estado.should.equal('PUJA'); await productoPerdido(identificadorP);
+        (await getProducto(identificadorP)).estado.should.equal('PERDIDO');
 
     });
 
@@ -2027,17 +1976,12 @@ describe('Sample', () => {
         await useIdentity('usuario1@pes1');
         await crearTipoProducto('PESCADO');
         const productoId = await crearProductoEjemplo();
-        (await getProducto(productoId)).estado.should.equal('PARADO');
-        await ponerVentaProducto(productoId, 'NORMAL', '€', 13.4);
-        (await getProducto(productoId)).estado.should.equal('VENTA');
+        await ponerVentaProducto(productoId, 'NORMAL', '€', 20);
         await useIdentity('usuario1@res1');
         await comprarProducto(productoId);
-
-        (await getProducto(productoId)).estado.should.equal('TRANSACCION');
         await chai.expect(
             productoPerdido(productoId)
         ).to.be.rejectedWith(Error);
-        var producto = await getProducto(productoId);
         (await getProducto(productoId)).estado.should.equal('TRANSACCION');
 
     });

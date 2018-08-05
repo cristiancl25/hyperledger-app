@@ -9,7 +9,9 @@
     "start": "npm run dev",
     "lint": "eslint --ext .js,.vue src",
     "build": "node build/build.js",
-    "envprod": "./envprod.sh && npm run build"
+    "envprod": "./envprod.sh && npm run build",
+    "sonarserver": "docker run -d --name sonarqube -p 9000:9000 -p 9092:9092 sonarqube",
+    "sonar-scanner": "sonar-scanner"
   },
   "dependencies": {
     "axios": "^0.18.0",
@@ -60,6 +62,7 @@
     "rimraf": "^2.6.0",
     "semver": "^5.3.0",
     "shelljs": "^0.7.6",
+    "sonar-scanner": "^3.1.0",
     "uglifyjs-webpack-plugin": "^1.1.1",
     "url-loader": "^0.5.8",
     "vue-loader": "^13.3.0",
