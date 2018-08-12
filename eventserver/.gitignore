@@ -1,0 +1,11 @@
+.eslintrc.yml
+dist
+.sonarlint
+composer-logs
+node_modules
+package-lock.json
+.vscode/
+coverage
+.nyc_output
+DevServer_connection.json
+.scannerwork

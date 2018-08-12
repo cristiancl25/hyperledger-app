@@ -1,0 +1,17 @@
+{
+  "name": "eventserver",
+  "version": "1.0.0",
+  "description": "Servidor de eventos para Hyperledger Composer",
+  "scripts": {
+    "runserver": "./runServer.sh",
+    "logs": "docker logs eventserver"
+  },
+  "author": "Cristian Cancela Lema",
+  "email": "cristian.cancela.lema@udc.es",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "composer-admin": "^0.19.12",
+    "composer-client": "^0.19.12",
+    "composer-common": "^0.19.12"
+  }
+}
