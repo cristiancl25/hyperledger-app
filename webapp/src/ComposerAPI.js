@@ -16,6 +16,15 @@ export const composer = {
                 return returnError(error);
             }
         },
+        getHistorian : async function(axios, participante) {
+            try{
+                let response = await axios.get('/api/queries/getHistorian?participante=' + participante);
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+                
+            }
+        },
         eliminarPerfil : async function(axios, perfil) {
             try{
                 let response = await axios.delete('/api/wallet/' + perfil);
@@ -141,6 +150,14 @@ export const composer = {
         getOrganizacionId : async function(axios, id){
             try{
                 let response = await axios.get('/api/org.hyperledger.composer.organizaciones.Organizacion/' + id + '?filter={%22include%22:%22resolve%22}');
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
+        actualizarOrganizacion : async function(axios, datos){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.organizaciones.ActualizarOrganizacion', datos);
                 return returnResponse(response);
             }catch(error){
                 return returnError(error);

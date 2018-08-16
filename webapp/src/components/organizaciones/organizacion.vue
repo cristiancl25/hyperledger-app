@@ -9,7 +9,19 @@
           <h1 align="center"><strong>{{ organizacion.nombre}}</strong></h1>
           <h5 align="center"><strong>ID: </strong>{{organizacion.orgId}}</h5>
           <h5 align="center"><strong>Tipo de organización: </strong>{{organizacion.tipoOrganizacion.tipo}}</h5>
-          <h5 align="center"><strong>Descripción: </strong>{{organizacion.descripcion}}</h5>
+          <h5 v-if="organizacion.descripcion" align="center"><strong>Descripción: </strong>{{organizacion.descripcion}}</h5>
+          <h5 align="center"><strong>Administrador: </strong>{{organizacion.administrador.email}} 
+            <button
+              data-toggle="modal" data-target="#ModalParticipante"
+              @click="modal.tipo='historian'; modal.titulo='Historian';
+                getHistorian('org.hyperledger.composer.participantes.OrgAdmin', organizacion.administrador.id);"
+              class="btn btn-info btn-sm">
+              Historian
+            </button>
+          </h5>
+          <h5 v-if="organizacion.email" align="center"><strong>Email: </strong>{{organizacion.email}}</h5>
+          <h5 v-if="organizacion.telefono" align="center"><strong>Teléfono: </strong>{{organizacion.telefono}}</h5>
+          <h5 v-if="organizacion.webUrl" align="center"><strong>Email: </strong><a v-bind:href="organizacion.webUrl">{{organizacion.webUrl}}</a></h5>
         </div>
       </div>
       <div class="row">
@@ -20,14 +32,23 @@
               :key="usuario.id"
               v-for="(usuario) in organizacion.usuarios">
               {{usuario.email}}
-              <button
-                v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
-                data-toggle="modal" data-target="#ModalParticipante"
-                @click="modal.tipo='eliminarParticipante'; modal.titulo='Eliminar Participante Usuario';
-                  datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Usuario'"
-                class="btn btn-danger btn-sm">
-                Eliminar
-              </button>
+              <div>
+                <button
+                  data-toggle="modal" data-target="#ModalParticipante"
+                  @click="modal.tipo='historian'; modal.titulo='Historian';
+                    getHistorian('org.hyperledger.composer.participantes.Usuario', usuario.id);"
+                  class="btn btn-info btn-sm">
+                  Historian
+                </button>
+                <button
+                  v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
+                  data-toggle="modal" data-target="#ModalParticipante"
+                  @click="modal.tipo='eliminarParticipante'; modal.titulo='Eliminar Participante Usuario';
+                    datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Usuario'"
+                  class="btn btn-danger btn-sm">
+                  Eliminar
+                </button>
+              </div>
             </li>
           </ul>
         </div>
@@ -78,7 +99,7 @@
       </div>
       <br>
       <div class="row" v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id">
-        <div class="btn-group col-md-6">
+        <div class="btn-group flex-wrap col-md-12">
           <button 
             class="btn btn-primary"
             data-toggle="modal" data-target="#ModalParticipante"
@@ -89,6 +110,11 @@
             data-toggle="modal" data-target="#ModalParticipante"
             @click="modal.titulo='Crear Localizacion'; modal.tipo='crearLocalizacion'">
             Crear localizacion
+          </button>
+          <button class="btn btn-primary"
+            data-toggle="modal" data-target="#ModalParticipante"
+            @click="modal.titulo='Actualizar Localizacion'; modal.tipo='actualizarOrg'">
+            Actualizar Organización
           </button>
         </div>
       </div>
@@ -164,7 +190,55 @@
                 </div>
                 <div id="card" class="col-md-12"></div>
               </div>
-              
+
+              <div v-if="modal.tipo==='historian'">
+                <div class="form-group col-md-12">
+                  <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center"
+                      :key="hist.transactionId"
+                      v-for="hist in historian">
+                        <div>
+                          <p>
+                            <strong>Tx: </strong>{{hist.transactionType | transaction}}
+                            <br>
+                            <strong>TimeStamp: </strong>{{hist.transactionTimestamp}}
+                          </p>
+                        </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div v-if="modal.tipo==='actualizarOrg'">
+                <div class="form-group col-md-12">
+                  <div class="form-group col-md-12">
+                    <label>Nombre</label>
+                    <input v-model="datosActualizar.nombre" class="form-control"  placeholder="Nombre de la organización">
+                    <small class="form-text text-muted">Opcional</small>
+                  </div>
+                  <div class="form-group col-md-12">
+                    <label>Descripción</label>
+                    <input v-model="datosActualizar.descripcion" class="form-control"  placeholder="Descripción de la organización">
+                    <small class="form-text text-muted">Opcional</small>
+                  </div>
+                  <div class="form-group col-md-12">
+                    <label>Email</label>
+                    <input v-model="datosActualizar.email" class="form-control"  placeholder="Email">
+                    <small class="form-text text-muted">Opcional</small>
+                  </div>
+                  <div class="form-group col-md-12">
+                    <label>Número</label>
+                    <input v-model.number="datosActualizar.telefono" type=number step=1 class="form-control"  placeholder="Número">
+                    <small class="form-text text-muted">Opcional</small>
+                  </div>
+                  <div class="form-group col-md-12">
+                    <label>URL</label>
+                    <input v-model="datosActualizar.webUrl" class="form-control"  placeholder="url de página web">
+                    <small class="form-text text-muted">Opcional</small>
+                  </div>
+                </div>
+              </div>
+
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" @click="inicializar(); error.show=false" data-dismiss="modal">{{$t('close')}}</button>
@@ -172,6 +246,7 @@
               <button type="button" v-if="modal.tipo==='eliminarLocalizacion'" class="btn btn-danger" @click="eliminarLocalizacion()" >Eliminar Localizacion</button>
               <button type="button" v-if="modal.tipo==='crearParticipante'" class="btn btn-primary" @click="crearParticipante()" >Crear Participante</button>
               <button type="button" v-if="modal.tipo==='crearLocalizacion'" class="btn btn-primary" @click="crearLocalizacion()" >Crear Localizacion</button>
+              <button type="button" v-if="modal.tipo==='actualizarOrg'" class="btn btn-primary" @click="actualizarOrganizacion" >Actualizar Organización</button>
             </div>
           </div>
         </div>
@@ -233,6 +308,14 @@
         mapa : false,
         locSelec : "",      
         progress : false,
+        historian : [],
+        datosActualizar : {
+          "nombre": "",
+          "descripcion": "",
+          "email": "",
+          "telefono": "",
+          "webUrl": ""
+        }
       }
     },
     created : async function () {
@@ -241,6 +324,14 @@
     watch: {
       '$route' : async function(to, from) {
         await this.inicializar();
+      }
+    },
+    filters: {
+      transaction: function (value) {
+        if (!value) return '';
+        var n = value.lastIndexOf(".");
+        var val = value.substr(0, n) + " " + value.substr(n + 1);
+        return val;
       }
     },
     methods : {
@@ -306,7 +397,27 @@
               this.progress = false;
               this.error.show = true; this.error.message = 'Error al procesar la petición'; this.error.tipo = "alert alert-danger";
             }
-          }else{
+          }else{  this.progress = true;
+        this.error.show = false;
+        if ("geolocation" in navigator) {
+          let self = this;
+          this.coordenadas.latitud = ""; this.coordenadas.longitud = ""; this.coordenadas.direccion = "";
+          navigator.geolocation.getCurrentPosition(function(position) {
+            const latitud = position.coords.latitude;
+            const longitud = position.coords.longitude;
+            self.localizacion.latitud = latitud;
+            self.localizacion.longitud = longitud;
+          },function(error){
+            self.error.show = true;
+            self.error.message = error.message;
+            self.error.tipo = "alert alert-warning";
+          });
+        } else {
+          this.error.show = true;
+          this.error.message = 'Geolocalización no disponible en este dispositivo';
+          this.error.tipo = "alert alert-warning";
+        }
+        this.progress = false;
             this.error.show = true; this.error.message = response.message; this.error.tipo = "alert alert-danger";
           }
 
@@ -342,28 +453,69 @@
         }
       },
       geolocalizacion : async function(){
-      this.progress = true;
-      this.error.show = false;
-      if ("geolocation" in navigator) {
-        let self = this;
-        this.coordenadas.latitud = ""; this.coordenadas.longitud = ""; this.coordenadas.direccion = "";
-        navigator.geolocation.getCurrentPosition(function(position) {
-          const latitud = position.coords.latitude;
-          const longitud = position.coords.longitude;
-          self.localizacion.latitud = latitud;
-          self.localizacion.longitud = longitud;
-        },function(error){
-          self.error.show = true;
-          self.error.message = error.message;
-          self.error.tipo = "alert alert-warning";
-        });
-      } else {
-        this.error.show = true;
-        this.error.message = 'Geolocalización no disponible en este dispositivo';
-        this.error.tipo = "alert alert-warning";
+        this.progress = true;
+        this.error.show = false;
+        if ("geolocation" in navigator) {
+          let self = this;
+          this.coordenadas.latitud = ""; this.coordenadas.longitud = ""; this.coordenadas.direccion = "";
+          navigator.geolocation.getCurrentPosition(function(position) {
+            const latitud = position.coords.latitude;
+            const longitud = position.coords.longitude;
+            self.localizacion.latitud = latitud;
+            self.localizacion.longitud = longitud;
+          },function(error){
+            self.error.show = true;
+            self.error.message = error.message;
+            self.error.tipo = "alert alert-warning";
+          });
+        } else {
+          this.error.show = true;
+          this.error.message = 'Geolocalización no disponible en este dispositivo';
+          this.error.tipo = "alert alert-warning";
+        }
+        this.progress = false;
+      },
+      getHistorian : async function(tipo, id){
+        this.error.show = false;
+        let response = await composer.sistema.getHistorian(this.$axios, 'resource%3A' + tipo + '%23' + id);
+        this.progress = false;
+        if (response.statusCode === 200){
+          this.historian = response.data;
+        }else{
+          this.error.show = true; this.error.message = response.message; this.error.tipo = "alert alert-danger";
+        }
+      },
+      actualizarOrganizacion : async function(){
+        this.progress = true;
+        this.error.show = false;
+        var datos = {
+          "$class": "org.hyperledger.composer.organizaciones.ActualizarOrganizacion"
+        }
+        
+        if (this.datosActualizar.nombre !== ""){
+          datos.nombre = this.datosActualizar.nombre;
+        }
+        if (this.datosActualizar.descripcion !== ""){
+          datos.descripcion = this.datosActualizar.descripcion;
+        }
+        if (this.datosActualizar.email !== ""){
+          datos.email = this.datosActualizar.email;
+        }
+        if (this.datosActualizar.telefono !== ""){
+          datos.telefono = this.datosActualizar.telefono;
+        }
+        if (this.datosActualizar.webUrl !== ""){
+          datos.webUrl = this.datosActualizar.webUrl;
+        }
+
+        let response = await composer.organizaciones.actualizarOrganizacion(this.$axios, datos);
+        this.progress = false;
+        if (response.statusCode === 200){
+          this.error.show = true; this.error.message = 'Organizacion Actualizada'; this.error.tipo = "alert alert-success";
+        }else{
+          this.error.show = true; this.error.message = response.message; this.error.tipo = "alert alert-danger";
+        }
       }
-      this.progress = false;
-    },
     }
   }
 </script>

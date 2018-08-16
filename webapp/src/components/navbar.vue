@@ -23,7 +23,7 @@
                     class="dropdown-item" to="/productos/crear" tag="a" active-class="active" exact>
                     <a>Crear Producto</a>
                   </router-link>
-                  <router-link class="dropdown-item" to="/productos/all" tag="a" active-class="active" exact><a>Productos</a></router-link>
+                  <router-link class="dropdown-item" to="/productos" tag="a" active-class="active" exact><a>Productos</a></router-link>
                 </div>
               </li>
             </ul>  
@@ -106,8 +106,8 @@
                 @click="cambiarPerfil(index)"
                 v-for="(perfil, index) in perfiles">
                 {{ perfil.name }}
-                <span v-if="perfil.default" class="badge badge-success">{{$t('active')}}</span>
-                <div class="col-md-12" v-if="perfil.default">
+                <div v-if="perfil.default">
+                  <span v-if="perfil.default" class="badge badge-success">{{$t('active')}}</span>
                   <button class="btn btn-info btn-sm" @click="exportarPerfil(perfil.name)">Exportar</button>
                   <button class="btn btn-danger btn-sm" @click="eliminarPerfil(perfil.name)">Eliminar</button>
                 </div>

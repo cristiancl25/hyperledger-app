@@ -23,8 +23,15 @@ query ProductosPorTipo {
 }
 
 query getIdentity {
-  description: "Devuelve todos los productos de unha organización"
+  description: ""
   statement:  
     SELECT  org.hyperledger.composer.system.Identity
   	WHERE   ( participant == _$participanteId )
+}
+
+query getHistorian {
+  description: ""
+  statement:  
+    SELECT  org.hyperledger.composer.system.HistorianRecord
+  	WHERE   ( participantInvoking == _$participante )
 }
