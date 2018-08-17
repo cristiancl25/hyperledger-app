@@ -185,6 +185,14 @@ export const composer = {
                 return returnError(error);
             }
         },
+        actualizarParticipante : async function(axios, datos){
+            try{
+                let response = await axios.post('/api/org.hyperledger.composer.participantes.ActualizarParticipante', datos);
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+            }
+        },
         getParticipante : async function(axios, rol, id){
             try{
                 let response = await axios.get('/api/org.hyperledger.composer.participantes.' + rol + '/' + id);

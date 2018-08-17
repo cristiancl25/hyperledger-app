@@ -10,7 +10,7 @@ import evento from './components/eventos/Evento';
 import HomePage from './components/HomePage';
 
 export const routes = [
-  { path: '', component: ListaProductos },
+  { path: '', component: HomePage },
   { path: '/productos', component: Productos, children: [
       { path: '', component: ListaProductos },
       { path: 'crear', component: CrearProducto },
@@ -22,5 +22,5 @@ export const routes = [
     { path: '', component: AllOrganizaciones },
     { path: ':id/', name: 'org', component: organizacion }]
   },
-  { path: '*', redirect: '/productos'}
+  { path: '*', redirect: '/'}
 ];

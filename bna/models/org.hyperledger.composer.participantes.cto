@@ -21,8 +21,8 @@ transaction CrearParticipante {
 }
 
 transaction ActualizarParticipante {
-  o String email
-  o String nombre
+  o String email optional
+  o String nombre optional
 }
 
 transaction EliminarParticipante {

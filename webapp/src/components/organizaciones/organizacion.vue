@@ -13,10 +13,23 @@
           <h5 align="center"><strong>Administrador: </strong>{{organizacion.administrador.email}} 
             <button
               data-toggle="modal" data-target="#ModalParticipante"
+              @click="modal.tipo='infoPar'; modal.titulo='Info participante'; infoPar = organizacion.administrador"
+              class="btn btn-info btn-sm">
+              Info
+            </button>
+            <button
+              data-toggle="modal" data-target="#ModalParticipante"
               @click="modal.tipo='historian'; modal.titulo='Historian';
                 getHistorian('org.hyperledger.composer.participantes.OrgAdmin', organizacion.administrador.id);"
-              class="btn btn-info btn-sm">
+              class="btn btn-success btn-sm">
               Historian
+            </button>
+            <button
+              v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
+              data-toggle="modal" data-target="#ModalParticipante"
+              @click="modal.tipo='actualizarPar'; modal.titulo='ActualizarParticipante';"
+              class="btn btn-warning btn-sm">
+              Actualizar
             </button>
           </h5>
           <h5 v-if="organizacion.email" align="center"><strong>Email: </strong>{{organizacion.email}}</h5>
@@ -35,9 +48,22 @@
               <div>
                 <button
                   data-toggle="modal" data-target="#ModalParticipante"
+                  @click="modal.tipo='infoPar'; modal.titulo='Info participante'; infoPar = usuario"
+                  class="btn btn-info btn-sm">
+                  Info
+                </button>
+                <button
+                  v-if="$store.state.rolParticipante === 'Usuario' && $store.state.participante === usuario.id"
+                  data-toggle="modal" data-target="#ModalParticipante"
+                  @click="modal.tipo='actualizarPar'; modal.titulo='ActualizarParticipante';"
+                  class="btn btn-warning btn-sm">
+                  Actualizar
+                </button>
+                <button
+                  data-toggle="modal" data-target="#ModalParticipante"
                   @click="modal.tipo='historian'; modal.titulo='Historian';
                     getHistorian('org.hyperledger.composer.participantes.Usuario', usuario.id);"
-                  class="btn btn-info btn-sm">
+                  class="btn btn-success btn-sm">
                   Historian
                 </button>
                 <button
@@ -59,14 +85,22 @@
               :key="usuario.id"
               v-for="(usuario) in organizacion.invitados">
               {{usuario.email}}
-              <button
-                v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
-                data-toggle="modal" data-target="#ModalParticipante"
-                @click="modal.tipo='eliminarParticipante'; modal.titulo='Eliminar Participante Invitado';
-                  datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Invitado'"
-                class="btn btn-danger btn-sm">
-                Eliminar
-              </button>
+              <div>
+                <button
+                  data-toggle="modal" data-target="#ModalParticipante"
+                  @click="modal.tipo='infoPar'; modal.titulo='Info participante'; infoPar = usuario"
+                  class="btn btn-info btn-sm">
+                  Info
+                </button>
+                <button
+                  v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
+                  data-toggle="modal" data-target="#ModalParticipante"
+                  @click="modal.tipo='eliminarParticipante'; modal.titulo='Eliminar Participante Invitado';
+                    datosParticipanteBorrar=usuario; datosParticipanteBorrar.tipo='Invitado'"
+                  class="btn btn-danger btn-sm">
+                  Eliminar
+                </button>
+              </div>
             </li>
           </ul>
         </div>
@@ -77,23 +111,28 @@
           <ul class="list-group">
             <li class="list-group-item d-flex justify-content-between align-items-center"
               :key="localizacion.nombre"
-              @click="coordenadas.latitud = localizacion.latitud; coordenadas.longitud = localizacion.longitud; coordenadas.info = coordenadas.direccion; locSelec=localizacion.localizacionId"
               v-for="(localizacion) in organizacion.localizaciones">
               {{localizacion.direccion}}
-              <span v-if="locSelec === localizacion.localizacionId" class="badge badge-success">{{$t('active')}}</span>
-              <button
-                v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
-                data-toggle="modal" data-target="#ModalParticipante"
-                @click="modal.tipo='eliminarLocalizacion'; modal.titulo='Eliminar Localizacion';
-                  delLocalizacionId=localizacion.localizacionId;"
-                class="btn btn-danger btn-sm">
-                Eliminar
-              </button>
+              <div>
+                <button
+                  data-toggle="modal" data-target="#ModalParticipante"
+                  @click="modal.tipo='infoLoc'; modal.titulo='Info localización'; infoLoc = localizacion; 
+                  coordenadas.latitud = localizacion.latitud; coordenadas.longitud = localizacion.longitud; coordenadas.info = coordenadas.direccion; locSelec=localizacion.localizacionId"
+                  class="btn btn-info btn-sm">
+                  Info
+                </button>
+                <button
+                  v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
+                  data-toggle="modal" data-target="#ModalParticipante"
+                  @click="modal.tipo='eliminarLocalizacion'; modal.titulo='Eliminar Localizacion';
+                    delLocalizacionId=localizacion.localizacionId;"
+                  class="btn btn-danger btn-sm">
+                  Eliminar
+                </button>
+              </div>
+              
             </li>
           </ul>
-        </div>
-        <div class="col-md-6">
-          <google-map v-if="locSelec!==''" v-bind:markers="[{'lat':coordenadas.latitud, 'lng':coordenadas.longitud, 'info':coordenadas.direccion}]" v-bind:lista='false'></google-map>
         </div>
 
       </div>
@@ -239,6 +278,43 @@
                 </div>
               </div>
 
+              <div v-if="modal.tipo==='actualizarPar'">
+                <div class="form-group col-md-12">
+                  <div class="form-group col-md-12">
+                    <label>Nombre</label>
+                    <input v-model="actualizarPar.nombre" class="form-control"  placeholder="Nombre del participante">
+                    <small class="form-text text-muted">Opcional</small>
+                  </div>
+                  <div class="form-group col-md-12">
+                    <label>Email</label>
+                    <input v-model="actualizarPar.email" class="form-control"  placeholder="Email del participante">
+                    <small class="form-text text-muted">Opcional</small>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="modal.tipo==='infoPar'">
+                <h5 align="center"><strong>Tipo: </strong>{{infoPar.$class}}</h5>
+                <h5 align="center"><strong>ID: </strong>{{infoPar.id}}</h5>
+                <h5 align="center"><strong>Nombre: </strong>{{infoPar.nombre}}</h5>
+                <h5 align="center"><strong>Email: </strong>{{infoPar.email}}</h5>
+              </div>
+
+              <div v-if="modal.tipo==='infoLoc'">                
+                <h5 align="center"><strong>ID: </strong>{{infoLoc.localizacionId}}</h5>
+                <h5 align="center"><strong>Dirección: </strong>{{infoLoc.direccion}}</h5>
+                <h5 align="center"><strong>Latitud: </strong>{{infoLoc.latitud}}</h5>
+                <h5 align="center"><strong>Longitud: </strong>{{infoLoc.longitud}}</h5>
+
+                <div class="col-md-12">
+                  <button v-if="!mapa" @click="mapa=!mapa; locSelec=''" class="btn btn -info">Mostrar mapa</button>
+                  <button v-if="mapa" @click="mapa=!mapa" class="btn btn -info">Ocultar mapa</button>
+                </div>
+                <google-map v-if="mapa" v-bind:markers="[{'lat':localizacion.latitud, 'lng':localizacion.longitud, 'info':localizacion.direccion}]" v-bind:lista='false'></google-map>
+              </div>
+
+              
+
             </div>
             <div class="modal-footer">
               <button type="button" class="btn btn-secondary" @click="inicializar(); error.show=false" data-dismiss="modal">{{$t('close')}}</button>
@@ -247,6 +323,7 @@
               <button type="button" v-if="modal.tipo==='crearParticipante'" class="btn btn-primary" @click="crearParticipante()" >Crear Participante</button>
               <button type="button" v-if="modal.tipo==='crearLocalizacion'" class="btn btn-primary" @click="crearLocalizacion()" >Crear Localizacion</button>
               <button type="button" v-if="modal.tipo==='actualizarOrg'" class="btn btn-primary" @click="actualizarOrganizacion" >Actualizar Organización</button>
+              <button type="button" v-if="modal.tipo==='actualizarPar'" class="btn btn-primary" @click="actualizarParticipante" >Actualizar Participante</button>
             </div>
           </div>
         </div>
@@ -315,7 +392,13 @@
           "email": "",
           "telefono": "",
           "webUrl": ""
-        }
+        },
+        actualizarPar : {
+          "email": "",
+          "nombre": ""
+        },
+        infoPar : {},
+        infoLoc : {}
       }
     },
     created : async function () {
@@ -423,6 +506,28 @@
 
         } else {
           this.error.show = true; this.error.message = 'Datos Icorrectos'; this.error.tipo = "alert alert-danger";
+        }
+      },
+      actualizarParticipante : async function(){
+        this.progress = true;
+        var datos = {
+          "$class": "org.hyperledger.composer.participantes.ActualizarParticipante",
+        }
+        if (this.actualizarPar.nombre !== ""){
+          datos.nombre = this.actualizarPar.nombre;
+        }
+        if (this.actualizarPar.email !== ""){
+          datos.email = this.actualizarPar.email;
+        }
+        
+        let response = await composer.participantes.actualizarParticipante(this.$axios, datos);
+        this.progress = false;
+        if (response.statusCode === 200) {
+          this.error.show = true; this.error.message = 'Participante actualizado'; this.error.tipo = "alert alert-success";
+          this.actualizarPar.nombre = '';
+          this.actualizarPar.email = '';
+        } else {
+          this.error.show = true; this.error.message = response.message; this.error.tipo = "alert alert-danger";
         }
       },
       eliminarParticipante : async function(){
