@@ -370,7 +370,16 @@ export const composer = {
             }catch(error){
                 return returnError(error);
             }
-        }
+        },
+        historian : async function(axios) {
+            try{
+                let response = await axios.get('/api/queries/getHistorianOrder');
+                return returnResponse(response);
+            }catch(error){
+                return returnError(error);
+                
+            }
+        },
     }
 
 }

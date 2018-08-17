@@ -11,7 +11,8 @@ export const store = new Vuex.Store({
         rolParticipante : '', 
         participante : '',
         organizacion : '',
-        eventos : []
+        eventos : [],
+        notificaciones : true
     },
     getters : {
 
@@ -37,7 +38,14 @@ export const store = new Vuex.Store({
             state.eventos.unshift(evento);
         },
         setEventos(state, eventos){
-            state.store.eventos = eventos;
+            state.eventos = eventos;
+        },
+        eliminarEvento(state, id){
+            var index = state.eventos.findIndex((evento) => evento.eventId === id);
+            state.eventos.splice(index,1);
+        },
+        setNotificaciones(state, bool){
+            state.notificaciones = bool;
         }
     },
     actions : {

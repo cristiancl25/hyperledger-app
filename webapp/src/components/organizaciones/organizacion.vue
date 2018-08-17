@@ -34,7 +34,7 @@
           </h5>
           <h5 v-if="organizacion.email" align="center"><strong>Email: </strong>{{organizacion.email}}</h5>
           <h5 v-if="organizacion.telefono" align="center"><strong>Teléfono: </strong>{{organizacion.telefono}}</h5>
-          <h5 v-if="organizacion.webUrl" align="center"><strong>Email: </strong><a v-bind:href="organizacion.webUrl">{{organizacion.webUrl}}</a></h5>
+          <h5 v-if="organizacion.webUrl" align="center"><strong>URL: </strong><a v-bind:href="organizacion.webUrl">{{organizacion.webUrl}}</a></h5>
         </div>
       </div>
       <div class="row">
@@ -116,8 +116,7 @@
               <div>
                 <button
                   data-toggle="modal" data-target="#ModalParticipante"
-                  @click="modal.tipo='infoLoc'; modal.titulo='Info localización'; infoLoc = localizacion; 
-                  coordenadas.latitud = localizacion.latitud; coordenadas.longitud = localizacion.longitud; coordenadas.info = coordenadas.direccion; locSelec=localizacion.localizacionId"
+                  @click="modal.tipo='infoLoc'; modal.titulo='Info localización'; infoLoc = localizacion;"
                   class="btn btn-info btn-sm">
                   Info
                 </button>
@@ -310,7 +309,7 @@
                   <button v-if="!mapa" @click="mapa=!mapa; locSelec=''" class="btn btn -info">Mostrar mapa</button>
                   <button v-if="mapa" @click="mapa=!mapa" class="btn btn -info">Ocultar mapa</button>
                 </div>
-                <google-map v-if="mapa" v-bind:markers="[{'lat':localizacion.latitud, 'lng':localizacion.longitud, 'info':localizacion.direccion}]" v-bind:lista='false'></google-map>
+                <google-map v-if="mapa" v-bind:markers="[{'lat':infoLoc.latitud, 'lng':infoLoc.longitud, 'info':infoLoc.direccion}]" v-bind:lista='false'></google-map>
               </div>
 
               

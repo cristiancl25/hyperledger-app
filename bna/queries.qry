@@ -35,3 +35,10 @@ query getHistorian {
     SELECT  org.hyperledger.composer.system.HistorianRecord
   	WHERE   ( participantInvoking == _$participante )
 }
+
+query getHistorianOrder {
+  description: ""
+  statement:  
+    SELECT  org.hyperledger.composer.system.HistorianRecord
+  	ORDER BY transactionTimestamp DESC
+}

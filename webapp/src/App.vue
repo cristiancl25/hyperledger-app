@@ -44,7 +44,7 @@
         evento.$class = this.getTipoEvento(evento.$class)
         if(evento.$class === 'ProductoEnVenta' || evento.orgDestino === this.$store.state.organizacion){
           this.$store.commit('anadirEvento', evento);
-          if ('Notification' in window && Notification.permission === 'granted'){
+          if ('Notification' in window && Notification.permission === 'granted' && this.$store.state.notificaciones){
             let notification = new Notification('Evento Hyperledger', {
               body: evento.$class,
               tag: evento.$class

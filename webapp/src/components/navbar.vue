@@ -46,7 +46,12 @@
           </div>
           <div class="navbar-nav" v-if="sesionIniciada">
             <router-link v-if="$store.state.rolParticipante === 'Usuario'" class="nav-item nav-link" to="/transacciones" tag="a">Transacciones</router-link>
-            <router-link class="nav-item nav-link" to="/eventos" tag="a"><a>Eventos <span class="badge badge-success badge-pill"> {{eventos.length}}</span></a></router-link>
+            <router-link class="nav-item nav-link" to="/eventos" tag="a">
+              <a>Eventos 
+                <span class="badge badge-success badge-pill"> {{eventos.length}}</span>
+                <span v-if="!$store.state.notificaciones">&#x1f507;</span>
+              </a>
+            </router-link>
           </div>
           <div class="nav navbar-nav navbar-right" v-if="sesionIniciada">
             <ul class="navbar-nav">

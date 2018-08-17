@@ -13,7 +13,20 @@
           <option @click="filtrado()" >EstadoTransaccion</option>
         </select>
       </div>
+      <div class="form-group col-md-2">
+        <input type="checkbox" v-model="notificaciones">
+        <label>Activar/Desactivar Notificaciones</label>
+      </div>
+      <div>
+        <button
+          v-if="filtros.tipoEvento === 'ALL'"
+          @click="eventos = []"
+          class="btn btn-danger btn-sm">
+          Borrar Eventos
+        </button>
+      </div>
     </div>
+    
     <br>
     <div class="row justify-content-center">
       <div align="center" v-if="paginacion.contenido.length === 0" class="alert alert-warning col-md-6">
@@ -23,8 +36,15 @@
         <ul class="list-group col-md-12">
           <li :class="getTipoEventoColor(evento)"
             :key="evento.eventId"
-            v-for="evento in paginacion.contenido">
-            <h5><strong>{{evento.$class}}</strong></h5>
+            v-for="(evento) in paginacion.contenido">
+            <div> 
+              <button type="button" class="close"
+                @click="$store.commit('eliminarEvento', evento.eventId)"
+                >
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h5><strong>{{evento.$class}}</strong></h5> 
+            </div>
             <div>
               <h6>
                 <strong>Producto: </strong>
@@ -101,6 +121,14 @@ export default {
       },
       set(value) {
         this.$store.commit('setEventos', value);
+      }
+    },
+    notificaciones : {
+      get() {
+        return this.$store.state.notificaciones
+      },
+      set(value) {
+        this.$store.commit('setNotificaciones', value);
       }
     }
   },
