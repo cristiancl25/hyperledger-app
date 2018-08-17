@@ -2,7 +2,7 @@
   <div>
     <div class="row justify-content-center">
       <div class="col-md-2">
-        <label for="inputState">Filtro</label>
+        <label for="inputState">{{$t('filter')}}</label>
         <select v-model="filtros.compraVenta" class="form-control">
           <option @click="filtrado()" value="">Todas</option>
           <option @click="filtrado()" >Compra</option>
@@ -10,10 +10,10 @@
         </select>
       </div>
     </div>
-    <h1 align="center">Transacciones</h1>
+    <h1 align="center">{{$t('transactions')}}</h1>
     <div class="row justify-content-center">
       <div align="center" v-if="paginacion.contenido.length === 0" class="alert alert-warning col-md-6">
-        <strong>No existen transacciones</strong>
+        <strong>{{$t('no-transactions')}}</strong>
       </div>
       <div class="col-md-10">
         <ul class="list-group">
@@ -23,9 +23,9 @@
             v-for="(tran) in paginacion.contenido">
             <div>
               <h6><strong>ID: </strong>{{tran.transaccionId}}</h6>
-              <router-link :to="'/productos/' + getProductoId(tran.producto)" tag="a"> <a>producto</a> </router-link>
+              <router-link :to="'/productos/' + getProductoId(tran.producto)" tag="a"> <a>{{$t('product')}}</a> </router-link>
               <h6>
-                <span v-if="tran.orgCompra.orgId===$store.state.organizacion">&#10132; </span><strong>Comprador</strong>
+                <span v-if="tran.orgCompra.orgId===$store.state.organizacion">&#10132; </span><strong>{{$t('buyer')}}</strong>
                 <router-link
                   :to="'/organizaciones/' + tran.orgCompra.orgId"
                   tag="a">
@@ -35,7 +35,7 @@
                 <span v-else>&#10008;</span>
               </h6>
               <h6>
-                <span v-if="tran.orgVenta.orgId===$store.state.organizacion">&#10132; </span><strong>Vendedor</strong>
+                <span v-if="tran.orgVenta.orgId===$store.state.organizacion">&#10132; </span><strong>{{$t('seller')}}</strong>
                 <router-link
                   :to="'/organizaciones/' + tran.orgVenta.orgId"
                   tag="a">
@@ -46,11 +46,11 @@
               </h6>
               <button class="btn btn-primary"
                 data-toggle="modal" data-target="#ModalTransaccion"
-                @click="modal.titulo='Confirmar transaccion';
+                @click="modal.titulo=$t('confirm-transaction');
                   getLocalizaciones();
                   transaccion.orgCompra=tran.orgCompra.orgId;
                   transaccion.productoId=getProductoId(tran.producto)">
-                Confirmar Transaccion
+                {{$t('confirm-transaction')}}
               </button>
             </div>
           </li>
@@ -97,10 +97,10 @@
             <div id="ContenidoModal">
               <form> 
                 <div class="form-group col-md-6">
-                  <label for="exampleFormControlSelect1">Respuesta</label>
+                  <label for="exampleFormControlSelect1">{{$t('response')}}</label>
                   <select class="form-control" v-model="transaccion.confirmar" id="exampleFormControlSelect1">
-                    <option value="true" selected>Confirmar</option>
-                    <option value="false">Rechazar</option>
+                    <option value="true" selected>{{$t('confirm')}}</option>
+                    <option value="false">{{$t('reject')}}</option>
                   </select>
                 </div>
                 <div class="form-group col-md-12" v-if="$store.state.organizacion===transaccion.orgCompra">
@@ -118,8 +118,8 @@
               </form>
               <div class="col-md-12"> 
                 <div v-if="$store.state.organizacion===transaccion.orgCompra">
-                  <button class="btn btn-primary" v-if="!coordenadas.mapa" @click="coordenadas.mapa=!coordenadas.mapa">Mostrar Localización</button>
-                  <button class="btn btn-primary" v-if="coordenadas.mapa" @click="coordenadas.mapa=!coordenadas.mapa">Ocultar Localización</button>
+                  <button class="btn btn-primary" v-if="!coordenadas.mapa" @click="coordenadas.mapa=!coordenadas.mapa">{{$t('show-location')}}</button>
+                  <button class="btn btn-primary" v-if="coordenadas.mapa" @click="coordenadas.mapa=!coordenadas.mapa">{{$t('hide-location')}}</button>
                 </div>
                 <google-map v-if="coordenadas.mapa" v-bind:markers="[{'lat':coordenadas.latitud, 'lng':coordenadas.longitud, 'info':coordenadas.direccion}]" v-bind:lista='false'></google-map>
               </div>
@@ -127,7 +127,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" @click="inicializar(); modalInfo.show=false" data-dismiss="modal">{{$t('close')}}</button>
-            <button type="button" class="btn btn-primary" @click="confirmarTransaccion">Enviar</button>
+            <button type="button" class="btn btn-primary" @click="confirmarTransaccion">{{$t('send')}}</button>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@
     </div>
     <div v-else class="row justify-content-center">
       <div class="col-md-10">
-        <h1 align="center">{{$t('homePage')}}</h1>
+        <h1 align="center">{{$t('recent-transactions')}}</h1>
         <div class="form-group col-md-12">
           <ul class="list-group">
             <li class="list-group-item d-flex justify-content-between align-items-center mt-2 mr-2 border"
@@ -17,7 +17,7 @@
                     <br>
                     <strong>TimeStamp: </strong>{{hist.transactionTimestamp}}
                     <br>
-                    <strong>Participante: </strong> {{hist.participantInvoking | participant}}
+                    <strong>{{$t('participant')}}: </strong> {{hist.participantInvoking | participant}}
                   </p>
                 </div>
             </li>

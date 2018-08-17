@@ -11,62 +11,62 @@
           <div class="col-md-12" v-if="info.show" v-bind:class="info.tipo" role="alert">
             <strong></strong> {{ info.message }}
           </div>
-           <h1>Crear Producto</h1>
+           <h1>{{$t('create-product')}}</h1>
           <form>
             <div class="form-group col-md-6"> 
-              <label for="identificador">Identificador</label>
+              <label for="identificador">{{$t('identifier')}}</label>
               <input v-model="caracteristicas.identificador" class="form-control" aria-describedby="emailHelp" placeholder="Identificador del producto">
-                <small id="emailHelp" class="form-text text-muted">Opcional</small>
+                <small id="emailHelp" class="form-text text-muted">{{$t('optional')}}</small>
                 <small id="emailHelp" class="form-text text-muted">
-                  <a href="" data-toggle="modal"  @click="scannerQR=true" data-target="#ModalScannerQR">Escanear código QR</a>
+                  <a href="" data-toggle="modal"  @click="scannerQR=true" data-target="#ModalScannerQR">{{$t('qr-code-scanner')}}</a>
                 </small>
             </div>
 
-            <h3>Características</h3>
+            <h3>{{$t('characteristics')}}</h3>
 
             <div class="form-row col-md-12">
               <div class="form-group col-md-4">
-                <label for="variedad">Variedad</label>
+                <label for="variedad">{{$t('type-product')}}</label>
                 <input v-model="caracteristicas.tipoProducto" class="form-control" aria-describedby="emailHelp" placeholder="" disabled="true">
                 <small id="emailHelp" class="form-text text-muted">
                   <a href="" 
                     data-toggle="modal"
                     @click="modal.titulo='Crear tipo Producto'; modal.tipo='crearTipoProducto'"
                     data-target="#ModalCrearProducto">
-                    Seleccionar tipo de producto
+                    {{$t('select-type-product')}}
                   </a>
                 </small>
               </div>
               <div class="form-group col-md-4">
-                <label for="variedad">Variedad</label>
+                <label for="variedad">{{$t('variety')}}</label>
                 <input v-model="caracteristicas.variedadProducto" class="form-control" aria-describedby="emailHelp" placeholder="Variedad">
-                <small id="emailHelp" class="form-text text-muted">Opcional</small>
+                <small id="emailHelp" class="form-text text-muted">{{$t('optional')}}</small>
               </div>
             </div>
               
             <div class="form-group col-md-12"> 
               <div class="form-row">
                 <div class="form-group col-md-3">
-                  <label for="inputState">Tipo</label>
+                  <label for="inputState">{{$t('type')}}</label>
                   <select v-model="caracteristicas.tipo" id="inputState" class="form-control">
                     <option selected>UNIDAD</option>
                     <option>PESO</option>
                   </select>
                 </div>
                 <div v-if="caracteristicas.tipo==='UNIDAD'" class="form-group col-md-3">
-                  <label for="Unidades">Unidades</label>
+                  <label for="Unidades">{{$t('units')}}</label>
                   <input v-model="caracteristicas.unidades" type="number" min="1" class="form-control" aria-describedby="emailHelp" placeholder="Unidades">
                 </div>
                 <div v-if="caracteristicas.tipo==='UNIDAD'" class="form-group col-md-3">
-                  <label for="Peso Medio">Peso medio</label>
+                  <label for="Peso Medio">{{$t('middleweight')}}</label>
                   <input v-model="caracteristicas.peso" type=number step=0.01 min="0.01" class="form-control" aria-describedby="emailHelp" placeholder="Peso medio">
                 </div>
                 <div v-if="caracteristicas.tipo==='PESO'" class="form-group col-md-3">
-                  <label for="Peso">Peso</label>
+                  <label for="Peso">{{$t('weight')}}</label>
                   <input v-model="caracteristicas.peso" type=number step=0.01 min="0.01" class="form-control" aria-describedby="emailHelp" placeholder="Peso">
                 </div>
                 <div class="form-group col-md-3">
-                  <label for="inputState">Magnitud</label>
+                  <label for="inputState">{{$t('magnitude')}}</label>
                   <select v-model="caracteristicas.magnitud" id="inputState" class="form-control">
                     <option selected>kilogramos</option>
                     <option>gramos</option>
@@ -76,17 +76,17 @@
             </div>
 
             <div class="form-group col-md-8"> 
-              <label for="Descripción">Descripción:</label>
+              <label for="Descripción">{{$t('description')}}:</label>
               <textarea v-model="caracteristicas.descripcion" class="form-control" id="message-text"></textarea>
-              <small id="emailHelp" class="form-text text-muted">Opcional</small>
+              <small id="emailHelp" class="form-text text-muted">{{$t('opcional')}}</small>
             </div>
 
-            <h3>Localización Inicial</h3>
+            <h3>{{$t('initial-location')}}</h3>
             <div>
               <div>
                 <fieldset class="form-group col-md-12">
                   <div class="row">
-                    <legend class="col-form-label col-sm-3 pt-0">Métodos</legend>
+                    <legend class="col-form-label col-sm-3 pt-0">{{$t('methods')}}</legend>
                     <div class="col-sm-9">
                       <div class="form-check">
                         <input v-model="loc" @click="geolocalizacion" class="form-check-input" type="radio" name="gridRadios" id="gridRadios1" value="gps" checked>
@@ -97,26 +97,26 @@
                       <div class="form-check">
                         <input v-model="loc" @click="getLocalizaciones" class="form-check-input" type="radio" name="gridRadios" id="gridRadios2" value="org">
                         <label class="form-check-label" for="gridRadios2">
-                          Organización
+                          {{$t('organization')}}
                         </label>
                       </div>
                     </div>
                   </div>
                 </fieldset>
                 <div class="col-md-10" v-if="loc === 'gps'">
-                  <h5>Coordenadas</h5>
+                  <h5>{{$t('coordinates')}}</h5>
                   <ul class="list-group">
-                    <li><strong>Latitud:</strong> {{coordenadas.latitud}}</li>
-                    <li><strong>Longitud:</strong> {{coordenadas.longitud}}</li>
+                    <li><strong>{{$t('latitude')}}:</strong> {{coordenadas.latitud}}</li>
+                    <li><strong>{{$t('longitude')}}:</strong> {{coordenadas.longitud}}</li>
                   </ul>
                   <div class="form-group col-md-12">
                     <label for="direccion">Dirección</label>
                     <input v-model="coordenadas.direccion" class="form-control" aria-describedby="emailHelp" placeholder="Dirección de la nueva localización">
-                    <small id="emailHelp" class="form-text text-muted">Obligatorio</small>
+                    <small id="emailHelp" class="form-text text-muted">{{$t('required')}}</small>
                   </div>
                 </div>
                 <div class="col-md-10" v-if="loc === 'org'">
-                  <h5>Localizaciones de la organizacion</h5>
+                  <h5>{{$t('locations')}}</h5>
                   <ul class="list-group">
                     <li class="list-group-item d-flex justify-content-between align-items-center"
                       v-for="(loc) in localizaciones"
@@ -138,11 +138,11 @@
               </div>
             </div>
           
-            <h3>Imagen</h3>
+            <h3>{{$t('image')}}</h3>
             <div class="form-group col-md-12">
               <input type="checkbox" id="jack" value="Jack" v-model="imagen.incluir">
               <label for="jack">Añadir datos imagen  </label>
-              <small id="emailHelp" class="form-text text-muted">Opcional</small>
+              <small id="emailHelp" class="form-text text-muted">{{$t('optional')}}</small>
             </div>
             <div v-if="imagen.incluir"> 
               <div class="form-group col-md-12">
@@ -154,7 +154,7 @@
                 <input v-model="imagen.hashImagen" class="form-control" aria-describedby="emailHelp" placeholder="Hash de la imagen">
               </div>
               <div class="form-group col-md-3">
-                <label for="inputState">Algoritmo</label>
+                <label for="inputState">{{$t('algorithm')}}</label>
                 <select v-model="imagen.algoritmo" id="inputState" class="form-control">
                   <option selected>sha1</option>
                   <option>sha256</option>
@@ -169,7 +169,7 @@
               data-toggle="modal"
               @click="modal.titulo='Crear Producto'; modal.tipo='crearProducto'"
               data-target="#ModalCrearProducto">
-              Crear Producto
+              {{$t('create-product')}}
             </button>
           </div>
         </div>
@@ -181,7 +181,7 @@
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Escáner QR</h5>
+              <h5 class="modal-title" id="exampleModalLabel">{{$t('qr-scanner')}}</h5>
               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
@@ -195,8 +195,8 @@
               <input v-model="caracteristicas.identificador" class="form-control" aria-describedby="emailHelp" placeholder="CódigoQR" disabled="true">
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-info" @click="scannerQR=true">Reintentar</button>
-              <button type="button" class="btn btn-primary" @click="closeModal; scannerQR=false" data-dismiss="modal">Cerrar</button>
+              <button type="button" class="btn btn-info" @click="scannerQR=true">{{$t('retry')}}</button>
+              <button type="button" class="btn btn-primary" @click="closeModal; scannerQR=false" data-dismiss="modal">{{$t('close')}}</button>
             </div>
           </div>
         </div>
@@ -237,14 +237,14 @@
                 <div class="form-group">
                   <input v-model="nuevoTipoProducto" class="form-control" aria-describedby="emailHelp" required="true" placeholder="Identificador del producto">
                 </div>
-                <button type="submit" @click="crearTipoProducto" class="btn btn-primary">Crear</button>
+                <button type="submit" @click="crearTipoProducto" class="btn btn-primary">{{$t('create')}}</button>
               </div>
               
 
             </div>
             <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" @click="closeModal" data-dismiss="modal">Cerrar</button>
-              <button type="button" class="btn btn-primary" @click="crearProducto" v-if="modal.tipo==='crearProducto'">Crear Producto</button>
+              <button type="button" class="btn btn-secondary" @click="closeModal" data-dismiss="modal">{{$t('close')}}</button>
+              <button type="button" class="btn btn-primary" @click="crearProducto" v-if="modal.tipo==='crearProducto'">{{$t('create-product')}}</button>
             </div>
           </div>
         </div>

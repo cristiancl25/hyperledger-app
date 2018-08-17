@@ -1,11 +1,11 @@
 <template>
   <div>
-    <h1 align="center">Eventos</h1>
+    <h1 align="center">{{$t('events')}}</h1>
     <div class="row justify-content-center">
       <div class="col-md-3">
-        <label for="inputState">Filtro</label>
+        <label for="inputState">{{$t('filter')}}</label>
         <select v-model="filtros.tipoEvento" class="form-control">
-          <option @click="filtrado()" value="ALL">Todos</option>
+          <option @click="filtrado()" value="ALL">{{$t('all')}}</option>
           <option @click="filtrado()" >ProductoEnVenta</option>
           <option @click="filtrado()" >NuevaPuja</option>
           <option @click="filtrado()" >GanadorPuja</option>
@@ -15,14 +15,14 @@
       </div>
       <div class="form-group col-md-2">
         <input type="checkbox" v-model="notificaciones">
-        <label>Activar/Desactivar Notificaciones</label>
+        <label>{{$t('a-d-notifications')}}</label>
       </div>
       <div>
         <button
           v-if="filtros.tipoEvento === 'ALL'"
           @click="eventos = []"
           class="btn btn-danger btn-sm">
-          Borrar Eventos
+          {{$t('delete-events')}}
         </button>
       </div>
     </div>
@@ -30,7 +30,7 @@
     <br>
     <div class="row justify-content-center">
       <div align="center" v-if="paginacion.contenido.length === 0" class="alert alert-warning col-md-6">
-        <strong>No existen eventos recientes</strong>
+        <strong>{{$t('no-recent-events')}}</strong>
       </div>
       <div class="col-md-12 col-lg-10">
         <ul class="list-group col-md-12">
@@ -47,7 +47,7 @@
             </div>
             <div>
               <h6>
-                <strong>Producto: </strong>
+                <strong>{{$t('product')}}: </strong>
                 <router-link
                 :to="'/productos/' + evento.productoId"
                 tag="a">
@@ -55,16 +55,16 @@
                 </router-link>
               </h6>
               <h6>
-                <strong>Organización: </strong>
+                <strong>{{$t('organization')}}: </strong>
                 <router-link
                 :to="'/organizaciones/' + evento.orgOrigen"
                 tag="a">
                 {{evento.orgOrigen}}
                 </router-link>
               </h6>
-              <h6 v-if="evento.$class === 'EstadoTransaccion'"><strong>Confirmación: </strong>{{evento.confirmacion}}</h6>
-              <h6 v-if="evento.$class === 'ProductoEnVenta'"><strong>Tipo de Producto: </strong>{{evento.tipoProducto}}</h6>
-              <h6 v-if="evento.$class === 'ProductoEnVenta'"><strong>Variedad: </strong>{{evento.variedad}}</h6>
+              <h6 v-if="evento.$class === 'EstadoTransaccion'"><strong>{{$t('confirmation')}}: </strong>{{evento.confirmacion}}</h6>
+              <h6 v-if="evento.$class === 'ProductoEnVenta'"><strong>{{$t('type-product')}}: </strong>{{evento.tipoProducto}}</h6>
+              <h6 v-if="evento.$class === 'ProductoEnVenta'"><strong>{{$t('variety')}}: </strong>{{evento.variedad}}</h6>
               <h6 v-if="evento.$class === 'ProductoEnVenta'"><strong>Tipo Venta: </strong>{{evento.tipoVenta}}</h6>
                 
               

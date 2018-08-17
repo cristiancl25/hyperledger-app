@@ -5,12 +5,12 @@
         <strong>Error:</strong> {{ error.message }}
       </div>
       <div>
-        <h1 align="center"><strong>Organizaciones</strong></h1>
+        <h1 align="center"><strong>{{$t('organizations')}}</strong></h1>
       </div>
     </div>
     <div class="row justify-content-center">
       <div class="form-group col-xs-12 col-md-6">
-        <label>Filtro tipo de organización</label>
+        <label>{{$t('filter-type-organization')}}</label>
         <select class="form-control" v-model="filtroTipo">
           <option @click="filtroOrganizaciones('ALL')">Todos</option>
           <option
@@ -33,8 +33,8 @@
               {{organizacion.orgId}}
               </router-link>
           </h6>
-          <h6><strong>Nombre: </strong>{{organizacion.nombre}}</h6>
-          <h6><strong>Tipo: </strong>{{getTipoProducto(organizacion.tipoOrganizacion)}}</h6>
+          <h6><strong>{{$t('name')}}: </strong>{{organizacion.nombre}}</h6>
+          <h6><strong>{{$t('type')}}: </strong>{{getTipoProducto(organizacion.tipoOrganizacion)}}</h6>
       </div>
     </div>
     <br>

@@ -4,14 +4,14 @@
       <div class="col-md-12" v-if="info.show" v-bind:class="info.tipo" role="alert">
           <strong></strong> {{ info.message }}
       </div>
-      <h3 align="center">Filtros</h3>
+      <h3 align="center">{{$t('filters')}}</h3>
       <div class="row justify-content-center">
         <div v-if="filtros.id===''" class="form-group col-md-2">
           <input type="checkbox" v-model="filtros.miOrg">
-          <label>Mis productos</label>
+          <label>{{$t('my-products')}}</label>
         </div>
         <div v-if="filtros.id===''" class="col-md-2">
-          <label for="inputState">Tipo Producto</label>
+          <label for="inputState">{{$t('type-product')}}</label>
           <select v-model="filtros.tipoProducto" class="form-control">
             <option value=""></option>
             <option 
@@ -22,7 +22,7 @@
           </select>
         </div>
         <div v-if="filtros.id===''" class="col-md-2">
-          <label for="inputState">Tipo</label>
+          <label for="inputState">{{$t('type')}}</label>
           <select v-model="filtros.tipo" class="form-control">
             <option value=""></option>
             <option>UNIDAD</option>
@@ -30,7 +30,7 @@
           </select>
         </div>
         <div v-if="filtros.id===''" class="col-md-2">
-          <label for="inputState">Estado</label>
+          <label for="inputState">{{$t('state')}}</label>
           <select v-model="filtros.estado" class="form-control">
             <option value=""></option>
             <option>PARADO</option>
@@ -43,11 +43,11 @@
           </select>
         </div>
         <div v-if="filtros.id===''" class="form-group col-md-3"> 
-          <label for="identificador">Variedad</label>
-          <input v-model="filtros.variedad" class="form-control" placeholder="Variedad">
+          <label for="identificador">{{$t('variety')}}</label>
+          <input v-model="filtros.variedad" class="form-control" placeholder="">
         </div>
         <div v-if="!filtros.miOrg && filtros.id===''" class="col-md-2">
-          <label for="inputState">Organizaciones</label>
+          <label for="inputState">{{$t('organizations')}}</label>
           <select v-model="filtros.orgId" class="form-control">
             <option value=""></option>
             <option
@@ -59,10 +59,10 @@
           </select>
         </div>
         <div class="form-group col-md-4"> 
-          <label for="identificador">Identificador</label>
-          <input v-model="filtros.id" class="form-control" placeholder="Identificador del producto">
+          <label for="identificador">{{$t('identifier')}}</label>
+          <input v-model="filtros.id" class="form-control" placeholder="">
           <small id="emailHelp" class="form-text text-muted">
-            <a href="" data-toggle="modal"  @click="scannerQR=true" data-target="#ModalScannerQRFilter">Escanear código QR</a>
+            <a href="" data-toggle="modal"  @click="scannerQR=true" data-target="#ModalScannerQRFilter">{{$t('qr-code-scanner')}}</a>
           </small>
         </div>
       </div>
@@ -73,18 +73,18 @@
               type="button"
               @click="filtros.id=''; filtros.miOrg=false; filtros.orgId=''; filtros.tipoProducto=''; filtros.variedad=''; filtros.tipo=''"
               class="btn btn-secondary">
-              Reiniciar
+              {{$t('restart')}}
             </button>
-            <button type="button" class="btn btn-primary" @click="filtrado()">Filtrar</button>
+            <button type="button" class="btn btn-primary" @click="filtrado()">{{$t('filter')}}</button>
           </div> 
         </div>
       </div>
 
       <br>
-      <h3 align="center" v-if="paginacion.show" >Productos</h3>
+      <h3 align="center" v-if="paginacion.show" >{{$t('products')}}</h3>
       <div class="row justify-content-center">
         <div align="center" v-if="paginacion.contenido.length === 0" class="alert alert-warning col-md-6">
-          <strong>No se encontraron productos</strong>
+          <strong>{{$t('no-products')}}</strong>
         </div>
         <div class="mt-2 mr-2 border col-md-5 div-default"
           :key="producto.productoId"
@@ -97,16 +97,16 @@
             </router-link>
           </h6>
           <h6 align="center"><span :class="colorEstado(producto.estado)">{{producto.estado}}</span></h6>
-          <h6><strong>Organización ID: </strong>
+          <h6><strong>{{$t('organization-id')}}: </strong>
             <router-link
               :to="'/organizaciones/' + producto.operacionActual.orgId"
               tag="a">
               {{producto.operacionActual.orgId}}
             </router-link>
           </h6>
-          <h6><strong>Tipo Producto: </strong>{{getTipoProducto(producto.caracteristicas.tipoProducto)}}</h6>
-          <h6><strong>Variedad: </strong>{{producto.caracteristicas.variedadProducto}}</h6>
-          <h6><strong>Tipo: </strong>{{producto.caracteristicas.tipo}}</h6>
+          <h6><strong>{{$t('type-product')}}: </strong>{{getTipoProducto(producto.caracteristicas.tipoProducto)}}</h6>
+          <h6><strong>{{$t('variety')}}: </strong>{{producto.caracteristicas.variedadProducto}}</h6>
+          <h6><strong>{{$t('type')}}: </strong>{{producto.caracteristicas.tipo}}</h6>
         </div>
       </div>
     </div>
@@ -132,7 +132,7 @@
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalLabel">Escáner QR</h5>
+            <h5 class="modal-title" id="exampleModalLabel">{{$t('qr-scanner')}}</h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
               <span aria-hidden="true">&times;</span>
             </button>
@@ -146,8 +146,8 @@
             <input v-model="filtros.id" class="form-control" aria-describedby="emailHelp" placeholder="CódigoQR" disabled="true">
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-info" @click="scannerQR=true">Reintentar</button>
-            <button type="button" class="btn btn-primary" @click="scannerQR=false" data-dismiss="modal">Cerrar</button>
+            <button type="button" class="btn btn-info" @click="scannerQR=true">{{$t('retry')}}</button>
+            <button type="button" class="btn btn-primary" @click="scannerQR=false" data-dismiss="modal">{{$t('close')}}</button>
           </div>
         </div>
       </div>

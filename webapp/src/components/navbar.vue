@@ -21,9 +21,9 @@
                   <router-link 
                     v-if="$store.state.rolParticipante === 'Usuario'"
                     class="dropdown-item" to="/productos/crear" tag="a" active-class="active" exact>
-                    <a>Crear Producto</a>
+                    <a>{{$t('create-product')}}</a>
                   </router-link>
-                  <router-link class="dropdown-item" to="/productos" tag="a" active-class="active" exact><a>Productos</a></router-link>
+                  <router-link class="dropdown-item" to="/productos" tag="a" active-class="active" exact><a>{{$t('products')}}</a></router-link>
                 </div>
               </li>
             </ul>  
@@ -37,7 +37,7 @@
                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                   <router-link class="dropdown-item" 
                     :to="{path:'/organizaciones/:id', name:'org',params:{id:$store.state.organizacion}}"
-                    tag="a"><a>Mi organización</a>
+                    tag="a"><a>{{$t('my-organization')}}</a>
                   </router-link>                   
                   <router-link class="dropdown-item" to="/organizaciones" tag="a"><a>{{$t('organizations')}}</a></router-link>
                 </div>
@@ -45,9 +45,9 @@
             </ul>  
           </div>
           <div class="navbar-nav" v-if="sesionIniciada">
-            <router-link v-if="$store.state.rolParticipante === 'Usuario'" class="nav-item nav-link" to="/transacciones" tag="a">Transacciones</router-link>
+            <router-link v-if="$store.state.rolParticipante === 'Usuario'" class="nav-item nav-link" to="/transacciones" tag="a">{{$t('transactions')}}</router-link>
             <router-link class="nav-item nav-link" to="/eventos" tag="a">
-              <a>Eventos 
+              <a>{{$t('events')}} 
                 <span class="badge badge-success badge-pill"> {{eventos.length}}</span>
                 <span v-if="!$store.state.notificaciones">&#x1f507;</span>
               </a>
@@ -113,8 +113,8 @@
                 {{ perfil.name }}
                 <div v-if="perfil.default">
                   <span v-if="perfil.default" class="badge badge-success">{{$t('active')}}</span>
-                  <button class="btn btn-info btn-sm" @click="exportarPerfil(perfil.name)">Exportar</button>
-                  <button class="btn btn-danger btn-sm" @click="eliminarPerfil(perfil.name)">Eliminar</button>
+                  <button class="btn btn-info btn-sm" @click="exportarPerfil(perfil.name)">{{$t('export')}}</button>
+                  <button class="btn btn-danger btn-sm" @click="eliminarPerfil(perfil.name)">{{$t('delete')}}</button>
                 </div>
               </li>
             </ul>
