@@ -59,7 +59,7 @@ export const en = {
   "delete-events": "Delete Events",
   "no-recent-events": "No recent events",
   "confirmation": "Confirmation",
-  "no-trasactions": "No Transactions",
+  "no-transactions": "No Transactions",
   "buyer": "Buyer",
   "seller": "Seller",
   "confirm-transaction": "Confirm Transaction",

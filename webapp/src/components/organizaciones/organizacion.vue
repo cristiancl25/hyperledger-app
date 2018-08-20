@@ -93,6 +93,13 @@
                   Info
                 </button>
                 <button
+                  v-if="$store.state.rolParticipante === 'Invitado' && $store.state.participante === usuario.id"
+                  data-toggle="modal" data-target="#ModalParticipante"
+                  @click="modal.tipo='actualizarPar'; modal.titulo='ActualizarParticipante';"
+                  class="btn btn-warning btn-sm">
+                  Actualizar
+                </button>
+                <button
                   v-if="$store.state.rolParticipante === 'OrgAdmin' && $store.state.participante === organizacion.administrador.id"
                   data-toggle="modal" data-target="#ModalParticipante"
                   @click="modal.tipo='eliminarParticipante'; modal.titulo='Eliminar Participante Invitado';
@@ -151,7 +158,7 @@
           </button>
           <button class="btn btn-primary"
             data-toggle="modal" data-target="#ModalParticipante"
-            @click="modal.titulo='Actualizar Localizacion'; modal.tipo='actualizarOrg'">
+            @click="modal.titulo='Actualizar Organización'; modal.tipo='actualizarOrg'">
             Actualizar Organización
           </button>
         </div>

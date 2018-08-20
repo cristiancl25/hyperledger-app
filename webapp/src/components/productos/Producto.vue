@@ -43,7 +43,10 @@
               tag="a">
               {{puja.orgId}}
             </router-link>
-            {{puja.precio}}
+            <div>
+              {{puja.precio}}
+              {{datosProducto.operacionActual.datosVenta.unidadMonetaria}}
+            </div>
           </li>
         </ul>
       </div>

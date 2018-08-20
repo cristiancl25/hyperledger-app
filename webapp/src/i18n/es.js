@@ -59,7 +59,7 @@ export const es = {
   "delete-events": "Borrar Eventos",
   "no-recent-events": "No existen eventos recientes",
   "confirmation": "Confirmación",
-  "no-trasactions": "No existen transacciones",
+  "no-transactions": "No existen transacciones",
   "buyer": "Comprador",
   "seller": "Vendedor",
   "confirm-transaction": "Confirmar Transacción",
