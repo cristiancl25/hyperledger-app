@@ -46,7 +46,7 @@ asset Producto identified by productoId {
 
 concept Operacion {
   --> Localizacion localizacion
-  o DateTime fecha
+  o String fecha
   o String orgId
   o DatosVenta datosVenta optional
 }

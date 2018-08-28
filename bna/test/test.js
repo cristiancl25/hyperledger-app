@@ -1080,7 +1080,7 @@ describe('Tests de las transacciones del Smartcontract', () => {
         await pujarProducto(productoId, 15);
         puja = await getPuja(pujaId);
         puja.organizaciones.should.have.lengthOf(2);
-        (await regPuja.getAll()).should.have.lengthOf(2);
+        (await regPuja.getAll()).should.have.lengthOf(1);
         await useIdentity('usuario1@pes1');
         await finalizarPuja(productoId);
         puja = await getPuja(pujaId);

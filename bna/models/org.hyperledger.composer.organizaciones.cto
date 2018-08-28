@@ -17,7 +17,7 @@ asset Organizacion identified by orgId {
   o String email optional
   o String telefono optional
   o String webUrl optional
-  o DateTime fechaCreacion
+  o String fechaCreacion
   --> OrgAdmin administrador
   --> Usuario[] usuarios
   --> Invitado[] invitados

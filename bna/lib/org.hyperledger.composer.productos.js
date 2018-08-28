@@ -2,6 +2,10 @@ const NS_PAR = 'org.hyperledger.composer.participantes';
 const NS_PROD = 'org.hyperledger.composer.productos';
 const NS_ORG = 'org.hyperledger.composer.organizaciones';
 
+function getTime(){
+    var time = new Date().toJSON().split(':');
+    return time[0] + ':' + time[1]
+}
 
 function generarIdProducto(orgId){
     return orgId + '-' + new Date().toJSON() + '-' + Math.floor(Math.random()*1000);
@@ -32,7 +36,7 @@ async function crearTransaccion(producto, orgId){
 
     // Creación del asset Transacción
     var transaccion = factory.newResource(NS_PROD, 'Transaccion', producto.productoId + 
-            '-' + orgVenta.orgId + '-' + orgCompra.orgId + '-' + new Date().toJSON());
+            '-' + orgVenta.orgId + '-' + orgCompra.orgId + '-' + getTime());
     transaccion.producto = factory.newRelationship(NS_PROD, 'Producto', producto.productoId);
     transaccion.orgCompra = orgCompra;
     transaccion.orgVenta = orgVenta;
@@ -76,7 +80,7 @@ async function generarProducto(datos){
     var localizacionId;
     if (datos.loc){
         // Creación de una nueva localización
-        localizacionId = new Date().toJSON();
+        localizacionId = datos.productoId;
         var loc = factory.newResource(NS_ORG, 'Localizacion', localizacionId);
         loc.latitud = datos.loc.latitud;
         loc.longitud = datos.loc.longitud;
@@ -105,7 +109,7 @@ async function generarProducto(datos){
     // Creación de la operación inicial
     var operacion = factory.newConcept(NS_PROD, 'Operacion');
     operacion.localizacion = factory.newRelationship(NS_ORG, 'Localizacion', localizacionId);
-    operacion.fecha = new Date();
+    operacion.fecha = getTime();
     operacion.orgId = datos.orgId;
     
     // Creación del producto
@@ -127,7 +131,7 @@ async function generarProducto(datos){
  */
  async function CrearProducto(datos){
     var participante = getCurrentParticipant();
-    datos.productoId = generarIdProducto(participante.orgId);
+    datos.productoId = participante.orgId + '-' + getTime() + '-' + datos.identificador;
     datos.orgId = participante.orgId;
     var producto = await generarProducto(datos);
 
@@ -159,7 +163,7 @@ async function PonerVentaProducto(datos){
     venta.unidadMonetaria = datos.unidadMonetaria;
     venta.precio = datos.precio;
     if (venta.tipoVenta === 'PUJA'){
-        const pujaId = participante.orgId + '-' + new Date().toJSON();
+        const pujaId = participante.orgId + '-' + getTime();
         var puja = factory.newResource(NS_PROD, 'Puja', pujaId);
         puja.precioPartida = datos.precio;
         puja.producto = factory.newRelationship(NS_PROD, 'Producto', producto.productoId);
@@ -247,6 +251,7 @@ async function pujaATransaccion(producto){
         producto.estado = 'PARADO';
         delete producto.operacionActual.datosVenta;
         var regProd = await getAssetRegistry(NS_PROD + '.Producto');
+        await regPuja.remove(puja);
         await regProd.update(producto);
     } else {
         const ganador = puja.organizaciones[0].orgId;
@@ -386,7 +391,7 @@ async function ConfirmarTransaccion(datos){
         // Si confirmaron ambas compañías, el producto cambia de propietario
         var operacion = factory.newConcept(NS_PROD, 'Operacion');
         operacion.localizacion = factory.newRelationship(NS_ORG, 'Localizacion', transaccion.nuevaLocalizacion);
-        operacion.fecha = new Date();
+        operacion.fecha = getTime();
         operacion.orgId = transaccion.orgCompra.orgId;
         
         producto.operaciones.unshift(producto.operacionActual);
@@ -451,7 +456,7 @@ async function DividirProducto(datos){
 
     var sucesores = [];
     for (i = 0; i < datos.trozos.length; i++) {
-        let productoId = generarIdProducto(participante.orgId);
+        let productoId = producto.productoId + '-' + i;
         sucesores.push(productoId);
 
         let caracteristicas = factory.newConcept(NS_PROD,'Caracteristicas');

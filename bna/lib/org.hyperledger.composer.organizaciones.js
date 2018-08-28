@@ -44,7 +44,7 @@ async function CrearOrganizacion(datos){
     org.tipoOrganizacion = factory.newRelationship(NS_ORG, 'TipoOrganizacion', datos.tipoOrganizacion);
     org.descripcion = datos.descripcion;
     org.nombre = datos.nombre;
-    org.fechaCreacion = new Date();
+    org.fechaCreacion = new Date().toJSON().split('T')[0];
     org.usuarios = [];
     org.invitados = [];
     org.localizaciones = [];
